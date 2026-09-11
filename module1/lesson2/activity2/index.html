@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Activity 1.2.2 — Understanding Network Layers</title>
+<style>
+  :root{
+    --bg:#f5f7fb;
+    --panel:#ffffff;
+    --text:#172033;
+    --muted:#667085;
+    --line:#d9e0ea;
+    --accent:#1769e0;
+    --accent2:#0f4faa;
+    --good:#137a4b;
+    --goodbg:#edf9f2;
+    --bad:#b42318;
+    --badbg:#fff1f0;
+    --hint:#805600;
+    --hintbg:#fff7df;
+    --soft:#eef4ff;
+    --shadow:0 12px 32px rgba(20,35,60,.08);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    background:linear-gradient(180deg,#f7f9fc 0,#f3f6fa 100%);
+    color:var(--text);
+  }
+  .shell{max-width:1180px;margin:0 auto;padding:32px 20px 64px}
+  .hero{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;flex-wrap:wrap;margin-bottom:18px}
+  .eyebrow{color:var(--accent);font-weight:800;font-size:.82rem;letter-spacing:.06em;text-transform:uppercase}
+  h1{margin:.28rem 0 .45rem;font-size:clamp(1.8rem,3vw,2.55rem)}
+  .lead{margin:0;color:var(--muted);line-height:1.6;max-width:820px}
+  .phase-nav{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 10px}
+  .phase-pill{
+    border:1px solid var(--line);background:#fff;color:#42526a;cursor:pointer;
+    padding:9px 13px;border-radius:999px;font-weight:750;font-size:.9rem
+  }
+  .phase-pill.active{background:var(--soft);border-color:#9fc0f7;color:var(--accent2)}
+  .phase-pill.done{background:var(--goodbg);border-color:#b7dfca;color:var(--good)}
+  .phase-help{color:var(--muted);font-size:.86rem;margin-bottom:6px}
+  .progress-card{
+    min-width:230px;background:var(--panel);border:1px solid var(--line);
+    border-radius:14px;padding:14px 16px;box-shadow:var(--shadow)
+  }
+  .progress-row{display:flex;justify-content:space-between;font-size:.9rem;margin-bottom:8px}
+  .progress-track{height:10px;background:#e7edf5;border-radius:999px;overflow:hidden}
+  .progress-fill{height:100%;background:var(--accent);transition:width .25s ease}
+  .card{
+    background:var(--panel);border:1px solid var(--line);border-radius:18px;
+    box-shadow:var(--shadow);padding:24px
+  }
+  .section-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap}
+  .section-kicker{font-size:.82rem;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.05em}
+  h2{margin:.2rem 0 .4rem;font-size:1.5rem}
+  .instruction{color:var(--muted);line-height:1.6;margin:0}
+  .controls{margin-top:20px;display:flex;gap:10px;flex-wrap:wrap}
+  button{
+    border:none;border-radius:10px;padding:11px 16px;font-weight:800;
+    cursor:pointer;font-size:.94rem
+  }
+  .primary{background:var(--accent);color:#fff}
+  .primary:hover{background:var(--accent2)}
+  .secondary{background:#eef2f7;color:#263245}
+  .ghost{background:#fff;color:#263245;border:1px solid var(--line)}
+  .hidden{display:none!important}
+  .message{margin-top:18px;border-radius:12px;padding:14px 16px;display:none;line-height:1.5}
+  .message.good{display:block;background:var(--goodbg);color:var(--good);border:1px solid #b8e2cc}
+  .message.bad{display:block;background:var(--badbg);color:var(--bad);border:1px solid #f0c5c2}
+  .message.hint{display:block;background:var(--hintbg);color:var(--hint);border:1px solid #efd792}
+  .small-note{margin-top:14px;color:var(--muted);font-size:.85rem;line-height:1.5}
+
+  /* Phase 1 stack builder */
+  .stack-workspace{
+    margin-top:22px;display:grid;grid-template-columns:minmax(270px,1fr) minmax(270px,1fr);
+    gap:22px;align-items:start
+  }
+  .stack-panel,.tray-panel{
+    border:1px solid var(--line);border-radius:16px;background:#fbfcfe;padding:18px
+  }
+  .stack-panel h3,.tray-panel h3{margin:0 0 10px;font-size:1rem}
+  .layer-stack{display:flex;flex-direction:column;gap:8px}
+  .layer-slot{
+    min-height:58px;border:2px dashed #aebbd0;border-radius:12px;background:#fff;
+    display:flex;align-items:center;justify-content:center;text-align:center;padding:8px;
+    cursor:pointer
+  }
+  .layer-slot.fixed{border-style:solid;background:#f0f4f9;color:#42526a;cursor:default}
+  .layer-slot.correct{border-style:solid;border-color:#70c59b;background:#f2fbf6}
+  .layer-slot.wrong{border-color:#df8a82;background:#fff6f5}
+  .slot-number{
+    display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;
+    border-radius:999px;background:#eef2f7;color:#526174;font-size:.8rem;font-weight:800;margin-right:8px
+  }
+  .layer-card{
+    border:1px solid var(--line);background:#fff;border-radius:12px;padding:12px 14px;
+    cursor:grab;margin:8px 0;font-weight:800;display:flex;align-items:center;justify-content:space-between;gap:10px
+  }
+  .layer-card:hover{border-color:#9fb6da}
+  .layer-card.selected{outline:3px solid rgba(23,105,224,.14);border-color:var(--accent)}
+  .layer-card.used{opacity:.35;cursor:not-allowed}
+  .layer-desc{font-size:.8rem;color:var(--muted);font-weight:500}
+  .direction-note{
+    padding:10px 12px;border-radius:10px;background:#f6f8fb;border:1px solid var(--line);
+    color:#536174;font-size:.9rem;margin-bottom:12px
+  }
+
+  /* Phase 2 matching/mapping */
+  .match-layout{margin-top:22px;display:grid;grid-template-columns:1fr 1fr;gap:22px}
+  .prompt-card{
+    border:1px solid var(--line);border-radius:16px;padding:20px;background:#fbfcfe;
+    min-height:170px;display:flex;flex-direction:column;justify-content:center
+  }
+  .prompt-label{font-size:.78rem;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.05em}
+  .prompt-main{font-size:1.18rem;font-weight:850;line-height:1.45;margin-top:8px}
+  .prompt-sub{color:var(--muted);line-height:1.5;margin-top:8px}
+  .option-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .option{
+    border:1px solid var(--line);border-radius:12px;padding:13px;background:#fff;cursor:pointer;
+    transition:.15s ease;font-weight:750;line-height:1.35
+  }
+  .option:hover{border-color:#9fb6da;transform:translateY(-1px)}
+  .option.selected{border-color:var(--accent);outline:3px solid rgba(23,105,224,.13)}
+  .option.correct{border-color:#70c59b;background:#f2fbf6}
+  .option.wrong{border-color:#df8a82;background:#fff6f5}
+  .mapping-visual{
+    margin-top:12px;display:grid;grid-template-columns:1fr 48px 1fr;gap:10px;align-items:center
+  }
+  .model-column{display:flex;flex-direction:column;gap:6px}
+  .model-layer{border:1px solid var(--line);border-radius:10px;background:#fff;padding:10px;text-align:center;font-weight:750}
+  .model-layer.highlight{background:#eef4ff;border-color:#9fc0f7;color:#0f4faa}
+  .map-arrow{text-align:center;font-size:1.4rem;color:#7b8799}
+
+  /* Phase 3 */
+  .flow-visual{
+    margin-top:22px;border:1px solid var(--line);border-radius:16px;padding:18px;background:#fbfcfe;
+    display:grid;grid-template-columns:1fr 160px 1fr;gap:18px;align-items:center
+  }
+  .device-flow{border:1px solid var(--line);border-radius:14px;background:#fff;padding:16px}
+  .device-flow h3{margin:0 0 10px}
+  .flow-stack{display:flex;flex-direction:column;gap:7px}
+  .flow-box{border:1px solid var(--line);border-radius:9px;padding:9px;text-align:center;font-weight:700;background:#fafcff}
+  .flow-arrow{text-align:center;font-size:1.4rem;font-weight:900;color:var(--accent)}
+  .medium{
+    border:2px dashed #9fb6da;border-radius:14px;padding:18px 10px;text-align:center;
+    color:#4a5a70;font-weight:800;background:#f7fbff
+  }
+  .reason-panel{
+    margin-top:20px;border:1px solid var(--line);border-radius:16px;padding:18px;background:#fbfcfe
+  }
+  .reason-panel h3{margin:0 0 6px;font-size:1.05rem}
+  .reason-panel p{margin:0 0 12px;color:var(--muted);line-height:1.5}
+
+  .transition-card{text-align:center;padding:34px 24px}
+  .transition-icon{font-size:3rem;margin-bottom:8px}
+  .transition-card p{max-width:760px;margin:0 auto 18px;color:var(--muted);line-height:1.6}
+  .mastery{display:none;text-align:center;padding:36px 24px}
+  .mastery.show{display:block}
+  .mastery p{color:var(--muted);max-width:760px;margin:0 auto 18px;line-height:1.6}
+  .mastery-grid{max-width:820px;margin:20px auto 24px;display:grid;grid-template-columns:repeat(2,1fr);gap:12px;text-align:left}
+  .mastery-item{border:1px solid var(--line);border-radius:12px;padding:14px;background:#fbfcfe}
+  .mastery-item strong{display:block;margin-bottom:3px}
+
+  @media (max-width:850px){
+    .stack-workspace,.match-layout,.flow-visual{grid-template-columns:1fr}
+    .mapping-visual{grid-template-columns:1fr}
+    .map-arrow{transform:rotate(90deg)}
+    .option-grid{grid-template-columns:1fr}
+    .mastery-grid{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="hero">
+    <div>
+      <div class="eyebrow">Module 1 · Lesson 2</div>
+      <h1>Activity 1.2.2 — Understanding Network Layers</h1>
+      <p class="lead">
+        Build the layer models, match layers to their broad responsibilities, compare OSI and TCP/IP,
+        and reason about the direction of communication through a layered system.
+      </p>
+
+      <div class="phase-nav">
+        <div class="phase-pill active" id="pill1" role="button" tabindex="0">Phase 1 · Build the Models</div>
+        <div class="phase-pill" id="pill2" role="button" tabindex="0">Phase 2 · Match &amp; Map</div>
+        <div class="phase-pill" id="pill3" role="button" tabindex="0">Phase 3 · Follow &amp; Diagnose</div>
+      </div>
+      <div class="phase-help">
+        You can work through the phases in order or open any phase directly. New attempts draw different questions from the bank.
+      </div>
+    </div>
+
+    <div class="progress-card">
+      <div class="progress-row">
+        <span id="progressLabel">Phase 1 progress</span>
+        <strong id="progressText">1 of 5</strong>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+  </div>
+
+  <!-- PHASE 1 -->
+  <section class="card" id="phase1Card">
+    <div class="section-head">
+      <div>
+        <div class="section-kicker" id="p1Num">Question 1</div>
+        <h2 id="p1Title"></h2>
+        <p class="instruction" id="p1Text"></p>
+      </div>
+    </div>
+
+    <div class="stack-workspace">
+      <div class="stack-panel">
+        <h3 id="stackHeading">Model</h3>
+        <div class="direction-note" id="directionNote"></div>
+        <div class="layer-stack" id="layerStack"></div>
+      </div>
+
+      <div class="tray-panel">
+        <h3>Layer tray</h3>
+        <div id="layerTray"></div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="primary" id="checkP1Btn">Check model</button>
+      <button class="secondary" id="hintP1Btn">Hint</button>
+      <button class="ghost" id="resetP1Btn">Reset question</button>
+      <button class="primary hidden" id="nextP1Btn">Next question</button>
+    </div>
+    <div class="message" id="p1Message"></div>
+    <div class="small-note">
+      Drag layers into the empty positions, or click a layer and then click a target slot.
+      Click an occupied slot to return that layer to the tray.
+    </div>
+  </section>
+
+  <section class="card transition-card hidden" id="transition2Card">
+    <div class="transition-icon">🧩</div>
+    <h2>Phase 1 complete</h2>
+    <p>
+      The structure of the models is established. The next phase focuses on what the layers broadly do
+      and how the OSI and TCP/IP models relate to one another.
+    </p>
+    <button class="primary" id="startP2Btn">Start Phase 2 — Match &amp; Map</button>
+  </section>
+
+  <!-- PHASE 2 -->
+  <section class="card hidden" id="phase2Card">
+    <div class="section-head">
+      <div>
+        <div class="section-kicker" id="p2Num">Question 1</div>
+        <h2 id="p2Title"></h2>
+        <p class="instruction" id="p2Text"></p>
+      </div>
+    </div>
+
+    <div class="match-layout">
+      <div class="prompt-card">
+        <div class="prompt-label" id="p2PromptLabel">Prompt</div>
+        <div class="prompt-main" id="p2PromptMain"></div>
+        <div class="prompt-sub" id="p2PromptSub"></div>
+        <div id="mappingVisual"></div>
+      </div>
+      <div>
+        <div class="option-grid" id="p2Options"></div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="primary" id="checkP2Btn">Check answer</button>
+      <button class="secondary" id="hintP2Btn">Hint</button>
+      <button class="ghost" id="resetP2Btn">Reset question</button>
+      <button class="primary hidden" id="nextP2Btn">Next question</button>
+    </div>
+    <div class="message" id="p2Message"></div>
+  </section>
+
+  <section class="card transition-card hidden" id="transition3Card">
+    <div class="transition-icon">🔎</div>
+    <h2>Phase 2 complete</h2>
+    <p>
+      You have connected layer names to their broad responsibilities and compared the OSI and TCP/IP structures.
+      The final phase checks whether you can reason about communication through the layered system.
+    </p>
+    <button class="primary" id="startP3Btn">Start Phase 3 — Follow &amp; Diagnose</button>
+  </section>
+
+  <!-- PHASE 3 -->
+  <section class="card hidden" id="phase3Card">
+    <div class="section-head">
+      <div>
+        <div class="section-kicker" id="p3Num">Diagnosis 1</div>
+        <h2 id="p3Title"></h2>
+        <p class="instruction" id="p3Text"></p>
+      </div>
+    </div>
+
+    <div class="flow-visual">
+      <div class="device-flow">
+        <h3>Sending Device</h3>
+        <div class="flow-stack">
+          <div class="flow-box">Application</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-box">Communication layers</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-box">Physical transmission</div>
+        </div>
+      </div>
+
+      <div class="medium">Network medium</div>
+
+      <div class="device-flow">
+        <h3>Receiving Device</h3>
+        <div class="flow-stack">
+          <div class="flow-box">Physical reception</div>
+          <div class="flow-arrow">↑</div>
+          <div class="flow-box">Communication layers</div>
+          <div class="flow-arrow">↑</div>
+          <div class="flow-box">Application</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="reason-panel">
+      <h3>Step 1 — Diagnose the statement</h3>
+      <p id="statementText"></p>
+      <div class="option-grid" id="diagnosisOptions"></div>
+    </div>
+
+    <div class="reason-panel hidden" id="reasonPanel">
+      <h3>Step 2 — Explain your decision</h3>
+      <p>Select the explanation that best supports the diagnosis.</p>
+      <div class="option-grid" id="reasonOptions"></div>
+    </div>
+
+    <div class="controls">
+      <button class="primary" id="checkP3DiagnosisBtn">Check diagnosis</button>
+      <button class="secondary" id="hintP3Btn">Hint</button>
+      <button class="ghost" id="resetP3Btn">Reset question</button>
+      <button class="primary hidden" id="checkP3ReasonBtn">Check explanation</button>
+      <button class="primary hidden" id="nextP3Btn">Next diagnosis</button>
+    </div>
+    <div class="message" id="p3Message"></div>
+  </section>
+
+  <!-- COMPLETE -->
+  <section class="card mastery" id="masteryCard">
+    <div style="font-size:3rem">✓</div>
+    <h2>Activity complete</h2>
+    <p>
+      You progressed from building the layer models, to matching their broad responsibilities,
+      to reasoning about how communication moves through the layered system.
+    </p>
+    <div class="mastery-grid">
+      <div class="mastery-item">
+        <strong>Layer order</strong>
+        Build the OSI and TCP/IP models in the correct sequence.
+      </div>
+      <div class="mastery-item">
+        <strong>Broad responsibilities</strong>
+        Connect a layer to the type of networking function it represents.
+      </div>
+      <div class="mastery-item">
+        <strong>Model relationship</strong>
+        Recognise how the OSI layers correspond to the four TCP/IP layers.
+      </div>
+      <div class="mastery-item">
+        <strong>Communication direction</strong>
+        Follow sending downward through the layers and receiving upward.
+      </div>
+      <div class="mastery-item">
+        <strong>Layered reasoning</strong>
+        Explain why layers cooperate while remaining responsible for different functions.
+      </div>
+    </div>
+    <button class="primary" id="restartAllBtn">Start a new attempt</button>
+  </section>
+</div>
+
+<script>
+const OSI = ["Application","Presentation","Session","Transport","Network","Data Link","Physical"];
+const TCPIP = ["Application","Transport","Internet","Network Access"];
+
+const OSI_RESP = {
+  "Application":"Provides network-related functions used by applications at the top of the model.",
+  "Presentation":"Represents, formats or translates information for use by applications.",
+  "Session":"Supports the organisation and management of communication sessions between applications.",
+  "Transport":"Provides end-to-end transport functions between communicating applications.",
+  "Network":"Handles logical communication across networks and path-related network functions.",
+  "Data Link":"Supports communication across the local link and prepares data for the local network medium.",
+  "Physical":"Transmits and receives signals through the physical medium using electrical, light or radio signalling."
+};
+
+const TCPIP_RESP = {
+  "Application":"Combines the functions associated with the OSI Application, Presentation and Session layers.",
+  "Transport":"Represents transport functions between communicating applications.",
+  "Internet":"Corresponds broadly to the OSI Network layer.",
+  "Network Access":"Combines the local-link and physical-transmission functions represented by the OSI Data Link and Physical layers."
+};
+
+const MODEL_MAP = {
+  "OSI Application / Presentation / Session":"TCP/IP Application",
+  "OSI Transport":"TCP/IP Transport",
+  "OSI Network":"TCP/IP Internet",
+  "OSI Data Link / Physical":"TCP/IP Network Access"
+};
+
+const $ = id => document.getElementById(id);
+
+function shuffle(array){
+  const a=[...array];
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function safeReadStorage(key){
+  try{
+    const raw=localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : {};
+  }catch(e){ return {}; }
+}
+function safeWriteStorage(key,value){
+  try{ localStorage.setItem(key,JSON.stringify(value)); }catch(e){}
+}
+function pickFromCycle(pool,historyKey,category){
+  let history=safeReadStorage(historyKey);
+  if(!history || Array.isArray(history)) history={};
+  let used=Array.isArray(history[category]) ? history[category] : [];
+  let available=pool.filter(q=>!used.includes(q.id));
+  if(available.length===0){
+    used=[];
+    available=[...pool];
+  }
+  const chosen=available[Math.floor(Math.random()*available.length)];
+  used.push(chosen.id);
+  history[category]=used;
+  safeWriteStorage(historyKey,history);
+  return chosen;
+}
+
+/* -------------------- PHASE 1 QUESTION BANK -------------------- */
+function makeStackQuestion(id,category,title,text,model,displayOrder,fixedIndices,hint){
+  const answers = displayOrder==="top" ? [...model] : [...model].reverse();
+  const fixed = {};
+  fixedIndices.forEach(i=>fixed[i]=answers[i]);
+  return {id,category,title,text,model,displayOrder,answers,fixed,hint};
+}
+
+const p1Bank = [];
+
+// 7 full OSI variants (wording/direction differs)
+[
+  ["osi-full-1","Build the OSI model from top to bottom","Place all seven OSI layers in order, starting with the highest layer.","top"],
+  ["osi-full-2","Rebuild the complete OSI stack","Arrange the seven OSI layers from Application down to Physical.","top"],
+  ["osi-full-3","Construct the OSI model","Complete the full OSI sequence in descending layer order.","top"],
+  ["osi-full-4","Build OSI from the physical side upward","Arrange the seven OSI layers starting with Physical and moving upward.","bottom"],
+  ["osi-full-5","Reverse-build the OSI model","Start at the Physical layer and construct the model upward to Application.","bottom"],
+  ["osi-full-6","Complete a fresh OSI stack","Arrange all OSI layers in the correct model order.","top"],
+  ["osi-full-7","Order the OSI layers","Build the seven-layer model using the supplied tray.","bottom"]
+].forEach(([id,title,text,dir])=>{
+  p1Bank.push(makeStackQuestion(id,"osi-full",title,text,OSI,dir,[],
+    "Use the relationship between neighbouring layers rather than placing them randomly."));
+});
+
+// 7 partial OSI variants
+[
+  ["osi-partial-1",[0,3,6]],
+  ["osi-partial-2",[1,4]],
+  ["osi-partial-3",[2,5]],
+  ["osi-partial-4",[0,2,4,6]],
+  ["osi-partial-5",[1,3,5]],
+  ["osi-partial-6",[0,5]],
+  ["osi-partial-7",[2,3,6]]
+].forEach(([id,fixed])=>{
+  p1Bank.push(makeStackQuestion(
+    id,"osi-partial","Complete the missing OSI layers",
+    "Some OSI layers are already fixed. Place the remaining layers in the correct positions.",
+    OSI,"top",fixed,
+    "Use the fixed layers as anchors and determine what sits immediately above and below them."
+  ));
+});
+
+// 7 OSI neighbour-focused partial variants
+[
+  ["osi-neighbour-1",[0,1,4,5]],
+  ["osi-neighbour-2",[0,2,3,6]],
+  ["osi-neighbour-3",[1,2,5,6]],
+  ["osi-neighbour-4",[0,3,4,6]],
+  ["osi-neighbour-5",[1,3,4,5]],
+  ["osi-neighbour-6",[0,1,5,6]],
+  ["osi-neighbour-7",[2,3,4]]
+].forEach(([id,fixed])=>{
+  p1Bank.push(makeStackQuestion(
+    id,"osi-neighbour","Fill the gaps in the OSI sequence",
+    "Use the surrounding layers to determine which OSI layers belong in the empty positions.",
+    OSI,"top",fixed,
+    "Focus on which layer is directly above and directly below each empty position."
+  ));
+});
+
+// 7 full TCP/IP variants
+[
+  ["tcp-full-1","Build the TCP/IP model from top to bottom","Arrange the four TCP/IP layers from Application down to Network Access.","top"],
+  ["tcp-full-2","Construct the four-layer TCP/IP model","Place all TCP/IP layers in the correct order.","top"],
+  ["tcp-full-3","Rebuild the TCP/IP stack","Arrange the four TCP/IP layers in descending order.","top"],
+  ["tcp-full-4","Build TCP/IP from the bottom upward","Start with Network Access and move upward to Application.","bottom"],
+  ["tcp-full-5","Reverse-build the TCP/IP model","Arrange the model beginning at the lowest TCP/IP layer.","bottom"],
+  ["tcp-full-6","Order the TCP/IP layers","Complete the four-layer model.","top"],
+  ["tcp-full-7","Build a fresh TCP/IP stack","Place all four layers in correct model order.","bottom"]
+].forEach(([id,title,text,dir])=>{
+  p1Bank.push(makeStackQuestion(id,"tcp-full",title,text,TCPIP,dir,[],
+    "The TCP/IP model has four layers. Use the top-to-bottom relationship between application functions, transport, internetwork communication and network access."));
+});
+
+// 7 partial TCP/IP variants
+[
+  ["tcp-partial-1",[0,3]],
+  ["tcp-partial-2",[1]],
+  ["tcp-partial-3",[2]],
+  ["tcp-partial-4",[0,2]],
+  ["tcp-partial-5",[1,3]],
+  ["tcp-partial-6",[0,1]],
+  ["tcp-partial-7",[2,3]]
+].forEach(([id,fixed])=>{
+  p1Bank.push(makeStackQuestion(
+    id,"tcp-partial","Complete the missing TCP/IP layers",
+    "Some TCP/IP layers are already fixed. Fill the empty positions.",
+    TCPIP,"top",fixed,
+    "Use the fixed layer positions to determine what belongs above or below them."
+  ));
+});
+
+function createP1Attempt(){
+  const categories=["osi-full","osi-partial","osi-neighbour","tcp-full","tcp-partial"];
+  return shuffle(categories.map(cat=>{
+    const pool=p1Bank.filter(q=>q.category===cat);
+    return pickFromCycle(pool,"netActivity122_p1History_v1",cat);
+  }));
+}
+
+/* -------------------- PHASE 2 QUESTION BANK -------------------- */
+const p2Bank = [];
+
+// 7 OSI responsibility questions, one for each layer
+OSI.forEach((layer,idx)=>{
+  p2Bank.push({
+    id:`osi-resp-${idx+1}`,category:"osi-resp",
+    title:"Match the responsibility to an OSI layer",
+    text:"Choose the OSI layer that best matches the broad responsibility shown.",
+    prompt:OSI_RESP[layer],
+    options:OSI,
+    correct:layer,
+    hint:"Use the broad purpose of each layer as introduced in the lesson, not detailed protocols or header fields.",
+    success:`Correct. ${layer} is the OSI layer that best matches this broad responsibility.`
+  });
+});
+
+// 7 TCP/IP responsibility variants
+const tcpRespVariants = [
+  ["tcp-resp-app-1","Application",TCPIP_RESP["Application"]],
+  ["tcp-resp-app-2","Application","Represents the top TCP/IP layer, covering the combined upper-layer application functions."],
+  ["tcp-resp-transport-1","Transport",TCPIP_RESP["Transport"]],
+  ["tcp-resp-transport-2","Transport","Sits between the TCP/IP Application and Internet layers and represents transport functions."],
+  ["tcp-resp-internet-1","Internet",TCPIP_RESP["Internet"]],
+  ["tcp-resp-access-1","Network Access",TCPIP_RESP["Network Access"]],
+  ["tcp-resp-access-2","Network Access","Represents the TCP/IP layer closest to the local network and physical transmission functions."]
+];
+tcpRespVariants.forEach(([id,correct,prompt])=>{
+  p2Bank.push({
+    id,category:"tcp-resp",title:"Match the responsibility to a TCP/IP layer",
+    text:"Choose the TCP/IP layer that best matches the broad responsibility shown.",
+    prompt,options:TCPIP,correct,
+    hint:"Think about the four-layer TCP/IP structure and where this responsibility sits.",
+    success:`Correct. ${correct} is the best match.`
+  });
+});
+
+// 7 model-mapping variants
+const mappingVariants = [
+  ["map-1","OSI Application / Presentation / Session","TCP/IP Application"],
+  ["map-2","OSI Transport","TCP/IP Transport"],
+  ["map-3","OSI Network","TCP/IP Internet"],
+  ["map-4","OSI Data Link / Physical","TCP/IP Network Access"],
+  ["map-5","OSI Presentation / Session / Application","TCP/IP Application"],
+  ["map-6","OSI Physical / Data Link","TCP/IP Network Access"],
+  ["map-7","OSI Network layer","TCP/IP Internet"]
+];
+mappingVariants.forEach(([id,prompt,correct])=>{
+  p2Bank.push({
+    id,category:"mapping",title:"Map OSI to TCP/IP",
+    text:"Choose the TCP/IP layer that corresponds most closely to the OSI layer or group shown.",
+    prompt,
+    options:["TCP/IP Application","TCP/IP Transport","TCP/IP Internet","TCP/IP Network Access"],
+    correct,
+    hint:"The TCP/IP model groups some OSI responsibilities together.",
+    success:`Correct. ${prompt} maps to ${correct}.`,
+    visual:true
+  });
+});
+
+function createP2Attempt(){
+  const categories=["osi-resp","tcp-resp","mapping"];
+  return shuffle(categories.map(cat=>{
+    const pool=p2Bank.filter(q=>q.category===cat);
+    return pickFromCycle(pool,"netActivity122_p2History_v1",cat);
+  }));
+}
+
+/* -------------------- PHASE 3 QUESTION BANK -------------------- */
+const p3Bank = [];
+
+function addP3(id,category,title,statement,correctDiagnosis,correctReason,hint){
+  p3Bank.push({
+    id,category,title,
+    text:"Decide whether the statement is correct, then select the explanation that best supports your decision.",
+    statement,
+    diagnosisOptions:[
+      {id:"correct",text:"Correct"},
+      {id:"incorrect",text:"Incorrect"}
+    ],
+    correctDiagnosis,
+    reasonOptions:[
+      {id:"r1",text:correctReason},
+      {id:"r2",text:"Each layer performs every networking function, so the order of layers does not matter."},
+      {id:"r3",text:"A network model only describes physical cables and connectors."}
+    ],
+    correctReason:"r1",
+    hint,
+    success:correctReason
+  });
+}
+
+// Direction: 7
+[
+  ["dir-1","On the sending device, communication moves downward through the layered structure before physical transmission.","correct",
+   "On the sender, information moves from the application side downward through networking functions until it reaches the physical transmission stage."],
+  ["dir-2","On the receiving device, communication moves upward from physical reception toward the application.","correct",
+   "The receiver first obtains the physical signal and then processes the communication upward toward the application."],
+  ["dir-3","A receiving device processes communication from the application downward toward the physical medium.","incorrect",
+   "That direction describes sending. Receiving begins with physical reception and moves upward toward the application."],
+  ["dir-4","Sending and receiving both move through the layered system in exactly the same direction.","incorrect",
+   "The sender moves downward toward transmission, while the receiver moves upward from physical reception toward the application."],
+  ["dir-5","The network medium sits between the sender's physical transmission and the receiver's physical reception.","correct",
+   "The medium carries the signal between the physical side of the sending and receiving devices."],
+  ["dir-6","The sending application communicates with the network medium without passing through lower networking functions.","incorrect",
+   "The layered model represents a sequence of networking responsibilities between the application and physical transmission."],
+  ["dir-7","The receiving application is reached only after the received signal has been processed upward through networking functions.","correct",
+   "The layered model organises reception from the physical side upward until the information reaches the application."]
+].forEach(([id,statement,diag,reason])=>addP3(
+  id,"direction","Follow the communication direction",statement,diag,reason,
+  "Compare the sender's direction with the receiver's direction in the diagram."
+));
+
+// Layering concept: 7
+[
+  ["layer-1","The Physical layer must understand the meaning of the user's application information before it can transmit the signal.","incorrect",
+   "The Physical layer is concerned with transmitting and receiving signals through the medium; it does not need to understand the application's meaning."],
+  ["layer-2","Different layers have different responsibilities but cooperate as part of the same communication process.","correct",
+   "Layering separates responsibilities while allowing the layers to work together to complete communication."],
+  ["layer-3","Using layers means every networking function is performed independently with no relationship to the other layers.","incorrect",
+   "Layers separate responsibilities, but the communication process depends on cooperation between them."],
+  ["layer-4","A major purpose of layering is to organise complex communication functions into manageable responsibilities.","correct",
+   "Layering structures communication into separate responsibilities so the system can be understood and implemented more clearly."],
+  ["layer-5","The Physical layer is the only layer involved in communication because all data eventually becomes a signal.","incorrect",
+   "Physical transmission is necessary, but the layered model represents several distinct networking responsibilities above it."],
+  ["layer-6","A layer can focus on its own responsibility without needing to perform the job of every other layer.","correct",
+   "One benefit of layering is separation of responsibilities: each layer contributes a particular part of the communication process."],
+  ["layer-7","The layered model means an application must directly control how electrical, light or radio signals are transmitted.","incorrect",
+   "Layering separates application functions from the lower-level responsibility of physical signal transmission."]
+].forEach(([id,statement,diag,reason])=>addP3(
+  id,"layering","Diagnose a layering statement",statement,diag,reason,
+  "Focus on separation of responsibilities and cooperation between layers."
+));
+
+// Model relationship: 7
+[
+  ["model-1","The OSI and TCP/IP models organise many of the same networking responsibilities, but they group them differently.","correct",
+   "Both models describe layered networking responsibilities, but TCP/IP combines some functions that OSI represents as separate layers."],
+  ["model-2","The TCP/IP model has seven layers because it is simply another name for the OSI model.","incorrect",
+   "The TCP/IP model used in this lesson has four layers, while the OSI model has seven."],
+  ["model-3","The TCP/IP Application layer broadly corresponds to the OSI Application, Presentation and Session layers.","correct",
+   "TCP/IP groups the upper OSI responsibilities into its Application layer."],
+  ["model-4","The TCP/IP Network Access layer broadly corresponds to the OSI Data Link and Physical layers.","correct",
+   "TCP/IP groups local-link and physical-transmission responsibilities into Network Access."],
+  ["model-5","The OSI Network layer maps most closely to the TCP/IP Internet layer.","correct",
+   "The TCP/IP Internet layer represents the networking responsibility that corresponds broadly to the OSI Network layer."],
+  ["model-6","The TCP/IP model replaces the OSI model, so the two should never be compared.","incorrect",
+   "The models can be compared because they organise many of the same communication responsibilities in different ways."],
+  ["model-7","The OSI Transport layer maps most closely to the TCP/IP Transport layer.","correct",
+   "Transport is represented as a distinct layer in both models at this introductory level."]
+].forEach(([id,statement,diag,reason])=>addP3(
+  id,"models","Compare OSI and TCP/IP",statement,diag,reason,
+  "Think about whether the models describe different networks or different ways of organising similar communication responsibilities."
+));
+
+function createP3Attempt(){
+  const categories=["direction","layering","models"];
+  return shuffle(categories.map(cat=>{
+    const pool=p3Bank.filter(q=>q.category===cat);
+    return pickFromCycle(pool,"netActivity122_p3History_v1",cat);
+  }));
+}
+
+/* -------------------- STATE -------------------- */
+let p1Questions=createP1Attempt();
+let p2Questions=createP2Attempt();
+let p3Questions=createP3Attempt();
+
+let p1Index=0, p1SelectedCard=null, p1Placed=[], p1Cards=[];
+let p2Index=0, p2Selected=null;
+let p3Index=0, p3Diagnosis=null, p3Reason=null;
+
+/* -------------------- PHASE NAVIGATION -------------------- */
+function setActivePill(id){
+  ["pill1","pill2","pill3"].forEach(x=>$(x).classList.remove("active"));
+  $(id).classList.add("active");
+}
+function hideSections(){
+  ["phase1Card","transition2Card","phase2Card","transition3Card","phase3Card"].forEach(id=>$(id).classList.add("hidden"));
+  $("masteryCard").classList.remove("show");
+}
+function openPhase1(){
+  hideSections(); $("phase1Card").classList.remove("hidden"); setActivePill("pill1"); renderP1();
+}
+function openPhase2(){
+  hideSections(); $("phase2Card").classList.remove("hidden"); setActivePill("pill2"); renderP2();
+}
+function openPhase3(){
+  hideSections(); $("phase3Card").classList.remove("hidden"); setActivePill("pill3"); renderP3();
+}
+function makePill(id,fn){
+  $(id).addEventListener("click",fn);
+  $(id).addEventListener("keydown",e=>{
+    if(e.key==="Enter"||e.key===" "){e.preventDefault();fn();}
+  });
+}
+makePill("pill1",openPhase1);
+makePill("pill2",openPhase2);
+makePill("pill3",openPhase3);
+
+/* -------------------- PHASE 1 LOGIC -------------------- */
+function renderP1(){
+  const q=p1Questions[p1Index];
+  p1SelectedCard=null;
+  p1Placed=Array(q.answers.length).fill(null);
+  p1Cards=[];
+
+  $("p1Num").textContent=`Question ${p1Index+1}`;
+  $("p1Title").textContent=q.title;
+  $("p1Text").textContent=q.text;
+  $("stackHeading").textContent=q.model===OSI ? "OSI model" : "TCP/IP model";
+  $("directionNote").textContent=q.displayOrder==="top"
+    ? "Build direction shown: highest layer at the top → lowest layer at the bottom."
+    : "Build direction shown: lowest layer at the top of this exercise → highest layer at the bottom.";
+
+  $("p1Message").className="message";
+  $("p1Message").textContent="";
+  $("nextP1Btn").classList.add("hidden");
+  $("checkP1Btn").classList.remove("hidden");
+
+  const stack=$("layerStack");
+  stack.innerHTML="";
+
+  q.answers.forEach((answer,i)=>{
+    const slot=document.createElement("div");
+    slot.className="layer-slot";
+    slot.dataset.index=i;
+
+    const displayNum = q.model===OSI
+      ? (q.displayOrder==="top" ? 7-i : i+1)
+      : (q.displayOrder==="top" ? i+1 : q.answers.length-i);
+
+    const fixed=q.fixed[i];
+    if(fixed){
+      slot.classList.add("fixed");
+      slot.innerHTML=`<span class="slot-number">${displayNum}</span><strong>${fixed}</strong>`;
+      p1Placed[i]={fixed:true,key:fixed};
+    }else{
+      slot.innerHTML=`<span class="slot-number">${displayNum}</span><span class="layer-desc">Drop layer here</span>`;
+      slot.addEventListener("dragover",e=>e.preventDefault());
+      slot.addEventListener("drop",e=>{
+        e.preventDefault();
+        const cardId=e.dataTransfer.getData("text/plain");
+        placeP1Card(cardId,i);
+      });
+      slot.addEventListener("click",()=>{
+        if(p1SelectedCard) placeP1Card(p1SelectedCard,i);
+        else if(p1Placed[i]) removeP1Card(i);
+      });
+      slot.addEventListener("dragstart",e=>{
+        if(!p1Placed[i] || p1Placed[i].fixed){e.preventDefault();return;}
+        e.dataTransfer.setData("text/plain",`slot:${i}`);
+      });
+      slot.addEventListener("dragover",e=>e.preventDefault());
+      slot.addEventListener("drop",e=>{
+        e.preventDefault();
+        const payload=e.dataTransfer.getData("text/plain");
+        if(payload.startsWith("slot:")){
+          const from=parseInt(payload.split(":")[1],10);
+          moveP1Card(from,i);
+        }else{
+          placeP1Card(payload,i);
+        }
+      });
+    }
+    stack.appendChild(slot);
+  });
+
+  const tray=$("layerTray");
+  tray.innerHTML="";
+  const needed=q.answers.filter((_,i)=>!q.fixed[i]);
+  shuffle(needed).forEach((layer,idx)=>{
+    const id=`p1_${p1Index}_${idx}_${layer.replace(/\s+/g,"_")}`;
+    const card={id,key:layer,used:false};
+    p1Cards.push(card);
+    const el=document.createElement("div");
+    el.className="layer-card";
+    el.draggable=true;
+    el.dataset.card=id;
+    el.innerHTML=`<span>${layer}</span><span class="layer-desc">${q.model===OSI ? "OSI layer" : "TCP/IP layer"}</span>`;
+    el.addEventListener("dragstart",e=>{
+      if(card.used){e.preventDefault();return;}
+      e.dataTransfer.setData("text/plain",id);
+      selectP1Card(id,el);
+    });
+    el.addEventListener("click",()=>{if(!card.used)selectP1Card(id,el);});
+    tray.appendChild(el);
+  });
+
+  updateProgress(1,p1Index+1,p1Questions.length);
+}
+
+function selectP1Card(id,el){
+  p1SelectedCard=id;
+  document.querySelectorAll("#layerTray .layer-card").forEach(x=>x.classList.remove("selected"));
+  if(el)el.classList.add("selected");
+}
+function placeP1Card(id,slotIndex){
+  if(id.startsWith("slot:"))return;
+  const card=p1Cards.find(c=>c.id===id);
+  if(!card||card.used)return;
+
+  if(p1Placed[slotIndex] && !p1Placed[slotIndex].fixed) removeP1Card(slotIndex);
+
+  p1Placed[slotIndex]={fixed:false,cardId:id,key:card.key};
+  card.used=true;
+
+  const trayEl=document.querySelector(`#layerTray .layer-card[data-card="${id}"]`);
+  if(trayEl){trayEl.classList.add("used");trayEl.classList.remove("selected");}
+  p1SelectedCard=null;
+
+  const slot=document.querySelector(`#layerStack .layer-slot[data-index="${slotIndex}"]`);
+  const num=slot.querySelector(".slot-number").outerHTML;
+  slot.innerHTML=`${num}<strong>${card.key}</strong>`;
+  slot.classList.remove("correct","wrong");
+  slot.draggable=true;
+}
+function removeP1Card(slotIndex){
+  const placed=p1Placed[slotIndex];
+  if(!placed||placed.fixed)return;
+  const card=p1Cards.find(c=>c.id===placed.cardId);
+  if(card)card.used=false;
+  const trayEl=document.querySelector(`#layerTray .layer-card[data-card="${placed.cardId}"]`);
+  if(trayEl)trayEl.classList.remove("used");
+  p1Placed[slotIndex]=null;
+
+  const slot=document.querySelector(`#layerStack .layer-slot[data-index="${slotIndex}"]`);
+  const num=slot.querySelector(".slot-number").outerHTML;
+  slot.innerHTML=`${num}<span class="layer-desc">Drop layer here</span>`;
+  slot.classList.remove("correct","wrong");
+  slot.draggable=false;
+}
+function moveP1Card(from,to){
+  if(from===to||!p1Placed[from]||p1Placed[from].fixed)return;
+  const moving=p1Placed[from];
+  if(p1Placed[to]&&!p1Placed[to].fixed)removeP1Card(to);
+  p1Placed[to]=moving;
+  p1Placed[from]=null;
+
+  const fromSlot=document.querySelector(`#layerStack .layer-slot[data-index="${from}"]`);
+  const toSlot=document.querySelector(`#layerStack .layer-slot[data-index="${to}"]`);
+  const fromNum=fromSlot.querySelector(".slot-number").outerHTML;
+  const toNum=toSlot.querySelector(".slot-number").outerHTML;
+  fromSlot.innerHTML=`${fromNum}<span class="layer-desc">Drop layer here</span>`;
+  fromSlot.draggable=false;
+  toSlot.innerHTML=`${toNum}<strong>${moving.key}</strong>`;
+  toSlot.draggable=true;
+}
+
+$("checkP1Btn").addEventListener("click",()=>{
+  const q=p1Questions[p1Index];
+  const msg=$("p1Message");
+  if(p1Placed.some(x=>!x)){
+    msg.className="message bad";msg.textContent="Complete every empty layer position before checking.";return;
+  }
+  let ok=true;
+  q.answers.forEach((answer,i)=>{
+    const slot=document.querySelector(`#layerStack .layer-slot[data-index="${i}"]`);
+    const key=p1Placed[i].key;
+    if(key===answer){slot.classList.add("correct");slot.classList.remove("wrong");}
+    else{ok=false;slot.classList.add("wrong");slot.classList.remove("correct");}
+  });
+  if(ok){
+    msg.className="message good";
+    msg.textContent="Correct. The layer model is in the required order.";
+    $("checkP1Btn").classList.add("hidden");
+    $("nextP1Btn").classList.remove("hidden");
+  }else{
+    msg.className="message bad";
+    msg.textContent="Some layers are in the wrong positions. Use the highlighted positions and the neighbouring layers to revise the order.";
+  }
+});
+$("hintP1Btn").addEventListener("click",()=>{
+  $("p1Message").className="message hint";
+  $("p1Message").textContent=p1Questions[p1Index].hint;
+});
+$("resetP1Btn").addEventListener("click",renderP1);
+$("nextP1Btn").addEventListener("click",()=>{
+  if(p1Index<p1Questions.length-1){p1Index++;renderP1();}
+  else{
+    $("phase1Card").classList.add("hidden");
+    $("transition2Card").classList.remove("hidden");
+    $("pill1").classList.add("done");
+  }
+});
+$("startP2Btn").addEventListener("click",openPhase2);
+
+/* -------------------- PHASE 2 LOGIC -------------------- */
+function renderMappingVisual(q){
+  const holder=$("mappingVisual");
+  holder.innerHTML="";
+  if(!q.visual)return;
+
+  const wrap=document.createElement("div");
+  wrap.className="mapping-visual";
+  wrap.innerHTML=`
+    <div class="model-column">
+      <div class="model-layer highlight">${q.prompt}</div>
+    </div>
+    <div class="map-arrow">→</div>
+    <div class="model-column">
+      <div class="model-layer">Choose the corresponding TCP/IP layer</div>
+    </div>`;
+  holder.appendChild(wrap);
+}
+
+function renderP2(){
+  const q=p2Questions[p2Index];
+  p2Selected=null;
+
+  $("p2Num").textContent=`Question ${p2Index+1}`;
+  $("p2Title").textContent=q.title;
+  $("p2Text").textContent=q.text;
+  $("p2PromptLabel").textContent=q.category==="mapping" ? "OSI layer or group" : "Broad responsibility";
+  $("p2PromptMain").textContent=q.prompt;
+  $("p2PromptSub").textContent=q.category==="mapping"
+    ? "Select the TCP/IP layer that represents the closest corresponding responsibility."
+    : "Choose the layer that best matches this description.";
+  renderMappingVisual(q);
+
+  $("p2Message").className="message";
+  $("p2Message").textContent="";
+  $("nextP2Btn").classList.add("hidden");
+  $("checkP2Btn").classList.remove("hidden");
+
+  const grid=$("p2Options");
+  grid.innerHTML="";
+  shuffle(q.options).forEach(opt=>{
+    const el=document.createElement("div");
+    el.className="option";
+    el.dataset.value=opt;
+    el.textContent=opt;
+    el.addEventListener("click",()=>{
+      grid.querySelectorAll(".option").forEach(x=>x.classList.remove("selected"));
+      el.classList.add("selected");
+      p2Selected=opt;
+    });
+    grid.appendChild(el);
+  });
+
+  updateProgress(2,p2Index+1,p2Questions.length);
+}
+
+$("checkP2Btn").addEventListener("click",()=>{
+  const q=p2Questions[p2Index];
+  const msg=$("p2Message");
+  if(!p2Selected){msg.className="message bad";msg.textContent="Choose an answer first.";return;}
+  const el=document.querySelector(`#p2Options .option[data-value="${CSS.escape(p2Selected)}"]`);
+  if(p2Selected===q.correct){
+    if(el)el.classList.add("correct");
+    msg.className="message good";msg.textContent=q.success;
+    $("checkP2Btn").classList.add("hidden");
+    $("nextP2Btn").classList.remove("hidden");
+  }else{
+    if(el)el.classList.add("wrong");
+    msg.className="message bad";msg.textContent="Not quite. Compare the responsibility with the broad purpose of the available layers.";
+  }
+});
+$("hintP2Btn").addEventListener("click",()=>{
+  $("p2Message").className="message hint";$("p2Message").textContent=p2Questions[p2Index].hint;
+});
+$("resetP2Btn").addEventListener("click",renderP2);
+$("nextP2Btn").addEventListener("click",()=>{
+  if(p2Index<p2Questions.length-1){p2Index++;renderP2();}
+  else{
+    $("phase2Card").classList.add("hidden");
+    $("transition3Card").classList.remove("hidden");
+    $("pill2").classList.add("done");
+  }
+});
+$("startP3Btn").addEventListener("click",openPhase3);
+
+/* -------------------- PHASE 3 LOGIC -------------------- */
+function renderOptions(containerId,options,onSelect){
+  const grid=$(containerId);
+  grid.innerHTML="";
+  shuffle(options).forEach(opt=>{
+    const el=document.createElement("div");
+    el.className="option";
+    el.dataset.id=opt.id;
+    el.textContent=opt.text;
+    el.addEventListener("click",()=>{
+      grid.querySelectorAll(".option").forEach(x=>x.classList.remove("selected"));
+      el.classList.add("selected");
+      onSelect(opt.id);
+    });
+    grid.appendChild(el);
+  });
+}
+
+function renderP3(){
+  const q=p3Questions[p3Index];
+  p3Diagnosis=null;p3Reason=null;
+
+  $("p3Num").textContent=`Diagnosis ${p3Index+1}`;
+  $("p3Title").textContent=q.title;
+  $("p3Text").textContent=q.text;
+  $("statementText").textContent=q.statement;
+
+  $("reasonPanel").classList.add("hidden");
+  $("checkP3ReasonBtn").classList.add("hidden");
+  $("nextP3Btn").classList.add("hidden");
+  $("checkP3DiagnosisBtn").classList.remove("hidden");
+
+  $("p3Message").className="message";
+  $("p3Message").textContent="";
+
+  renderOptions("diagnosisOptions",q.diagnosisOptions,id=>p3Diagnosis=id);
+  $("reasonOptions").innerHTML="";
+
+  updateProgress(3,p3Index+1,p3Questions.length);
+}
+
+$("checkP3DiagnosisBtn").addEventListener("click",()=>{
+  const q=p3Questions[p3Index];
+  const msg=$("p3Message");
+  if(!p3Diagnosis){msg.className="message bad";msg.textContent="Select Correct or Incorrect first.";return;}
+  const el=document.querySelector(`#diagnosisOptions .option[data-id="${p3Diagnosis}"]`);
+  if(p3Diagnosis===q.correctDiagnosis){
+    if(el)el.classList.add("correct");
+    msg.className="message good";msg.textContent="Diagnosis correct. Now explain why.";
+    $("checkP3DiagnosisBtn").classList.add("hidden");
+    $("reasonPanel").classList.remove("hidden");
+    $("checkP3ReasonBtn").classList.remove("hidden");
+    renderOptions("reasonOptions",q.reasonOptions,id=>p3Reason=id);
+  }else{
+    if(el)el.classList.add("wrong");
+    msg.className="message bad";
+    msg.textContent="That diagnosis does not match the layered communication concept shown. Review the statement and the diagram.";
+  }
+});
+
+$("checkP3ReasonBtn").addEventListener("click",()=>{
+  const q=p3Questions[p3Index];
+  const msg=$("p3Message");
+  if(!p3Reason){msg.className="message bad";msg.textContent="Choose an explanation first.";return;}
+  const el=document.querySelector(`#reasonOptions .option[data-id="${p3Reason}"]`);
+  if(p3Reason===q.correctReason){
+    if(el)el.classList.add("correct");
+    msg.className="message good";msg.textContent=q.success;
+    $("checkP3ReasonBtn").classList.add("hidden");
+    $("nextP3Btn").classList.remove("hidden");
+  }else{
+    if(el)el.classList.add("wrong");
+    msg.className="message bad";
+    msg.textContent="The diagnosis may be correct, but this explanation does not support it. Choose the explanation that matches the layered networking concept.";
+  }
+});
+$("hintP3Btn").addEventListener("click",()=>{
+  $("p3Message").className="message hint";$("p3Message").textContent=p3Questions[p3Index].hint;
+});
+$("resetP3Btn").addEventListener("click",renderP3);
+$("nextP3Btn").addEventListener("click",()=>{
+  if(p3Index<p3Questions.length-1){p3Index++;renderP3();}
+  else{
+    $("phase3Card").classList.add("hidden");
+    $("masteryCard").classList.add("show");
+    $("pill3").classList.add("done");
+    $("progressLabel").textContent="Activity";
+    $("progressText").textContent="Complete";
+    $("progressFill").style.width="100%";
+  }
+});
+
+/* -------------------- PROGRESS / RESTART -------------------- */
+function updateProgress(phase,current,total){
+  $("progressLabel").textContent=`Phase ${phase} progress`;
+  $("progressText").textContent=`${current} of ${total}`;
+  $("progressFill").style.width=`${((current-1)/total)*100}%`;
+}
+
+$("restartAllBtn").addEventListener("click",()=>{
+  p1Questions=createP1Attempt();
+  p2Questions=createP2Attempt();
+  p3Questions=createP3Attempt();
+
+  p1Index=0;p2Index=0;p3Index=0;
+
+  ["pill1","pill2","pill3"].forEach(x=>$(x).classList.remove("done"));
+  openPhase1();
+});
+
+renderP1();
+</script>
+</body>
+</html>
