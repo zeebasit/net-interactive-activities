@@ -1,12 +1,1132 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NET Interactive Activities</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Activity 1.2.1 — Network Connections</title>
+<style>
+  :root{
+    --bg:#f5f7fb;
+    --panel:#ffffff;
+    --text:#172033;
+    --muted:#667085;
+    --line:#d9e0ea;
+    --accent:#1769e0;
+    --accent-2:#0f4faa;
+    --good:#137a4b;
+    --good-bg:#edf9f2;
+    --bad:#b42318;
+    --bad-bg:#fff1f0;
+    --hint:#805600;
+    --hint-bg:#fff7df;
+    --shadow:0 12px 32px rgba(20,35,60,.08);
+    --soft:#eef4ff;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    background:linear-gradient(180deg,#f7f9fc 0,#f3f6fa 100%);
+    color:var(--text);
+  }
+  .shell{max-width:1180px;margin:0 auto;padding:32px 20px 64px}
+  .hero{
+    display:flex;justify-content:space-between;align-items:flex-start;
+    gap:18px;flex-wrap:wrap;margin-bottom:20px
+  }
+  .eyebrow{
+    color:var(--accent);font-weight:800;font-size:.82rem;
+    letter-spacing:.06em;text-transform:uppercase
+  }
+  h1{margin:.28rem 0 .45rem;font-size:clamp(1.8rem,3vw,2.55rem)}
+  .lead{margin:0;color:var(--muted);line-height:1.6;max-width:800px}
+  .phase-nav{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 22px}
+  .phase-pill{
+    border:1px solid var(--line);background:#fff;color:#42526a;
+    padding:9px 13px;border-radius:999px;font-weight:750;font-size:.9rem
+  }
+  .phase-pill.active{background:var(--soft);border-color:#9fc0f7;color:var(--accent-2)}
+  .phase-pill.done{background:var(--good-bg);border-color:#b7dfca;color:var(--good)}
+  .phase-pill.locked{opacity:.5}
+  .progress-card{
+    min-width:230px;background:var(--panel);border:1px solid var(--line);
+    border-radius:14px;padding:14px 16px;box-shadow:var(--shadow)
+  }
+  .progress-row{display:flex;justify-content:space-between;font-size:.9rem;margin-bottom:8px}
+  .progress-track{height:10px;background:#e7edf5;border-radius:999px;overflow:hidden}
+  .progress-fill{height:100%;background:var(--accent);transition:width .25s ease}
+  .card{
+    background:var(--panel);border:1px solid var(--line);border-radius:18px;
+    box-shadow:var(--shadow);padding:24px
+  }
+  .section-title{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap}
+  .section-title h2{margin:.2rem 0 .4rem;font-size:1.5rem}
+  .section-kicker{font-size:.82rem;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.05em}
+  .instruction{color:var(--muted);line-height:1.6;margin:0}
+  .network-stage{
+    margin-top:22px;display:grid;grid-template-columns:1fr 230px 1fr;gap:18px;align-items:center
+  }
+  .device{
+    min-height:210px;border:1px solid var(--line);border-radius:16px;padding:18px;
+    display:flex;flex-direction:column;justify-content:space-between;background:#fbfcfe
+  }
+  .device h3{margin:0 0 4px;font-size:1.1rem}
+  .device .desc{color:var(--muted);font-size:.92rem;line-height:1.45}
+  .device-icon{height:98px;display:flex;align-items:center;justify-content:center}
+  .device-icon svg{max-width:140px;max-height:92px}
+  .interface{
+    margin-top:10px;border-top:1px solid var(--line);padding-top:10px;font-size:.9rem
+  }
+  .interface strong{display:block;margin-bottom:2px}
+  .drop-zone{
+    min-height:150px;border:2px dashed #9fb6da;border-radius:18px;
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:18px;background:#f7fbff;transition:.15s ease
+  }
+  .drop-zone.dragover{background:#eaf3ff;border-color:var(--accent);transform:scale(1.02)}
+  .drop-zone.filled{border-style:solid}
+  .placeholder{color:#61708a;font-weight:700;line-height:1.45}
+  .choices{margin-top:24px}
+  .choices h3{margin:0 0 10px;font-size:1rem}
+  .choice-row{display:flex;gap:12px;flex-wrap:wrap}
+  .choice{
+    flex:1 1 210px;min-height:88px;border:1px solid var(--line);background:#fff;
+    border-radius:14px;padding:14px;cursor:grab;user-select:none;
+    display:flex;gap:12px;align-items:center;transition:.15s ease
+  }
+  .choice:hover{border-color:#9fb6da;box-shadow:0 6px 18px rgba(31,41,55,.06);transform:translateY(-1px)}
+  .choice.selected{outline:3px solid rgba(23,105,224,.16);border-color:var(--accent)}
+  .choice-icon{font-size:1.8rem;width:38px;text-align:center}
+  .choice-title{font-weight:800}
+  .choice-desc{font-size:.84rem;color:var(--muted);margin-top:2px;line-height:1.35}
+  .controls{margin-top:22px;display:flex;gap:10px;flex-wrap:wrap}
+  button{
+    border:none;border-radius:10px;padding:11px 16px;font-weight:800;cursor:pointer;font-size:.94rem
+  }
+  .primary{background:var(--accent);color:#fff}
+  .primary:hover{background:var(--accent-2)}
+  .secondary{background:#eef2f7;color:#263245}
+  .ghost{background:#fff;color:#263245;border:1px solid var(--line)}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  .message{margin-top:18px;border-radius:12px;padding:14px 16px;display:none;line-height:1.5}
+  .message.good{display:block;background:var(--good-bg);color:var(--good);border:1px solid #b8e2cc}
+  .message.bad{display:block;background:var(--bad-bg);color:var(--bad);border:1px solid #f0c5c2}
+  .message.hint{display:block;background:var(--hint-bg);color:var(--hint);border:1px solid #efd792}
+
+  /* Phase transition */
+  .transition-card{text-align:center;padding:34px 24px}
+  .transition-icon{font-size:3rem;margin-bottom:8px}
+  .transition-card h2{margin:.2rem 0 .6rem}
+  .transition-card p{max-width:740px;margin:0 auto 18px;color:var(--muted);line-height:1.6}
+
+  /* Build phase */
+  .build-wrap{margin-top:22px}
+  .build-diagram{
+    display:flex;align-items:stretch;gap:10px;flex-wrap:wrap;justify-content:center;
+    padding:18px;background:#f8fafc;border:1px solid var(--line);border-radius:16px
+  }
+  .build-endpoint{
+    flex:0 1 160px;min-height:120px;background:#fff;border:1px solid var(--line);
+    border-radius:14px;padding:13px;display:flex;flex-direction:column;justify-content:center;text-align:center
+  }
+  .build-endpoint strong{display:block}
+  .build-endpoint span{font-size:.82rem;color:var(--muted);margin-top:4px}
+  .slot{
+    flex:1 1 130px;min-width:120px;max-width:190px;min-height:120px;
+    border:2px dashed #b0bdd0;border-radius:14px;background:#fff;
+    display:flex;align-items:center;justify-content:center;text-align:center;padding:10px;
+    cursor:pointer;transition:.15s ease
+  }
+  .slot:hover,.slot.active{border-color:var(--accent);background:#f5f9ff}
+  .slot.correct{border-style:solid;border-color:#70c59b;background:#f2fbf6}
+  .slot.wrong{border-color:#df8a82;background:#fff6f5}
+  .slot .slot-label{font-size:.82rem;color:#7b8799;font-weight:750}
+  .slot .placed{font-weight:800;font-size:.9rem;line-height:1.35}
+  .arrow{
+    flex:0 0 24px;display:flex;align-items:center;justify-content:center;
+    color:#8a98ac;font-size:1.3rem;font-weight:900
+  }
+  .tray{
+    margin-top:20px;padding:16px;border:1px solid var(--line);border-radius:16px;background:#fff
+  }
+  .tray-title{font-weight:800;margin-bottom:10px}
+  .component-row{display:flex;gap:10px;flex-wrap:wrap}
+  .component{
+    flex:1 1 180px;min-height:76px;border:1px solid var(--line);border-radius:12px;
+    background:#fff;padding:12px;cursor:grab;user-select:none;display:flex;gap:10px;align-items:center
+  }
+  .component:hover{border-color:#9fb6da}
+  .component.selected{outline:3px solid rgba(23,105,224,.15);border-color:var(--accent)}
+  .component.used{opacity:.38;cursor:not-allowed}
+  .component .icon{font-size:1.5rem;width:30px;text-align:center}
+  .component .name{font-weight:800;font-size:.9rem}
+  .component .mini{font-size:.78rem;color:var(--muted);margin-top:2px;line-height:1.25}
+
+  .mastery{
+    display:none;text-align:center;padding:36px 24px
+  }
+  .mastery.show{display:block}
+  .mastery h2{margin:.2rem 0 .65rem}
+  .mastery p{color:var(--muted);max-width:720px;margin:0 auto 18px;line-height:1.6}
+  .mastery-grid{
+    max-width:760px;margin:20px auto 24px;display:grid;grid-template-columns:repeat(2,1fr);gap:12px;text-align:left
+  }
+  .mastery-item{border:1px solid var(--line);border-radius:12px;padding:14px;background:#fbfcfe}
+  .mastery-item strong{display:block;margin-bottom:3px}
+  .small-note{margin-top:16px;color:var(--muted);font-size:.86rem}
+  .hidden{display:none!important}
+  @media (max-width:820px){
+    .network-stage{grid-template-columns:1fr}
+    .drop-zone{min-height:110px}
+    .arrow{display:none}
+    .build-diagram{flex-direction:column}
+    .slot,.build-endpoint{max-width:none;width:100%}
+    .mastery-grid{grid-template-columns:1fr}
+  }
+</style>
 </head>
 <body>
-    <h1>NET Interactive Activities</h1>
-    <p>GitHub Pages test successful.</p>
+<div class="shell">
+  <div class="hero">
+    <div>
+      <div class="eyebrow">Module 1 · Lesson 2</div>
+      <h1>Activity 1.2.1 — Network Connections</h1>
+      <p class="lead">
+        Work through two phases. Each new attempt draws a balanced set from a question bank. First, choose a suitable connection. Then build the complete connection from its individual parts.
+      </p>
+      <div class="phase-nav">
+        <div class="phase-pill active" id="pill1">Phase 1 · Choose</div>
+        <div class="phase-pill locked" id="pill2">Phase 2 · Build</div>
+      </div>
+    </div>
+
+    <div class="progress-card">
+      <div class="progress-row">
+        <span id="progressLabel">Phase 1 progress</span>
+        <strong id="progressText">1 of 5</strong>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <section class="card" id="phase1Card">
+    <div class="section-title">
+      <div>
+        <div class="section-kicker" id="scenarioNum">Scenario 1</div>
+        <h2 id="scenarioTitle"></h2>
+        <p class="instruction" id="scenarioText"></p>
+      </div>
+    </div>
+
+    <div class="network-stage">
+      <div class="device">
+        <div>
+          <div class="device-icon" id="leftIcon"></div>
+          <h3 id="leftName"></h3>
+          <div class="desc" id="leftDesc"></div>
+        </div>
+        <div class="interface">
+          <strong>Available interface</strong>
+          <span id="leftInterface"></span>
+        </div>
+      </div>
+
+      <div class="drop-zone" id="dropZone" tabindex="0">
+        <div class="placeholder" id="dropText">Drop the best connection here</div>
+      </div>
+
+      <div class="device">
+        <div>
+          <div class="device-icon" id="rightIcon"></div>
+          <h3 id="rightName"></h3>
+          <div class="desc" id="rightDesc"></div>
+        </div>
+        <div class="interface">
+          <strong>Available interface</strong>
+          <span id="rightInterface"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="choices">
+      <h3>Available choices</h3>
+      <div class="choice-row" id="choiceRow"></div>
+    </div>
+
+    <div class="controls">
+      <button class="primary" id="checkBtn">Check connection</button>
+      <button class="secondary" id="hintBtn">Hint</button>
+      <button class="ghost" id="resetBtn">Reset scenario</button>
+      <button class="primary hidden" id="nextBtn">Next scenario</button>
+    </div>
+
+    <div class="message" id="message"></div>
+    <div class="small-note">Formative activity: results are not submitted. This browser only remembers which question IDs were used recently so the next attempt can vary.</div>
+  </section>
+
+  <section class="card transition-card hidden" id="transitionCard">
+    <div class="transition-icon">🔧</div>
+    <h2>Phase 1 complete</h2>
+    <p>
+      You have selected suitable network connections. The next step is more detailed:
+      build each connection from the interface, connector and transmission-medium components.
+    </p>
+    <button class="primary" id="startBuildBtn">Start Phase 2 — Build the Connection</button>
+  </section>
+
+  <section class="card hidden" id="phase2Card">
+    <div class="section-title">
+      <div>
+        <div class="section-kicker" id="buildNum">Build 1</div>
+        <h2 id="buildTitle"></h2>
+        <p class="instruction" id="buildText"></p>
+      </div>
+    </div>
+
+    <div class="build-wrap">
+      <div class="build-diagram" id="buildDiagram"></div>
+
+      <div class="tray">
+        <div class="tray-title">Component tray <span style="font-weight:500;color:#667085;font-size:.82rem">— drag a placed component back here to remove it</span></div>
+        <div class="component-row" id="componentRow"></div>
+      </div>
+
+      <div class="controls">
+        <button class="primary" id="checkBuildBtn">Check build</button>
+        <button class="secondary" id="hintBuildBtn">Hint</button>
+        <button class="ghost" id="resetBuildBtn">Reset build</button>
+        <button class="primary hidden" id="nextBuildBtn">Next build</button>
+      </div>
+
+      <div class="message" id="buildMessage"></div>
+      <div class="small-note">
+        Tip: drag components into the slots, or click a component and then click the target slot. To change your answer, drag a placed component back to the tray or click the occupied slot.
+      </div>
+    </div>
+  </section>
+
+  <section class="card mastery" id="masteryCard">
+    <div style="font-size:3rem">✓</div>
+    <h2>Activity complete</h2>
+    <p>
+      You progressed from selecting a connection to assembling it from individual components.
+      The same reasoning will be used later when selecting and troubleshooting physical network links.
+    </p>
+    <div class="mastery-grid">
+      <div class="mastery-item">
+        <strong>Connection selection</strong>
+        Match the connection type to the interfaces and requirement.
+      </div>
+      <div class="mastery-item">
+        <strong>Component recognition</strong>
+        Distinguish interfaces, connectors and transmission media.
+      </div>
+      <div class="mastery-item">
+        <strong>Wired vs wireless</strong>
+        Recognise when a physical connector is required and when radio is used.
+      </div>
+      <div class="mastery-item">
+        <strong>Suitability</strong>
+        Recognise that a connection can physically fit but still fail a stated requirement.
+      </div>
+    </div>
+    <button class="primary" id="restartAllBtn">Restart activity</button>
+  </section>
+</div>
+
+<script>
+
+const icons = {
+  pc: `<svg viewBox="0 0 160 100" aria-hidden="true">
+        <rect x="22" y="10" width="92" height="58" rx="5" fill="#dce8f8" stroke="#385a84" stroke-width="3"/>
+        <rect x="31" y="19" width="74" height="40" rx="2" fill="#f8fbff"/>
+        <rect x="62" y="69" width="13" height="10" fill="#385a84"/>
+        <rect x="48" y="79" width="42" height="6" rx="3" fill="#385a84"/>
+        <rect x="121" y="20" width="23" height="62" rx="4" fill="#eef2f7" stroke="#385a84" stroke-width="3"/>
+        <rect x="127" y="29" width="11" height="7" rx="1" fill="#385a84"/>
+      </svg>`,
+  switch: `<svg viewBox="0 0 160 100" aria-hidden="true">
+        <rect x="15" y="28" width="130" height="45" rx="6" fill="#edf2f7" stroke="#385a84" stroke-width="3"/>
+        ${Array.from({length:8},(_,i)=>`<rect x="${27+i*14}" y="41" width="9" height="8" rx="1" fill="#385a84"/>`).join("")}
+        ${Array.from({length:8},(_,i)=>`<rect x="${27+i*14}" y="55" width="9" height="8" rx="1" fill="#385a84"/>`).join("")}
+      </svg>`,
+  laptop: `<svg viewBox="0 0 160 100" aria-hidden="true">
+        <rect x="38" y="11" width="84" height="58" rx="5" fill="#dce8f8" stroke="#385a84" stroke-width="3"/>
+        <rect x="47" y="20" width="66" height="40" fill="#f8fbff"/>
+        <path d="M25 76h110l-10 10H35z" fill="#edf2f7" stroke="#385a84" stroke-width="3"/>
+        <path d="M109 23c8 4 14 10 18 18" fill="none" stroke="#1769e0" stroke-width="4" stroke-linecap="round"/>
+        <path d="M113 32c4 2 7 5 9 9" fill="none" stroke="#1769e0" stroke-width="4" stroke-linecap="round"/>
+      </svg>`,
+  ap: `<svg viewBox="0 0 160 100" aria-hidden="true">
+        <rect x="51" y="50" width="58" height="28" rx="7" fill="#edf2f7" stroke="#385a84" stroke-width="3"/>
+        <circle cx="80" cy="64" r="4" fill="#1769e0"/>
+        <path d="M80 45V25" stroke="#385a84" stroke-width="4" stroke-linecap="round"/>
+        <path d="M60 35c11-12 29-12 40 0" fill="none" stroke="#1769e0" stroke-width="4" stroke-linecap="round"/>
+        <path d="M51 25c16-18 42-18 58 0" fill="none" stroke="#1769e0" stroke-width="4" stroke-linecap="round"/>
+      </svg>`,
+  router: `<svg viewBox="0 0 160 100" aria-hidden="true">
+        <ellipse cx="80" cy="56" rx="56" ry="27" fill="#edf2f7" stroke="#385a84" stroke-width="3"/>
+        <path d="M52 54h56M80 36v40" stroke="#385a84" stroke-width="3"/>
+        <path d="M49 54l10-7v14zM111 54l-10-7v14zM80 35l-7 10h14zM80 77l-7-10h14z" fill="#385a84"/>
+      </svg>`
+};
+
+const phase1Choices = {
+  copper:{title:"Copper Ethernet cable",desc:"Twisted-pair connection with 8P8C modular connectors",icon:"🔌"},
+  fibre:{title:"Fibre-optic cable",desc:"Optical connection using compatible fibre interfaces",icon:"✨"},
+  wireless:{title:"Wireless connection",desc:"Radio communication between wireless interfaces",icon:"📶"},
+  suitable:{title:"Suitable",desc:"The proposed connection meets the stated requirements",icon:"✅"},
+  unsuitable:{title:"Not suitable",desc:"The proposed connection fails at least one requirement",icon:"⛔"}
+};
+
+// -----------------------------------------------------------------------------
+// QUESTION BANK
+// Five categories are used. A new attempt selects one question from each
+// category, then shuffles the resulting five questions.
+// -----------------------------------------------------------------------------
+const phase1Bank = [
+  // COPPER
+  {
+    id:"copper-office-pc", category:"copper",
+    title:"Connect the fixed Office-PC to SW1",
+    text:"The Office-PC stays at its desk. Both the PC and SW1 provide compatible copper Ethernet interfaces.",
+    left:{name:"Office-PC",desc:"Fixed desktop computer",iface:"Copper Ethernet interface",icon:"pc"},
+    right:{name:"SW1",desc:"Office access switch",iface:"Copper Ethernet interface",icon:"switch"},
+    choices:["copper","fibre","wireless"], correct:"copper",
+    hint:"Start by comparing the physical interfaces available at both ends.",
+    success:"Correct. Both devices provide compatible copper Ethernet interfaces, so a twisted-pair copper connection is appropriate.",
+    wrong:"Not quite. The selected connection does not match the interfaces available at both ends."
+  },
+  {
+    id:"copper-printer", category:"copper",
+    title:"Connect a fixed network printer to SW1",
+    text:"A network printer is installed beside SW1. The printer and SW1 each provide a compatible copper Ethernet interface.",
+    left:{name:"Office Printer",desc:"Fixed network printer",iface:"Copper Ethernet interface",icon:"pc"},
+    right:{name:"SW1",desc:"Office access switch",iface:"Copper Ethernet interface",icon:"switch"},
+    choices:["wireless","copper","fibre"], correct:"copper",
+    hint:"Mobility is not required. Check the interface type provided at both ends.",
+    success:"Correct. The fixed printer and switch both provide compatible copper Ethernet interfaces.",
+    wrong:"Not quite. Use the interface information given in the scenario."
+  },
+  {
+    id:"copper-desk-phone", category:"copper",
+    title:"Choose the connection for a fixed desk device",
+    text:"A fixed office device sits beside a wall outlet connected back to SW1. The device and switch connection both use compatible copper Ethernet interfaces.",
+    left:{name:"Desk Device",desc:"Fixed office endpoint",iface:"Copper Ethernet interface",icon:"pc"},
+    right:{name:"SW1",desc:"Office access switch",iface:"Copper Ethernet interface",icon:"switch"},
+    choices:["fibre","wireless","copper"], correct:"copper",
+    hint:"The scenario already tells you which interface technology is available at both ends.",
+    success:"Correct. A copper Ethernet link matches the interfaces and the short fixed-office requirement.",
+    wrong:"Not quite. Match the medium to the interfaces described."
+  },
+
+  // WIRELESS
+  {
+    id:"wireless-staff-laptop", category:"wireless",
+    title:"Connect the mobile Staff-Laptop",
+    text:"The member of staff moves between offices and meeting rooms. The laptop has a wireless network interface and the office access point provides wireless coverage.",
+    left:{name:"Staff-Laptop",desc:"Mobile user device",iface:"Wireless network interface",icon:"laptop"},
+    right:{name:"Office-AP",desc:"Wireless access point",iface:"Wireless radio interface",icon:"ap"},
+    choices:["copper","fibre","wireless"], correct:"wireless",
+    hint:"The requirement emphasises mobility and both devices support radio communication.",
+    success:"Correct. A wireless connection allows the laptop to communicate through radio signals without a physical network cable.",
+    wrong:"Not quite. Look again at the mobility requirement and the interfaces available on both devices."
+  },
+  {
+    id:"wireless-meeting-laptop", category:"wireless",
+    title:"Connect a laptop in a meeting room",
+    text:"A laptop must remain connected while its user moves around a meeting room. A compatible office access point is available.",
+    left:{name:"Meeting-Laptop",desc:"Mobile user device",iface:"Wireless network interface",icon:"laptop"},
+    right:{name:"Office-AP",desc:"Wireless access point",iface:"Wireless radio interface",icon:"ap"},
+    choices:["fibre","wireless","copper"], correct:"wireless",
+    hint:"Which connection type supports movement without attaching a physical cable?",
+    success:"Correct. Wireless is appropriate because mobility is part of the requirement and both endpoints support wireless communication.",
+    wrong:"Not quite. The user must remain mobile."
+  },
+  {
+    id:"wireless-tablet", category:"wireless",
+    title:"Connect a mobile tablet to the office network",
+    text:"A tablet is used while staff walk around the office. It has a wireless network interface and is within coverage of Office-AP.",
+    left:{name:"Tablet",desc:"Mobile user device",iface:"Wireless network interface",icon:"laptop"},
+    right:{name:"Office-AP",desc:"Wireless access point",iface:"Wireless radio interface",icon:"ap"},
+    choices:["wireless","copper","fibre"], correct:"wireless",
+    hint:"The device must remain usable while moving around the office.",
+    success:"Correct. The wireless interface and access point provide the required radio-based connection.",
+    wrong:"Not quite. Consider the mobility requirement."
+  },
+
+  // FIBRE
+  {
+    id:"fibre-two-optical", category:"fibre",
+    title:"Select a link for two optical interfaces",
+    text:"Two network devices must be connected over a longer distance. Compatible optical interfaces are already installed at both ends.",
+    left:{name:"Network Device A",desc:"Network infrastructure device",iface:"Optical interface",icon:"router"},
+    right:{name:"Network Device B",desc:"Network infrastructure device",iface:"Optical interface",icon:"switch"},
+    choices:["copper","fibre","wireless"], correct:"fibre",
+    hint:"The interfaces at both ends are designed to transmit and receive light.",
+    success:"Correct. The optical interfaces require a compatible fibre-optic connection.",
+    wrong:"Not quite. Choose the transmission medium that matches the optical interfaces."
+  },
+  {
+    id:"fibre-floor-link", category:"fibre",
+    title:"Connect two switches using optical interfaces",
+    text:"Two switches in different parts of a building have compatible optical interfaces available for the link.",
+    left:{name:"SW1",desc:"Office access switch",iface:"Optical interface",icon:"switch"},
+    right:{name:"SW2",desc:"Remote switch",iface:"Optical interface",icon:"switch"},
+    choices:["wireless","copper","fibre"], correct:"fibre",
+    hint:"Both ends provide optical interfaces.",
+    success:"Correct. A compatible fibre-optic link matches the optical interfaces.",
+    wrong:"Not quite. Match the transmission medium to the interface type."
+  },
+  {
+    id:"fibre-uplink", category:"fibre",
+    title:"Choose a medium for an optical uplink",
+    text:"A network uplink is presented with compatible optical interfaces at both ends. The required fibre type and optical equipment are specified as compatible.",
+    left:{name:"Distribution Device",desc:"Network infrastructure device",iface:"Optical interface",icon:"router"},
+    right:{name:"Remote Switch",desc:"Network infrastructure device",iface:"Optical interface",icon:"switch"},
+    choices:["fibre","wireless","copper"], correct:"fibre",
+    hint:"The link uses optical interfaces and the scenario confirms compatibility.",
+    success:"Correct. Fibre is the appropriate medium for the compatible optical interfaces.",
+    wrong:"Not quite. Focus on the interfaces provided."
+  },
+
+  // DIAGNOSE / SUITABILITY
+  {
+    id:"diagnose-copper-140m", category:"diagnose",
+    title:"Check a proposed copper link",
+    text:"A technician proposes a 140 m twisted-pair copper connection between two compatible copper Ethernet interfaces. The supplied maximum channel length for this copper option is 100 m.",
+    left:{name:"Device A",desc:"Copper-capable network device",iface:"Copper Ethernet interface",icon:"router"},
+    right:{name:"Device B",desc:"Copper-capable network device",iface:"Copper Ethernet interface",icon:"switch"},
+    choices:["suitable","unsuitable"], correct:"unsuitable",
+    hint:"Physical connector compatibility is only one requirement. Compare the proposed distance with the supplied limit.",
+    success:"Correct. The interfaces and connectors may be compatible, but the proposed 140 m link exceeds the stated 100 m limit.",
+    wrong:"Not quite. The connector may fit, but check whether the full link requirement is satisfied."
+  },
+  {
+    id:"diagnose-copper-75m", category:"diagnose",
+    title:"Check a 75 m copper link",
+    text:"A 75 m twisted-pair copper link is proposed between two compatible copper Ethernet interfaces. The supplied maximum channel length for this option is 100 m.",
+    left:{name:"Device A",desc:"Copper-capable network device",iface:"Copper Ethernet interface",icon:"router"},
+    right:{name:"Device B",desc:"Copper-capable network device",iface:"Copper Ethernet interface",icon:"switch"},
+    choices:["unsuitable","suitable"], correct:"suitable",
+    hint:"Check both interface compatibility and the stated distance limit.",
+    success:"Correct. The copper interfaces are compatible and the 75 m link is within the supplied 100 m limit.",
+    wrong:"Not quite. Compare 75 m with the supplied 100 m limit."
+  },
+  {
+    id:"diagnose-wrong-medium", category:"diagnose",
+    title:"Check an interface mismatch",
+    text:"A fibre-optic cable is proposed between two devices that only provide copper Ethernet interfaces.",
+    left:{name:"Device A",desc:"Fixed network device",iface:"Copper Ethernet interface only",icon:"router"},
+    right:{name:"Device B",desc:"Fixed network device",iface:"Copper Ethernet interface only",icon:"switch"},
+    choices:["suitable","unsuitable"], correct:"unsuitable",
+    hint:"A network medium must be compatible with the interfaces at both ends.",
+    success:"Correct. Fibre is a valid network medium, but the devices in this scenario do not provide compatible optical interfaces.",
+    wrong:"Not quite. Check whether the proposed cable can connect to the interfaces described."
+  },
+
+  // REQUIREMENT-BASED DECISION
+  {
+    id:"decision-300m", category:"decision",
+    title:"Choose the best connection for a 300 m link",
+    text:"Two network devices are 300 m apart. Each device has both a copper Ethernet interface and a compatible optical interface. The copper option supplied for this activity has a 100 m channel limit.",
+    left:{name:"Distribution Device",desc:"Network infrastructure device",iface:"Copper and optical interfaces",icon:"router"},
+    right:{name:"Remote Switch",desc:"Network infrastructure device",iface:"Copper and optical interfaces",icon:"switch"},
+    choices:["copper","fibre","wireless"], correct:"fibre",
+    hint:"Both copper and optical interfaces exist, so the deciding factor is the link requirement.",
+    success:"Correct. The fibre option matches the available optical interfaces and supports the stated 300 m requirement, while the supplied copper option does not.",
+    wrong:"Not quite. Since more than one interface type is available, use the distance requirement to decide."
+  },
+  {
+    id:"decision-short-fixed", category:"decision",
+    title:"Choose between available interfaces for a short fixed link",
+    text:"Two fixed devices are 20 m apart. Each has both a compatible copper Ethernet interface and a compatible optical interface. The requirement does not call for greater distance or mobility.",
+    left:{name:"Device A",desc:"Fixed network device",iface:"Copper and optical interfaces",icon:"router"},
+    right:{name:"Device B",desc:"Fixed network device",iface:"Copper and optical interfaces",icon:"switch"},
+    choices:["fibre","wireless","copper"], correct:"copper",
+    hint:"Do not choose a technology merely because it is more advanced. Use the stated requirement.",
+    success:"Correct. The compatible copper connection satisfies the short fixed-link requirement without needing the optical option.",
+    wrong:"Not quite. Both interfaces are available, so focus on what the requirement actually needs."
+  },
+  {
+    id:"decision-mobile-dual", category:"decision",
+    title:"Choose for a device that must remain mobile",
+    text:"A laptop has both a copper Ethernet interface and a wireless interface. The user must stay connected while moving around the office, and Office-AP provides coverage.",
+    left:{name:"Staff-Laptop",desc:"Mobile user device",iface:"Copper and wireless interfaces",icon:"laptop"},
+    right:{name:"Office-AP",desc:"Wireless access point",iface:"Wireless radio interface",icon:"ap"},
+    choices:["copper","wireless","fibre"], correct:"wireless",
+    hint:"More than one interface exists on the laptop. Which requirement should decide the choice?",
+    success:"Correct. Wireless best matches the mobility requirement.",
+    wrong:"Not quite. Use the mobility requirement to decide."
+  }
+];
+
+const components = {
+  copper_if:{name:"Copper Ethernet interface",mini:"Physical interface for a copper Ethernet connection",icon:"🖧"},
+  eightp8c:{name:"8P8C modular connector",mini:"Connector used on the twisted-pair patch cable in this activity",icon:"🔌"},
+  copper_cable:{name:"Twisted-pair copper cable",mini:"Carries the signal electrically through copper conductors",icon:"〰️"},
+  wireless_if:{name:"Wireless network interface",mini:"Interface that transmits and receives radio signals",icon:"📡"},
+  radio:{name:"Radio transmission medium",mini:"Wireless signal travels through the surrounding space",icon:"📶"},
+  ap_radio:{name:"Access-point radio interface",mini:"Wireless interface on the access point",icon:"📡"},
+  optical_if:{name:"Optical interface / transceiver",mini:"Converts between device data and optical signals",icon:"🔦"},
+  lc:{name:"LC fibre connector",mini:"Connector used with the fibre link in this activity",icon:"🔗"},
+  fibre_cable:{name:"Fibre-optic cable",mini:"Carries information using light",icon:"✨"}
+};
+
+// Three build categories are used. Each attempt selects one build from each
+// category (copper, wireless, fibre) and then shuffles the order.
+const buildBank = [
+  {
+    id:"build-copper-office-pc", category:"copper",
+    title:"Build the Office-PC copper connection",
+    text:"Assemble the complete physical path between Office-PC and SW1. Use every slot.",
+    left:"Office-PC", right:"SW1",
+    slots:[
+      {label:"PC interface",correct:"copper_if"},
+      {label:"Connector",correct:"eightp8c"},
+      {label:"Transmission medium",correct:"copper_cable"},
+      {label:"Connector",correct:"eightp8c"},
+      {label:"Switch interface",correct:"copper_if"}
+    ],
+    tray:["copper_if","copper_if","eightp8c","eightp8c","copper_cable","optical_if","lc","fibre_cable"],
+    hint:"Begin at Office-PC. What physical interface does it use? Then follow the path from the device into the cable and back into SW1.",
+    success:"Correct. You built the full copper path: copper interface → 8P8C connector → twisted-pair cable → 8P8C connector → copper interface."
+  },
+  {
+    id:"build-copper-printer", category:"copper",
+    title:"Build the printer-to-switch copper connection",
+    text:"Assemble the complete physical path between the Office Printer and SW1.",
+    left:"Office Printer", right:"SW1",
+    slots:[
+      {label:"Printer interface",correct:"copper_if"},
+      {label:"Connector",correct:"eightp8c"},
+      {label:"Transmission medium",correct:"copper_cable"},
+      {label:"Connector",correct:"eightp8c"},
+      {label:"Switch interface",correct:"copper_if"}
+    ],
+    tray:["copper_if","copper_if","eightp8c","eightp8c","copper_cable","wireless_if","radio","lc"],
+    hint:"The printer and switch use compatible copper Ethernet interfaces. Build outward from the first interface.",
+    success:"Correct. The complete copper path is interface → connector → twisted-pair cable → connector → interface."
+  },
+
+  {
+    id:"build-wireless-staff", category:"wireless",
+    title:"Build the Staff-Laptop wireless connection",
+    text:"Assemble the wireless path between Staff-Laptop and Office-AP. Notice which physical components are not needed.",
+    left:"Staff-Laptop", right:"Office-AP",
+    slots:[
+      {label:"Laptop interface",correct:"wireless_if"},
+      {label:"Transmission medium",correct:"radio"},
+      {label:"AP interface",correct:"ap_radio"}
+    ],
+    tray:["wireless_if","radio","ap_radio","eightp8c","copper_cable","lc"],
+    hint:"There is no physical cable between the laptop and access point. Think in terms of interface → medium → interface.",
+    success:"Correct. The wireless path is interface → radio transmission medium → access-point radio interface. No cable connector is required."
+  },
+  {
+    id:"build-wireless-meeting", category:"wireless",
+    title:"Build a meeting-room wireless connection",
+    text:"Assemble the wireless path between Meeting-Laptop and Office-AP.",
+    left:"Meeting-Laptop", right:"Office-AP",
+    slots:[
+      {label:"Laptop interface",correct:"wireless_if"},
+      {label:"Transmission medium",correct:"radio"},
+      {label:"AP interface",correct:"ap_radio"}
+    ],
+    tray:["radio","wireless_if","eightp8c","ap_radio","copper_if","copper_cable"],
+    hint:"Wireless still requires interfaces at both ends, but it does not use a physical cable between them.",
+    success:"Correct. The complete wireless path is wireless interface → radio medium → access-point radio interface."
+  },
+
+  {
+    id:"build-fibre-network-link", category:"fibre",
+    title:"Build an optical network link",
+    text:"Assemble a compatible fibre connection between two network devices with optical interfaces.",
+    left:"Network Device A", right:"Network Device B",
+    slots:[
+      {label:"Optical interface",correct:"optical_if"},
+      {label:"Connector",correct:"lc"},
+      {label:"Transmission medium",correct:"fibre_cable"},
+      {label:"Connector",correct:"lc"},
+      {label:"Optical interface",correct:"optical_if"}
+    ],
+    tray:["optical_if","optical_if","lc","lc","fibre_cable","copper_if","eightp8c","copper_cable"],
+    hint:"Follow the same logic as the copper build, but use the optical components.",
+    success:"Correct. You built the full fibre path: optical interface/transceiver → LC connector → fibre-optic cable → LC connector → optical interface/transceiver."
+  },
+  {
+    id:"build-fibre-switch-link", category:"fibre",
+    title:"Build a fibre switch-to-switch link",
+    text:"Assemble the complete optical connection between SW1 and a remote switch.",
+    left:"SW1", right:"Remote Switch",
+    slots:[
+      {label:"Optical interface",correct:"optical_if"},
+      {label:"Connector",correct:"lc"},
+      {label:"Transmission medium",correct:"fibre_cable"},
+      {label:"Connector",correct:"lc"},
+      {label:"Optical interface",correct:"optical_if"}
+    ],
+    tray:["lc","optical_if","copper_cable","fibre_cable","optical_if","eightp8c","lc","copper_if"],
+    hint:"The physical sequence is the same at each end: optical interface connects to the fibre through the compatible connector.",
+    success:"Correct. Both switches connect through optical interfaces, LC connectors and the fibre-optic medium."
+  }
+];
+
+const $ = id => document.getElementById(id);
+
+function shuffle(array){
+  const a=[...array];
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function safeReadStorage(key){
+  try{
+    const raw=localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : [];
+  }catch(e){ return []; }
+}
+
+function safeWriteStorage(key,value){
+  try{ localStorage.setItem(key,JSON.stringify(value)); }catch(e){}
+}
+
+function pickDifferent(pool,lastIds){
+  const preferred=pool.filter(q=>!lastIds.includes(q.id));
+  const candidates=preferred.length ? preferred : pool;
+  return candidates[Math.floor(Math.random()*candidates.length)];
+}
+
+function createPhase1Attempt(){
+  const last=safeReadStorage("netActivity121_lastPhase1");
+  const categories=["copper","wireless","fibre","diagnose","decision"];
+  const selected=categories.map(cat=>{
+    const pool=phase1Bank.filter(q=>q.category===cat);
+    return pickDifferent(pool,last);
+  });
+  safeWriteStorage("netActivity121_lastPhase1",selected.map(q=>q.id));
+  return shuffle(selected);
+}
+
+function createBuildAttempt(){
+  const last=safeReadStorage("netActivity121_lastBuilds");
+  const categories=["copper","wireless","fibre"];
+  const selected=categories.map(cat=>{
+    const pool=buildBank.filter(q=>q.category===cat);
+    return pickDifferent(pool,last);
+  });
+  safeWriteStorage("netActivity121_lastBuilds",selected.map(q=>q.id));
+  return shuffle(selected);
+}
+
+let phase1Scenarios=createPhase1Attempt();
+let builds=createBuildAttempt();
+
+let p1Index=0, p1Selected=null, p1Answered=false;
+let buildIndex=0, selectedComponentId=null, placed=[], componentInstances=[];
+
+function renderPhase1(){
+  const s=phase1Scenarios[p1Index];
+  p1Selected=null;
+  p1Answered=false;
+
+  $("scenarioNum").textContent=`Scenario ${p1Index+1}`;
+  $("scenarioTitle").textContent=s.title;
+  $("scenarioText").textContent=s.text;
+  $("leftName").textContent=s.left.name;
+  $("leftDesc").textContent=s.left.desc;
+  $("leftInterface").textContent=s.left.iface;
+  $("leftIcon").innerHTML=icons[s.left.icon];
+  $("rightName").textContent=s.right.name;
+  $("rightDesc").textContent=s.right.desc;
+  $("rightInterface").textContent=s.right.iface;
+  $("rightIcon").innerHTML=icons[s.right.icon];
+
+  $("dropText").textContent="Drop the best connection here";
+  $("dropZone").classList.remove("filled","dragover");
+  $("message").className="message";
+  $("message").textContent="";
+  $("nextBtn").classList.add("hidden");
+  $("checkBtn").classList.remove("hidden");
+
+  const row=$("choiceRow");
+  row.innerHTML="";
+  const shuffledChoices=shuffle(s.choices);
+  shuffledChoices.forEach(key=>{
+    const c=phase1Choices[key];
+    const el=document.createElement("div");
+    el.className="choice";
+    el.draggable=true;
+    el.dataset.key=key;
+    el.innerHTML=`<div class="choice-icon">${c.icon}</div>
+      <div><div class="choice-title">${c.title}</div>
+      <div class="choice-desc">${c.desc}</div></div>`;
+    el.addEventListener("dragstart",e=>{
+      e.dataTransfer.setData("text/plain",key);
+      selectP1(key,el);
+    });
+    el.addEventListener("click",()=>selectP1(key,el));
+    row.appendChild(el);
+  });
+
+  updatePhase1Progress();
+}
+
+function selectP1(key,el){
+  if(p1Answered) return;
+  p1Selected=key;
+  document.querySelectorAll("#choiceRow .choice").forEach(c=>c.classList.remove("selected"));
+  if(el) el.classList.add("selected");
+  const c=phase1Choices[key];
+  $("dropText").innerHTML=`<strong>${c.icon} ${c.title}</strong><br>
+    <span style="font-size:.84rem;color:#61708a">${c.desc}</span>`;
+  $("dropZone").classList.add("filled");
+}
+
+$("dropZone").addEventListener("dragover",e=>{
+  e.preventDefault();
+  if(!p1Answered) $("dropZone").classList.add("dragover");
+});
+$("dropZone").addEventListener("dragleave",()=> $("dropZone").classList.remove("dragover"));
+$("dropZone").addEventListener("drop",e=>{
+  e.preventDefault();
+  $("dropZone").classList.remove("dragover");
+  if(p1Answered) return;
+  const key=e.dataTransfer.getData("text/plain");
+  const el=document.querySelector(`#choiceRow .choice[data-key="${key}"]`);
+  if(key) selectP1(key,el);
+});
+
+$("checkBtn").addEventListener("click",()=>{
+  const s=phase1Scenarios[p1Index];
+  const msg=$("message");
+  if(!p1Selected){
+    msg.className="message bad";
+    msg.textContent="Choose a connection first.";
+    return;
+  }
+  if(p1Selected===s.correct){
+    p1Answered=true;
+    msg.className="message good";
+    msg.textContent=s.success;
+    $("checkBtn").classList.add("hidden");
+    $("nextBtn").classList.remove("hidden");
+  }else{
+    msg.className="message bad";
+    msg.textContent=s.wrong;
+  }
+});
+
+$("hintBtn").addEventListener("click",()=>{
+  $("message").className="message hint";
+  $("message").textContent=phase1Scenarios[p1Index].hint;
+});
+$("resetBtn").addEventListener("click",renderPhase1);
+
+$("nextBtn").addEventListener("click",()=>{
+  if(p1Index<phase1Scenarios.length-1){
+    p1Index++;
+    renderPhase1();
+  }else{
+    $("phase1Card").classList.add("hidden");
+    $("transitionCard").classList.remove("hidden");
+    $("pill1").classList.remove("active");
+    $("pill1").classList.add("done");
+    $("pill2").classList.remove("locked");
+    $("progressText").textContent=`${phase1Scenarios.length} of ${phase1Scenarios.length}`;
+    $("progressFill").style.width="100%";
+  }
+});
+
+function updatePhase1Progress(){
+  $("progressLabel").textContent="Phase 1 progress";
+  $("progressText").textContent=`${p1Index+1} of ${phase1Scenarios.length}`;
+  $("progressFill").style.width=`${(p1Index/phase1Scenarios.length)*100}%`;
+}
+
+$("startBuildBtn").addEventListener("click",()=>{
+  $("transitionCard").classList.add("hidden");
+  $("phase2Card").classList.remove("hidden");
+  $("pill2").classList.add("active");
+  renderBuild();
+});
+
+function renderBuild(){
+  const b=builds[buildIndex];
+  selectedComponentId=null;
+  placed=Array(b.slots.length).fill(null);
+
+  $("buildNum").textContent=`Build ${buildIndex+1}`;
+  $("buildTitle").textContent=b.title;
+  $("buildText").textContent=b.text;
+  $("buildMessage").className="message";
+  $("buildMessage").textContent="";
+  $("nextBuildBtn").classList.add("hidden");
+  $("checkBuildBtn").classList.remove("hidden");
+
+  const diagram=$("buildDiagram");
+  diagram.innerHTML="";
+
+  const left=document.createElement("div");
+  left.className="build-endpoint";
+  left.innerHTML=`<strong>${b.left}</strong><span>Starting device</span>`;
+  diagram.appendChild(left);
+
+  b.slots.forEach((slotDef,i)=>{
+    const arrow=document.createElement("div");
+    arrow.className="arrow";
+    arrow.textContent="→";
+    diagram.appendChild(arrow);
+
+    const slot=document.createElement("div");
+    slot.className="slot";
+    slot.dataset.index=i;
+    slot.innerHTML=`<div><div class="slot-label">${slotDef.label}</div><div class="placed"></div></div>`;
+
+    slot.addEventListener("dragover",e=>e.preventDefault());
+    slot.addEventListener("drop",e=>{
+      e.preventDefault();
+      const payload=e.dataTransfer.getData("text/plain");
+      if(payload.startsWith("slot:")){
+        const fromIndex=parseInt(payload.split(":")[1],10);
+        movePlacedComponent(fromIndex,i);
+      }else{
+        placeComponent(payload,i);
+      }
+    });
+    slot.addEventListener("click",()=>{
+      if(selectedComponentId){
+        placeComponent(selectedComponentId,i);
+      }else if(placed[i]){
+        removePlacedComponent(i);
+      }
+    });
+    slot.addEventListener("dragstart",e=>{
+      if(!placed[i]){
+        e.preventDefault();
+        return;
+      }
+      e.dataTransfer.setData("text/plain",`slot:${i}`);
+    });
+
+    diagram.appendChild(slot);
+  });
+
+  const arrow=document.createElement("div");
+  arrow.className="arrow";
+  arrow.textContent="→";
+  diagram.appendChild(arrow);
+
+  const right=document.createElement("div");
+  right.className="build-endpoint";
+  right.innerHTML=`<strong>${b.right}</strong><span>Destination device</span>`;
+  diagram.appendChild(right);
+
+  // Shuffle the component tray every time the build is rendered.
+  const shuffledTray=shuffle(b.tray);
+  const counts={};
+  componentInstances=shuffledTray.map((key,idx)=>{
+    counts[key]=(counts[key]||0)+1;
+    return {instanceId:`${key}__${counts[key]}__${idx}`,key,used:false};
+  });
+
+  const row=$("componentRow");
+  row.innerHTML="";
+  componentInstances.forEach(inst=>{
+    const c=components[inst.key];
+    const el=document.createElement("div");
+    el.className="component";
+    el.draggable=true;
+    el.dataset.instance=inst.instanceId;
+    el.innerHTML=`<div class="icon">${c.icon}</div>
+      <div><div class="name">${c.name}</div><div class="mini">${c.mini}</div></div>`;
+
+    el.addEventListener("dragstart",e=>{
+      if(inst.used){ e.preventDefault(); return; }
+      e.dataTransfer.setData("text/plain",inst.instanceId);
+      selectComponent(inst.instanceId,el);
+    });
+    el.addEventListener("click",()=>{
+      if(!inst.used) selectComponent(inst.instanceId,el);
+    });
+    row.appendChild(el);
+  });
+
+  updateBuildProgress();
+}
+
+function selectComponent(instanceId,el){
+  selectedComponentId=instanceId;
+  document.querySelectorAll("#componentRow .component").forEach(c=>c.classList.remove("selected"));
+  if(el) el.classList.add("selected");
+}
+
+function removePlacedComponent(slotIndex){
+  const instanceId=placed[slotIndex];
+  if(!instanceId) return;
+
+  const inst=componentInstances.find(x=>x.instanceId===instanceId);
+  if(inst) inst.used=false;
+
+  const trayEl=document.querySelector(`#componentRow .component[data-instance="${instanceId}"]`);
+  if(trayEl) trayEl.classList.remove("used");
+
+  placed[slotIndex]=null;
+
+  const slot=document.querySelector(`#buildDiagram .slot[data-index="${slotIndex}"]`);
+  if(slot){
+    slot.querySelector(".placed").innerHTML="";
+    slot.classList.remove("correct","wrong","active");
+    slot.draggable=false;
+  }
+}
+
+function movePlacedComponent(fromIndex,toIndex){
+  if(fromIndex===toIndex || !placed[fromIndex]) return;
+
+  const movingId=placed[fromIndex];
+
+  if(placed[toIndex]) removePlacedComponent(toIndex);
+
+  placed[toIndex]=movingId;
+  placed[fromIndex]=null;
+
+  const fromSlot=document.querySelector(`#buildDiagram .slot[data-index="${fromIndex}"]`);
+  const toSlot=document.querySelector(`#buildDiagram .slot[data-index="${toIndex}"]`);
+  const inst=componentInstances.find(x=>x.instanceId===movingId);
+  const c=inst ? components[inst.key] : null;
+
+  if(fromSlot){
+    fromSlot.querySelector(".placed").innerHTML="";
+    fromSlot.classList.remove("correct","wrong","active");
+    fromSlot.draggable=false;
+  }
+
+  if(toSlot && c){
+    toSlot.querySelector(".placed").innerHTML=`${c.icon}<br>${c.name}`;
+    toSlot.classList.remove("correct","wrong");
+    toSlot.draggable=true;
+  }
+}
+
+function placeComponent(instanceId,slotIndex){
+  const inst=componentInstances.find(x=>x.instanceId===instanceId);
+  if(!inst || inst.used) return;
+
+  const existing=placed[slotIndex];
+  if(existing) removePlacedComponent(slotIndex);
+
+  placed[slotIndex]=instanceId;
+  inst.used=true;
+
+  const el=document.querySelector(`#componentRow .component[data-instance="${instanceId}"]`);
+  if(el){
+    el.classList.add("used");
+    el.classList.remove("selected");
+  }
+  selectedComponentId=null;
+
+  const slot=document.querySelector(`#buildDiagram .slot[data-index="${slotIndex}"]`);
+  const c=components[inst.key];
+  slot.querySelector(".placed").innerHTML=`${c.icon}<br>${c.name}`;
+  slot.classList.remove("correct","wrong");
+  slot.draggable=true;
+}
+
+const componentRowEl=$("componentRow");
+componentRowEl.addEventListener("dragover",e=>e.preventDefault());
+componentRowEl.addEventListener("drop",e=>{
+  e.preventDefault();
+  const payload=e.dataTransfer.getData("text/plain");
+  if(payload.startsWith("slot:")){
+    const slotIndex=parseInt(payload.split(":")[1],10);
+    removePlacedComponent(slotIndex);
+  }
+});
+
+$("checkBuildBtn").addEventListener("click",()=>{
+  const b=builds[buildIndex];
+  const msg=$("buildMessage");
+
+  if(placed.some(x=>!x)){
+    msg.className="message bad";
+    msg.textContent="Complete every slot before checking the build.";
+    return;
+  }
+
+  let allCorrect=true;
+  b.slots.forEach((slotDef,i)=>{
+    const inst=componentInstances.find(x=>x.instanceId===placed[i]);
+    const slot=document.querySelector(`#buildDiagram .slot[data-index="${i}"]`);
+    if(inst && inst.key===slotDef.correct){
+      slot.classList.add("correct");
+      slot.classList.remove("wrong");
+    }else{
+      allCorrect=false;
+      slot.classList.add("wrong");
+      slot.classList.remove("correct");
+    }
+  });
+
+  if(allCorrect){
+    msg.className="message good";
+    msg.textContent=b.success;
+    $("checkBuildBtn").classList.add("hidden");
+    $("nextBuildBtn").classList.remove("hidden");
+  }else{
+    msg.className="message bad";
+    msg.textContent="Some components are in the wrong position. The highlighted slots need another look. Follow the connection from the left device to the right device.";
+  }
+});
+
+$("hintBuildBtn").addEventListener("click",()=>{
+  $("buildMessage").className="message hint";
+  $("buildMessage").textContent=builds[buildIndex].hint;
+});
+$("resetBuildBtn").addEventListener("click",renderBuild);
+
+$("nextBuildBtn").addEventListener("click",()=>{
+  if(buildIndex<builds.length-1){
+    buildIndex++;
+    renderBuild();
+  }else{
+    $("phase2Card").classList.add("hidden");
+    $("masteryCard").classList.add("show");
+    $("pill2").classList.remove("active");
+    $("pill2").classList.add("done");
+    $("progressText").textContent=`${builds.length} of ${builds.length}`;
+    $("progressFill").style.width="100%";
+  }
+});
+
+function updateBuildProgress(){
+  $("progressLabel").textContent="Phase 2 progress";
+  $("progressText").textContent=`${buildIndex+1} of ${builds.length}`;
+  $("progressFill").style.width=`${(buildIndex/builds.length)*100}%`;
+}
+
+$("restartAllBtn").addEventListener("click",()=>{
+  phase1Scenarios=createPhase1Attempt();
+  builds=createBuildAttempt();
+
+  p1Index=0;
+  buildIndex=0;
+
+  $("masteryCard").classList.remove("show");
+  $("phase1Card").classList.remove("hidden");
+  $("transitionCard").classList.add("hidden");
+  $("phase2Card").classList.add("hidden");
+  $("pill1").className="phase-pill active";
+  $("pill2").className="phase-pill locked";
+
+  renderPhase1();
+});
+
+renderPhase1();
+
+</script>
 </body>
 </html>
