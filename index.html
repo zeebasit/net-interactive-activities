@@ -42,12 +42,11 @@
   .lead{margin:0;color:var(--muted);line-height:1.6;max-width:800px}
   .phase-nav{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 22px}
   .phase-pill{
-    border:1px solid var(--line);background:#fff;color:#42526a;
+    border:1px solid var(--line);background:#fff;color:#42526a;cursor:pointer;
     padding:9px 13px;border-radius:999px;font-weight:750;font-size:.9rem
   }
   .phase-pill.active{background:var(--soft);border-color:#9fc0f7;color:var(--accent-2)}
   .phase-pill.done{background:var(--good-bg);border-color:#b7dfca;color:var(--good)}
-  .phase-pill.locked{opacity:.5}
   .progress-card{
     min-width:230px;background:var(--panel);border:1px solid var(--line);
     border-radius:14px;padding:14px 16px;box-shadow:var(--shadow)
@@ -175,6 +174,82 @@
   .mastery-item strong{display:block;margin-bottom:3px}
   .small-note{margin-top:16px;color:var(--muted);font-size:.86rem}
   .hidden{display:none!important}
+
+  /* Phase 3 */
+  .diagnose-stage{
+    margin-top:22px;
+    display:grid;
+    grid-template-columns:1fr 280px 1fr;
+    gap:18px;
+    align-items:stretch
+  }
+  .proposal-card{
+    border:1px solid var(--line);
+    border-radius:16px;
+    background:#f8fafc;
+    padding:18px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    text-align:center;
+    min-height:210px
+  }
+  .proposal-card .proposal-label{
+    font-size:.78rem;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    font-weight:800;
+    margin-bottom:8px
+  }
+  .proposal-card .proposal-main{
+    font-weight:850;
+    line-height:1.45;
+    font-size:1rem
+  }
+  .proposal-card .proposal-detail{
+    color:var(--muted);
+    font-size:.86rem;
+    line-height:1.45;
+    margin-top:8px
+  }
+  .reason-panel{
+    margin-top:22px;
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:18px;
+    background:#fbfcfe
+  }
+  .reason-panel h3{margin:0 0 6px;font-size:1.05rem}
+  .reason-panel p{margin:0 0 12px;color:var(--muted);line-height:1.5}
+  .diagnose-choice{
+    flex:1 1 220px;
+    border:1px solid var(--line);
+    border-radius:13px;
+    background:#fff;
+    padding:14px;
+    cursor:pointer;
+    transition:.15s ease;
+    line-height:1.4
+  }
+  .diagnose-choice:hover{
+    border-color:#9fb6da;
+    transform:translateY(-1px);
+    box-shadow:0 6px 18px rgba(31,41,55,.05)
+  }
+  .diagnose-choice.selected{
+    border-color:var(--accent);
+    outline:3px solid rgba(23,105,224,.14)
+  }
+  .diagnose-choice.correct{
+    border-color:#70c59b;
+    background:#f2fbf6
+  }
+  .diagnose-choice.wrong{
+    border-color:#df8a82;
+    background:#fff6f5
+  }
+
   @media (max-width:820px){
     .network-stage{grid-template-columns:1fr}
     .drop-zone{min-height:110px}
@@ -182,6 +257,7 @@
     .build-diagram{flex-direction:column}
     .slot,.build-endpoint{max-width:none;width:100%}
     .mastery-grid{grid-template-columns:1fr}
+    .diagnose-stage{grid-template-columns:1fr}
   }
 </style>
 </head>
@@ -192,11 +268,15 @@
       <div class="eyebrow">Module 1 · Lesson 2</div>
       <h1>Activity 1.2.1 — Network Connections</h1>
       <p class="lead">
-        Work through two phases. Each new attempt draws a balanced set from a question bank. First, choose a suitable connection. Then build the complete connection from its individual parts.
+        Work through three phases. Each new attempt draws a balanced set from a question bank. First, choose a suitable connection. Then build the complete connection from its individual parts. Finally, diagnose proposed connections and justify the decision.
       </p>
       <div class="phase-nav">
-        <div class="phase-pill active" id="pill1">Phase 1 · Choose</div>
-        <div class="phase-pill locked" id="pill2">Phase 2 · Build</div>
+        <div class="phase-pill active" id="pill1" role="button" tabindex="0">Phase 1 · Choose</div>
+        <div class="phase-pill" id="pill2" role="button" tabindex="0">Phase 2 · Build</div>
+        <div class="phase-pill" id="pill3" role="button" tabindex="0">Phase 3 · Diagnose</div>
+      </div>
+      <div style="color:#667085;font-size:.86rem;margin-top:-10px">
+        You can work through the phases in order or open any phase directly. New attempts draw different questions from the bank.
       </div>
     </div>
 
@@ -305,12 +385,89 @@
     </div>
   </section>
 
+
+  <section class="card transition-card hidden" id="transition3Card">
+    <div class="transition-icon">🔎</div>
+    <h2>Phase 2 complete</h2>
+    <p>
+      You can now select and assemble common network connections. The final phase asks you
+      to inspect a proposed connection, decide whether it is correct, and explain the reason.
+    </p>
+    <button class="primary" id="startDiagnoseBtn">Start Phase 3 — Diagnose and Explain</button>
+  </section>
+
+  <section class="card hidden" id="phase3Card">
+    <div class="section-title">
+      <div>
+        <div class="section-kicker" id="diagnoseNum">Diagnosis 1</div>
+        <h2 id="diagnoseTitle"></h2>
+        <p class="instruction" id="diagnoseText"></p>
+      </div>
+    </div>
+
+    <div class="diagnose-stage">
+      <div class="device">
+        <div>
+          <div class="device-icon" id="diagLeftIcon"></div>
+          <h3 id="diagLeftName"></h3>
+          <div class="desc" id="diagLeftDesc"></div>
+        </div>
+        <div class="interface">
+          <strong>Available interface</strong>
+          <span id="diagLeftInterface"></span>
+        </div>
+      </div>
+
+      <div class="proposal-card">
+        <div class="proposal-label">Proposed connection</div>
+        <div class="proposal-main" id="proposalMain"></div>
+        <div class="proposal-detail" id="proposalDetail"></div>
+      </div>
+
+      <div class="device">
+        <div>
+          <div class="device-icon" id="diagRightIcon"></div>
+          <h3 id="diagRightName"></h3>
+          <div class="desc" id="diagRightDesc"></div>
+        </div>
+        <div class="interface">
+          <strong>Available interface</strong>
+          <span id="diagRightInterface"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="reason-panel" id="diagnosisPanel">
+      <h3>Step 1 — Diagnose the connection</h3>
+      <p>Select the statement that best describes the proposed connection.</p>
+      <div class="choice-row" id="diagnosisChoices"></div>
+    </div>
+
+    <div class="reason-panel hidden" id="explanationPanel">
+      <h3>Step 2 — Explain your decision</h3>
+      <p>Select the explanation that best supports the diagnosis.</p>
+      <div class="choice-row" id="explanationChoices"></div>
+    </div>
+
+    <div class="controls">
+      <button class="primary" id="checkDiagnosisBtn">Check diagnosis</button>
+      <button class="secondary" id="hintDiagnosisBtn">Hint</button>
+      <button class="ghost" id="resetDiagnosisBtn">Reset question</button>
+      <button class="primary hidden" id="checkExplanationBtn">Check explanation</button>
+      <button class="primary hidden" id="nextDiagnosisBtn">Next diagnosis</button>
+    </div>
+
+    <div class="message" id="diagnosisMessage"></div>
+    <div class="small-note">
+      A correct diagnosis is not enough: the explanation must identify the networking reason.
+    </div>
+  </section>
+
   <section class="card mastery" id="masteryCard">
     <div style="font-size:3rem">✓</div>
     <h2>Activity complete</h2>
     <p>
-      You progressed from selecting a connection to assembling it from individual components.
-      The same reasoning will be used later when selecting and troubleshooting physical network links.
+      You progressed from selecting a connection, to assembling it from individual components, to diagnosing and explaining proposed links. The same reasoning will be used later when selecting, verifying and troubleshooting physical network connections.
     </p>
     <div class="mastery-grid">
       <div class="mastery-item">
@@ -328,6 +485,10 @@
       <div class="mastery-item">
         <strong>Suitability</strong>
         Recognise that a connection can physically fit but still fail a stated requirement.
+      </div>
+      <div class="mastery-item">
+        <strong>Diagnosis and reasoning</strong>
+        Identify why a proposed connection works or fails and support the decision with the relevant networking principle.
       </div>
     </div>
     <button class="primary" id="restartAllBtn">Restart activity</button>
@@ -385,179 +546,943 @@ const phase1Choices = {
 // category, then shuffles the resulting five questions.
 // -----------------------------------------------------------------------------
 const phase1Bank = [
-  // COPPER
   {
-    id:"copper-office-pc", category:"copper",
-    title:"Connect the fixed Office-PC to SW1",
-    text:"The Office-PC stays at its desk. Both the PC and SW1 provide compatible copper Ethernet interfaces.",
-    left:{name:"Office-PC",desc:"Fixed desktop computer",iface:"Copper Ethernet interface",icon:"pc"},
-    right:{name:"SW1",desc:"Office access switch",iface:"Copper Ethernet interface",icon:"switch"},
-    choices:["copper","fibre","wireless"], correct:"copper",
-    hint:"Start by comparing the physical interfaces available at both ends.",
-    success:"Correct. Both devices provide compatible copper Ethernet interfaces, so a twisted-pair copper connection is appropriate.",
-    wrong:"Not quite. The selected connection does not match the interfaces available at both ends."
+    "id": "copper-office-pc",
+    "category": "copper",
+    "title": "Connect the fixed Office-PC to SW1",
+    "text": "The Office-PC stays at its desk. Both the PC and SW1 provide compatible copper Ethernet interfaces.",
+    "left": {
+      "name": "Office-PC",
+      "desc": "Fixed desktop computer",
+      "iface": "Copper Ethernet interface",
+      "icon": "pc"
+    },
+    "right": {
+      "name": "SW1",
+      "desc": "Office access switch",
+      "iface": "Copper Ethernet interface",
+      "icon": "switch"
+    },
+    "choices": [
+      "copper",
+      "fibre",
+      "wireless"
+    ],
+    "correct": "copper",
+    "hint": "Match the transmission medium to the physical interfaces provided at both ends.",
+    "success": "Correct. A twisted-pair copper connection matches the compatible copper Ethernet interfaces.",
+    "wrong": "Not quite. Compare the connection type with the interfaces available at both ends."
   },
   {
-    id:"copper-printer", category:"copper",
-    title:"Connect a fixed network printer to SW1",
-    text:"A network printer is installed beside SW1. The printer and SW1 each provide a compatible copper Ethernet interface.",
-    left:{name:"Office Printer",desc:"Fixed network printer",iface:"Copper Ethernet interface",icon:"pc"},
-    right:{name:"SW1",desc:"Office access switch",iface:"Copper Ethernet interface",icon:"switch"},
-    choices:["wireless","copper","fibre"], correct:"copper",
-    hint:"Mobility is not required. Check the interface type provided at both ends.",
-    success:"Correct. The fixed printer and switch both provide compatible copper Ethernet interfaces.",
-    wrong:"Not quite. Use the interface information given in the scenario."
+    "id": "copper-nearby-device",
+    "category": "copper",
+    "title": "Connect a nearby fixed device to SW1",
+    "text": "A fixed network device is installed close to SW1. Both ends provide compatible copper Ethernet interfaces.",
+    "left": {
+      "name": "Fixed Device",
+      "desc": "Nearby network endpoint",
+      "iface": "Copper Ethernet interface",
+      "icon": "pc"
+    },
+    "right": {
+      "name": "SW1",
+      "desc": "Office access switch",
+      "iface": "Copper Ethernet interface",
+      "icon": "switch"
+    },
+    "choices": [
+      "copper",
+      "fibre",
+      "wireless"
+    ],
+    "correct": "copper",
+    "hint": "Match the transmission medium to the physical interfaces provided at both ends.",
+    "success": "Correct. A twisted-pair copper connection matches the compatible copper Ethernet interfaces.",
+    "wrong": "Not quite. Compare the connection type with the interfaces available at both ends."
   },
   {
-    id:"copper-desk-phone", category:"copper",
-    title:"Choose the connection for a fixed desk device",
-    text:"A fixed office device sits beside a wall outlet connected back to SW1. The device and switch connection both use compatible copper Ethernet interfaces.",
-    left:{name:"Desk Device",desc:"Fixed office endpoint",iface:"Copper Ethernet interface",icon:"pc"},
-    right:{name:"SW1",desc:"Office access switch",iface:"Copper Ethernet interface",icon:"switch"},
-    choices:["fibre","wireless","copper"], correct:"copper",
-    hint:"The scenario already tells you which interface technology is available at both ends.",
-    success:"Correct. A copper Ethernet link matches the interfaces and the short fixed-office requirement.",
-    wrong:"Not quite. Match the medium to the interfaces described."
-  },
-
-  // WIRELESS
-  {
-    id:"wireless-staff-laptop", category:"wireless",
-    title:"Connect the mobile Staff-Laptop",
-    text:"The member of staff moves between offices and meeting rooms. The laptop has a wireless network interface and the office access point provides wireless coverage.",
-    left:{name:"Staff-Laptop",desc:"Mobile user device",iface:"Wireless network interface",icon:"laptop"},
-    right:{name:"Office-AP",desc:"Wireless access point",iface:"Wireless radio interface",icon:"ap"},
-    choices:["copper","fibre","wireless"], correct:"wireless",
-    hint:"The requirement emphasises mobility and both devices support radio communication.",
-    success:"Correct. A wireless connection allows the laptop to communicate through radio signals without a physical network cable.",
-    wrong:"Not quite. Look again at the mobility requirement and the interfaces available on both devices."
-  },
-  {
-    id:"wireless-meeting-laptop", category:"wireless",
-    title:"Connect a laptop in a meeting room",
-    text:"A laptop must remain connected while its user moves around a meeting room. A compatible office access point is available.",
-    left:{name:"Meeting-Laptop",desc:"Mobile user device",iface:"Wireless network interface",icon:"laptop"},
-    right:{name:"Office-AP",desc:"Wireless access point",iface:"Wireless radio interface",icon:"ap"},
-    choices:["fibre","wireless","copper"], correct:"wireless",
-    hint:"Which connection type supports movement without attaching a physical cable?",
-    success:"Correct. Wireless is appropriate because mobility is part of the requirement and both endpoints support wireless communication.",
-    wrong:"Not quite. The user must remain mobile."
+    "id": "copper-short-device-link",
+    "category": "copper",
+    "title": "Connect two nearby copper-capable devices",
+    "text": "Two fixed network devices are located 25 m apart and both provide compatible copper Ethernet interfaces.",
+    "left": {
+      "name": "Network Device A",
+      "desc": "Fixed network device",
+      "iface": "Copper Ethernet interface",
+      "icon": "router"
+    },
+    "right": {
+      "name": "Network Device B",
+      "desc": "Fixed network device",
+      "iface": "Copper Ethernet interface",
+      "icon": "switch"
+    },
+    "choices": [
+      "copper",
+      "fibre",
+      "wireless"
+    ],
+    "correct": "copper",
+    "hint": "Match the transmission medium to the physical interfaces provided at both ends.",
+    "success": "Correct. A twisted-pair copper connection matches the compatible copper Ethernet interfaces.",
+    "wrong": "Not quite. Compare the connection type with the interfaces available at both ends."
   },
   {
-    id:"wireless-tablet", category:"wireless",
-    title:"Connect a mobile tablet to the office network",
-    text:"A tablet is used while staff walk around the office. It has a wireless network interface and is within coverage of Office-AP.",
-    left:{name:"Tablet",desc:"Mobile user device",iface:"Wireless network interface",icon:"laptop"},
-    right:{name:"Office-AP",desc:"Wireless access point",iface:"Wireless radio interface",icon:"ap"},
-    choices:["wireless","copper","fibre"], correct:"wireless",
-    hint:"The device must remain usable while moving around the office.",
-    success:"Correct. The wireless interface and access point provide the required radio-based connection.",
-    wrong:"Not quite. Consider the mobility requirement."
-  },
-
-  // FIBRE
-  {
-    id:"fibre-two-optical", category:"fibre",
-    title:"Select a link for two optical interfaces",
-    text:"Two network devices must be connected over a longer distance. Compatible optical interfaces are already installed at both ends.",
-    left:{name:"Network Device A",desc:"Network infrastructure device",iface:"Optical interface",icon:"router"},
-    right:{name:"Network Device B",desc:"Network infrastructure device",iface:"Optical interface",icon:"switch"},
-    choices:["copper","fibre","wireless"], correct:"fibre",
-    hint:"The interfaces at both ends are designed to transmit and receive light.",
-    success:"Correct. The optical interfaces require a compatible fibre-optic connection.",
-    wrong:"Not quite. Choose the transmission medium that matches the optical interfaces."
-  },
-  {
-    id:"fibre-floor-link", category:"fibre",
-    title:"Connect two switches using optical interfaces",
-    text:"Two switches in different parts of a building have compatible optical interfaces available for the link.",
-    left:{name:"SW1",desc:"Office access switch",iface:"Optical interface",icon:"switch"},
-    right:{name:"SW2",desc:"Remote switch",iface:"Optical interface",icon:"switch"},
-    choices:["wireless","copper","fibre"], correct:"fibre",
-    hint:"Both ends provide optical interfaces.",
-    success:"Correct. A compatible fibre-optic link matches the optical interfaces.",
-    wrong:"Not quite. Match the transmission medium to the interface type."
+    "id": "copper-desk-link",
+    "category": "copper",
+    "title": "Choose the medium for a short desk connection",
+    "text": "A fixed endpoint at a desk must connect to SW1. The endpoint and switch port are both copper Ethernet interfaces.",
+    "left": {
+      "name": "Desk Endpoint",
+      "desc": "Fixed office endpoint",
+      "iface": "Copper Ethernet interface",
+      "icon": "pc"
+    },
+    "right": {
+      "name": "SW1",
+      "desc": "Office access switch",
+      "iface": "Copper Ethernet interface",
+      "icon": "switch"
+    },
+    "choices": [
+      "copper",
+      "fibre",
+      "wireless"
+    ],
+    "correct": "copper",
+    "hint": "Match the transmission medium to the physical interfaces provided at both ends.",
+    "success": "Correct. A twisted-pair copper connection matches the compatible copper Ethernet interfaces.",
+    "wrong": "Not quite. Compare the connection type with the interfaces available at both ends."
   },
   {
-    id:"fibre-uplink", category:"fibre",
-    title:"Choose a medium for an optical uplink",
-    text:"A network uplink is presented with compatible optical interfaces at both ends. The required fibre type and optical equipment are specified as compatible.",
-    left:{name:"Distribution Device",desc:"Network infrastructure device",iface:"Optical interface",icon:"router"},
-    right:{name:"Remote Switch",desc:"Network infrastructure device",iface:"Optical interface",icon:"switch"},
-    choices:["fibre","wireless","copper"], correct:"fibre",
-    hint:"The link uses optical interfaces and the scenario confirms compatibility.",
-    success:"Correct. Fibre is the appropriate medium for the compatible optical interfaces.",
-    wrong:"Not quite. Focus on the interfaces provided."
-  },
-
-  // DIAGNOSE / SUITABILITY
-  {
-    id:"diagnose-copper-140m", category:"diagnose",
-    title:"Check a proposed copper link",
-    text:"A technician proposes a 140 m twisted-pair copper connection between two compatible copper Ethernet interfaces. The supplied maximum channel length for this copper option is 100 m.",
-    left:{name:"Device A",desc:"Copper-capable network device",iface:"Copper Ethernet interface",icon:"router"},
-    right:{name:"Device B",desc:"Copper-capable network device",iface:"Copper Ethernet interface",icon:"switch"},
-    choices:["suitable","unsuitable"], correct:"unsuitable",
-    hint:"Physical connector compatibility is only one requirement. Compare the proposed distance with the supplied limit.",
-    success:"Correct. The interfaces and connectors may be compatible, but the proposed 140 m link exceeds the stated 100 m limit.",
-    wrong:"Not quite. The connector may fit, but check whether the full link requirement is satisfied."
-  },
-  {
-    id:"diagnose-copper-75m", category:"diagnose",
-    title:"Check a 75 m copper link",
-    text:"A 75 m twisted-pair copper link is proposed between two compatible copper Ethernet interfaces. The supplied maximum channel length for this option is 100 m.",
-    left:{name:"Device A",desc:"Copper-capable network device",iface:"Copper Ethernet interface",icon:"router"},
-    right:{name:"Device B",desc:"Copper-capable network device",iface:"Copper Ethernet interface",icon:"switch"},
-    choices:["unsuitable","suitable"], correct:"suitable",
-    hint:"Check both interface compatibility and the stated distance limit.",
-    success:"Correct. The copper interfaces are compatible and the 75 m link is within the supplied 100 m limit.",
-    wrong:"Not quite. Compare 75 m with the supplied 100 m limit."
+    "id": "copper-wall-link",
+    "category": "copper",
+    "title": "Connect a fixed office endpoint",
+    "text": "A fixed endpoint is linked through the office cabling to a compatible copper Ethernet interface on SW1.",
+    "left": {
+      "name": "Office Endpoint",
+      "desc": "Fixed office device",
+      "iface": "Copper Ethernet interface",
+      "icon": "pc"
+    },
+    "right": {
+      "name": "SW1",
+      "desc": "Office access switch",
+      "iface": "Copper Ethernet interface",
+      "icon": "switch"
+    },
+    "choices": [
+      "copper",
+      "fibre",
+      "wireless"
+    ],
+    "correct": "copper",
+    "hint": "Match the transmission medium to the physical interfaces provided at both ends.",
+    "success": "Correct. A twisted-pair copper connection matches the compatible copper Ethernet interfaces.",
+    "wrong": "Not quite. Compare the connection type with the interfaces available at both ends."
   },
   {
-    id:"diagnose-wrong-medium", category:"diagnose",
-    title:"Check an interface mismatch",
-    text:"A fibre-optic cable is proposed between two devices that only provide copper Ethernet interfaces.",
-    left:{name:"Device A",desc:"Fixed network device",iface:"Copper Ethernet interface only",icon:"router"},
-    right:{name:"Device B",desc:"Fixed network device",iface:"Copper Ethernet interface only",icon:"switch"},
-    choices:["suitable","unsuitable"], correct:"unsuitable",
-    hint:"A network medium must be compatible with the interfaces at both ends.",
-    success:"Correct. Fibre is a valid network medium, but the devices in this scenario do not provide compatible optical interfaces.",
-    wrong:"Not quite. Check whether the proposed cable can connect to the interfaces described."
-  },
-
-  // REQUIREMENT-BASED DECISION
-  {
-    id:"decision-300m", category:"decision",
-    title:"Choose the best connection for a 300 m link",
-    text:"Two network devices are 300 m apart. Each device has both a copper Ethernet interface and a compatible optical interface. The copper option supplied for this activity has a 100 m channel limit.",
-    left:{name:"Distribution Device",desc:"Network infrastructure device",iface:"Copper and optical interfaces",icon:"router"},
-    right:{name:"Remote Switch",desc:"Network infrastructure device",iface:"Copper and optical interfaces",icon:"switch"},
-    choices:["copper","fibre","wireless"], correct:"fibre",
-    hint:"Both copper and optical interfaces exist, so the deciding factor is the link requirement.",
-    success:"Correct. The fibre option matches the available optical interfaces and supports the stated 300 m requirement, while the supplied copper option does not.",
-    wrong:"Not quite. Since more than one interface type is available, use the distance requirement to decide."
-  },
-  {
-    id:"decision-short-fixed", category:"decision",
-    title:"Choose between available interfaces for a short fixed link",
-    text:"Two fixed devices are 20 m apart. Each has both a compatible copper Ethernet interface and a compatible optical interface. The requirement does not call for greater distance or mobility.",
-    left:{name:"Device A",desc:"Fixed network device",iface:"Copper and optical interfaces",icon:"router"},
-    right:{name:"Device B",desc:"Fixed network device",iface:"Copper and optical interfaces",icon:"switch"},
-    choices:["fibre","wireless","copper"], correct:"copper",
-    hint:"Do not choose a technology merely because it is more advanced. Use the stated requirement.",
-    success:"Correct. The compatible copper connection satisfies the short fixed-link requirement without needing the optical option.",
-    wrong:"Not quite. Both interfaces are available, so focus on what the requirement actually needs."
+    "id": "copper-local-infra",
+    "category": "copper",
+    "title": "Connect two local infrastructure devices",
+    "text": "Two infrastructure devices in the same equipment area provide compatible copper Ethernet interfaces for the required short link.",
+    "left": {
+      "name": "Network Device A",
+      "desc": "Infrastructure device",
+      "iface": "Copper Ethernet interface",
+      "icon": "router"
+    },
+    "right": {
+      "name": "Network Device B",
+      "desc": "Infrastructure device",
+      "iface": "Copper Ethernet interface",
+      "icon": "switch"
+    },
+    "choices": [
+      "copper",
+      "fibre",
+      "wireless"
+    ],
+    "correct": "copper",
+    "hint": "Match the transmission medium to the physical interfaces provided at both ends.",
+    "success": "Correct. A twisted-pair copper connection matches the compatible copper Ethernet interfaces.",
+    "wrong": "Not quite. Compare the connection type with the interfaces available at both ends."
   },
   {
-    id:"decision-mobile-dual", category:"decision",
-    title:"Choose for a device that must remain mobile",
-    text:"A laptop has both a copper Ethernet interface and a wireless interface. The user must stay connected while moving around the office, and Office-AP provides coverage.",
-    left:{name:"Staff-Laptop",desc:"Mobile user device",iface:"Copper and wireless interfaces",icon:"laptop"},
-    right:{name:"Office-AP",desc:"Wireless access point",iface:"Wireless radio interface",icon:"ap"},
-    choices:["copper","wireless","fibre"], correct:"wireless",
-    hint:"More than one interface exists on the laptop. Which requirement should decide the choice?",
-    success:"Correct. Wireless best matches the mobility requirement.",
-    wrong:"Not quite. Use the mobility requirement to decide."
+    "id": "copper-fixed-laptop",
+    "category": "copper",
+    "title": "Connect a laptop used at a fixed desk",
+    "text": "For this task, the laptop remains at one desk and its copper Ethernet interface is connected to a compatible copper interface on SW1.",
+    "left": {
+      "name": "Staff-Laptop",
+      "desc": "Used at a fixed desk for this task",
+      "iface": "Copper Ethernet interface",
+      "icon": "laptop"
+    },
+    "right": {
+      "name": "SW1",
+      "desc": "Office access switch",
+      "iface": "Copper Ethernet interface",
+      "icon": "switch"
+    },
+    "choices": [
+      "copper",
+      "fibre",
+      "wireless"
+    ],
+    "correct": "copper",
+    "hint": "Match the transmission medium to the physical interfaces provided at both ends.",
+    "success": "Correct. A twisted-pair copper connection matches the compatible copper Ethernet interfaces.",
+    "wrong": "Not quite. Compare the connection type with the interfaces available at both ends."
+  },
+  {
+    "id": "wireless-staff-laptop",
+    "category": "wireless",
+    "title": "Connect the mobile Staff-Laptop",
+    "text": "The member of staff moves between offices and meeting rooms. The laptop has a wireless network interface and Office-AP provides coverage.",
+    "left": {
+      "name": "Staff-Laptop",
+      "desc": "Mobile user device",
+      "iface": "Wireless network interface",
+      "icon": "laptop"
+    },
+    "right": {
+      "name": "Office-AP",
+      "desc": "Wireless access point",
+      "iface": "Wireless radio interface",
+      "icon": "ap"
+    },
+    "choices": [
+      "copper",
+      "fibre",
+      "wireless"
+    ],
+    "correct": "wireless",
+    "hint": "The requirement includes mobility. Consider which medium does not require a physical cable between the client and access point.",
+    "success": "Correct. Wireless communication uses radio signals and supports the stated mobility requirement.",
+    "wrong": "Not quite. Recheck the mobility requirement and the wireless interfaces available at both ends."
+  },
+  {
+    "id": "wireless-meeting-room",
+    "category": "wireless",
+    "title": "Connect a laptop in a meeting room",
+    "text": "The user needs to move around a meeting room while staying connected. The laptop has a wireless interface and Office-AP provides coverage.",
+    "left": {
+      "name": "Staff-Laptop",
+      "desc": "Mobile user device",
+      "iface": "Wireless network interface",
+      "icon": "laptop"
+    },
+    "right": {
+      "name": "Office-AP",
+      "desc": "Wireless access point",
+      "iface": "Wireless radio interface",
+      "icon": "ap"
+    },
+    "choices": [
+      "copper",
+      "fibre",
+      "wireless"
+    ],
+    "correct": "wireless",
+    "hint": "The requirement includes mobility. Consider which medium does not require a physical cable between the client and access point.",
+    "success": "Correct. Wireless communication uses radio signals and supports the stated mobility requirement.",
+    "wrong": "Not quite. Recheck the mobility requirement and the wireless interfaces available at both ends."
+  },
+  {
+    "id": "wireless-open-office",
+    "category": "wireless",
+    "title": "Connect a mobile device in the open office",
+    "text": "The device must remain connected while its user moves through the covered open-office area. A wireless interface and Office-AP are available.",
+    "left": {
+      "name": "Staff-Laptop",
+      "desc": "Mobile user device",
+      "iface": "Wireless network interface",
+      "icon": "laptop"
+    },
+    "right": {
+      "name": "Office-AP",
+      "desc": "Wireless access point",
+      "iface": "Wireless radio interface",
+      "icon": "ap"
+    },
+    "choices": [
+      "copper",
+      "fibre",
+      "wireless"
+    ],
+    "correct": "wireless",
+    "hint": "The requirement includes mobility. Consider which medium does not require a physical cable between the client and access point.",
+    "success": "Correct. Wireless communication uses radio signals and supports the stated mobility requirement.",
+    "wrong": "Not quite. Recheck the mobility requirement and the wireless interfaces available at both ends."
+  },
+  {
+    "id": "wireless-hotdesk",
+    "category": "wireless",
+    "title": "Support a hot-desk user",
+    "text": "A staff member changes desks during the day and needs to remain connected within the Office-AP coverage area.",
+    "left": {
+      "name": "Staff-Laptop",
+      "desc": "Mobile user device",
+      "iface": "Wireless network interface",
+      "icon": "laptop"
+    },
+    "right": {
+      "name": "Office-AP",
+      "desc": "Wireless access point",
+      "iface": "Wireless radio interface",
+      "icon": "ap"
+    },
+    "choices": [
+      "copper",
+      "fibre",
+      "wireless"
+    ],
+    "correct": "wireless",
+    "hint": "The requirement includes mobility. Consider which medium does not require a physical cable between the client and access point.",
+    "success": "Correct. Wireless communication uses radio signals and supports the stated mobility requirement.",
+    "wrong": "Not quite. Recheck the mobility requirement and the wireless interfaces available at both ends."
+  },
+  {
+    "id": "wireless-training-room",
+    "category": "wireless",
+    "title": "Connect a mobile laptop in a training room",
+    "text": "The laptop is moved between seats during the session. A compatible wireless interface and Office-AP coverage are available.",
+    "left": {
+      "name": "Staff-Laptop",
+      "desc": "Mobile user device",
+      "iface": "Wireless network interface",
+      "icon": "laptop"
+    },
+    "right": {
+      "name": "Office-AP",
+      "desc": "Wireless access point",
+      "iface": "Wireless radio interface",
+      "icon": "ap"
+    },
+    "choices": [
+      "copper",
+      "fibre",
+      "wireless"
+    ],
+    "correct": "wireless",
+    "hint": "The requirement includes mobility. Consider which medium does not require a physical cable between the client and access point.",
+    "success": "Correct. Wireless communication uses radio signals and supports the stated mobility requirement.",
+    "wrong": "Not quite. Recheck the mobility requirement and the wireless interfaces available at both ends."
+  },
+  {
+    "id": "wireless-roaming-user",
+    "category": "wireless",
+    "title": "Choose the connection for a roaming office user",
+    "text": "The user must move between nearby work areas without reconnecting a physical network cable. Wireless coverage is available.",
+    "left": {
+      "name": "Staff-Laptop",
+      "desc": "Mobile user device",
+      "iface": "Wireless network interface",
+      "icon": "laptop"
+    },
+    "right": {
+      "name": "Office-AP",
+      "desc": "Wireless access point",
+      "iface": "Wireless radio interface",
+      "icon": "ap"
+    },
+    "choices": [
+      "copper",
+      "fibre",
+      "wireless"
+    ],
+    "correct": "wireless",
+    "hint": "The requirement includes mobility. Consider which medium does not require a physical cable between the client and access point.",
+    "success": "Correct. Wireless communication uses radio signals and supports the stated mobility requirement.",
+    "wrong": "Not quite. Recheck the mobility requirement and the wireless interfaces available at both ends."
+  },
+  {
+    "id": "wireless-temporary-work",
+    "category": "wireless",
+    "title": "Connect a temporary mobile workstation",
+    "text": "A laptop is used temporarily in different places within the office. It has a wireless interface and remains inside Office-AP coverage.",
+    "left": {
+      "name": "Staff-Laptop",
+      "desc": "Mobile user device",
+      "iface": "Wireless network interface",
+      "icon": "laptop"
+    },
+    "right": {
+      "name": "Office-AP",
+      "desc": "Wireless access point",
+      "iface": "Wireless radio interface",
+      "icon": "ap"
+    },
+    "choices": [
+      "copper",
+      "fibre",
+      "wireless"
+    ],
+    "correct": "wireless",
+    "hint": "The requirement includes mobility. Consider which medium does not require a physical cable between the client and access point.",
+    "success": "Correct. Wireless communication uses radio signals and supports the stated mobility requirement.",
+    "wrong": "Not quite. Recheck the mobility requirement and the wireless interfaces available at both ends."
+  },
+  {
+    "id": "fibre-optical-pair",
+    "category": "fibre",
+    "title": "Select a link for two optical interfaces",
+    "text": "Two network devices must be connected and compatible optical interfaces are installed at both ends.",
+    "left": {
+      "name": "Network Device A",
+      "desc": "Network infrastructure device",
+      "iface": "Optical interface",
+      "icon": "router"
+    },
+    "right": {
+      "name": "Network Device B",
+      "desc": "Network infrastructure device",
+      "iface": "Optical interface",
+      "icon": "switch"
+    },
+    "choices": [
+      "copper",
+      "fibre",
+      "wireless"
+    ],
+    "correct": "fibre",
+    "hint": "The interfaces at both ends are optical. Choose the medium that carries information as light.",
+    "success": "Correct. A compatible fibre-optic connection matches the optical interfaces.",
+    "wrong": "Not quite. Match the transmission medium to the optical interfaces."
+  },
+  {
+    "id": "fibre-switch-uplink",
+    "category": "fibre",
+    "title": "Connect two switches using optical interfaces",
+    "text": "SW1 and a remote switch both provide compatible optical interfaces for the required link.",
+    "left": {
+      "name": "SW1",
+      "desc": "Network infrastructure device",
+      "iface": "Optical interface",
+      "icon": "switch"
+    },
+    "right": {
+      "name": "Remote Switch",
+      "desc": "Network infrastructure device",
+      "iface": "Optical interface",
+      "icon": "switch"
+    },
+    "choices": [
+      "copper",
+      "fibre",
+      "wireless"
+    ],
+    "correct": "fibre",
+    "hint": "The interfaces at both ends are optical. Choose the medium that carries information as light.",
+    "success": "Correct. A compatible fibre-optic connection matches the optical interfaces.",
+    "wrong": "Not quite. Match the transmission medium to the optical interfaces."
+  },
+  {
+    "id": "fibre-building-link",
+    "category": "fibre",
+    "title": "Choose the medium for an optical building link",
+    "text": "Two infrastructure devices in different parts of a building have compatible optical interfaces available.",
+    "left": {
+      "name": "Distribution Device",
+      "desc": "Network infrastructure device",
+      "iface": "Optical interface",
+      "icon": "router"
+    },
+    "right": {
+      "name": "Remote Switch",
+      "desc": "Network infrastructure device",
+      "iface": "Optical interface",
+      "icon": "switch"
+    },
+    "choices": [
+      "copper",
+      "fibre",
+      "wireless"
+    ],
+    "correct": "fibre",
+    "hint": "The interfaces at both ends are optical. Choose the medium that carries information as light.",
+    "success": "Correct. A compatible fibre-optic connection matches the optical interfaces.",
+    "wrong": "Not quite. Match the transmission medium to the optical interfaces."
+  },
+  {
+    "id": "fibre-infra-link",
+    "category": "fibre",
+    "title": "Connect two infrastructure devices optically",
+    "text": "The required interfaces at both ends are optical and the fibre type and optical equipment are specified as compatible.",
+    "left": {
+      "name": "Network Device A",
+      "desc": "Network infrastructure device",
+      "iface": "Optical interface",
+      "icon": "router"
+    },
+    "right": {
+      "name": "Network Device B",
+      "desc": "Network infrastructure device",
+      "iface": "Optical interface",
+      "icon": "switch"
+    },
+    "choices": [
+      "copper",
+      "fibre",
+      "wireless"
+    ],
+    "correct": "fibre",
+    "hint": "The interfaces at both ends are optical. Choose the medium that carries information as light.",
+    "success": "Correct. A compatible fibre-optic connection matches the optical interfaces.",
+    "wrong": "Not quite. Match the transmission medium to the optical interfaces."
+  },
+  {
+    "id": "fibre-remote-switch",
+    "category": "fibre",
+    "title": "Connect a remote switch through optical interfaces",
+    "text": "A remote switch must connect to a distribution device. Compatible optical interfaces are available at both ends.",
+    "left": {
+      "name": "Distribution Device",
+      "desc": "Network infrastructure device",
+      "iface": "Optical interface",
+      "icon": "router"
+    },
+    "right": {
+      "name": "Remote Switch",
+      "desc": "Network infrastructure device",
+      "iface": "Optical interface",
+      "icon": "switch"
+    },
+    "choices": [
+      "copper",
+      "fibre",
+      "wireless"
+    ],
+    "correct": "fibre",
+    "hint": "The interfaces at both ends are optical. Choose the medium that carries information as light.",
+    "success": "Correct. A compatible fibre-optic connection matches the optical interfaces.",
+    "wrong": "Not quite. Match the transmission medium to the optical interfaces."
+  },
+  {
+    "id": "fibre-core-access",
+    "category": "fibre",
+    "title": "Choose the link for compatible optical ports",
+    "text": "Two network devices expose compatible optical interfaces for this connection.",
+    "left": {
+      "name": "Network Device A",
+      "desc": "Network infrastructure device",
+      "iface": "Optical interface",
+      "icon": "router"
+    },
+    "right": {
+      "name": "SW1",
+      "desc": "Network infrastructure device",
+      "iface": "Optical interface",
+      "icon": "switch"
+    },
+    "choices": [
+      "copper",
+      "fibre",
+      "wireless"
+    ],
+    "correct": "fibre",
+    "hint": "The interfaces at both ends are optical. Choose the medium that carries information as light.",
+    "success": "Correct. A compatible fibre-optic connection matches the optical interfaces.",
+    "wrong": "Not quite. Match the transmission medium to the optical interfaces."
+  },
+  {
+    "id": "fibre-longer-link",
+    "category": "fibre",
+    "title": "Select the medium for the supplied optical link",
+    "text": "The link requirement is beyond the supplied copper option and compatible optical interfaces are available at both ends.",
+    "left": {
+      "name": "Network Device A",
+      "desc": "Network infrastructure device",
+      "iface": "Optical interface",
+      "icon": "router"
+    },
+    "right": {
+      "name": "Remote Switch",
+      "desc": "Network infrastructure device",
+      "iface": "Optical interface",
+      "icon": "switch"
+    },
+    "choices": [
+      "copper",
+      "fibre",
+      "wireless"
+    ],
+    "correct": "fibre",
+    "hint": "The interfaces at both ends are optical. Choose the medium that carries information as light.",
+    "success": "Correct. A compatible fibre-optic connection matches the optical interfaces.",
+    "wrong": "Not quite. Match the transmission medium to the optical interfaces."
+  },
+  {
+    "id": "diag-copper-140m",
+    "category": "diagnose",
+    "title": "Check a proposed 140 m copper link",
+    "text": "A 140 m twisted-pair copper connection is proposed between compatible copper interfaces. The supplied maximum channel length is 100 m.",
+    "left": {
+      "name": "Device A",
+      "desc": "Connection endpoint",
+      "iface": "Copper / optical / wireless as stated",
+      "icon": "router"
+    },
+    "right": {
+      "name": "Device B",
+      "desc": "Connection endpoint",
+      "iface": "Copper / optical / wireless as stated",
+      "icon": "switch"
+    },
+    "choices": [
+      "suitable",
+      "unsuitable"
+    ],
+    "correct": "unsuitable",
+    "hint": "Check both physical compatibility and the complete link requirement.",
+    "success": "Correct. The proposed link exceeds the stated distance limit.",
+    "wrong": "Not quite. Check interface compatibility, distance, mobility or coverage as stated in the scenario."
+  },
+  {
+    "id": "diag-copper-75m",
+    "category": "diagnose",
+    "title": "Check a proposed 75 m copper link",
+    "text": "A 75 m twisted-pair copper connection is proposed between compatible copper interfaces. The supplied maximum channel length is 100 m.",
+    "left": {
+      "name": "Device A",
+      "desc": "Connection endpoint",
+      "iface": "Copper / optical / wireless as stated",
+      "icon": "router"
+    },
+    "right": {
+      "name": "Device B",
+      "desc": "Connection endpoint",
+      "iface": "Copper / optical / wireless as stated",
+      "icon": "switch"
+    },
+    "choices": [
+      "suitable",
+      "unsuitable"
+    ],
+    "correct": "suitable",
+    "hint": "Check both physical compatibility and the complete link requirement.",
+    "success": "Correct. The interfaces are compatible and the proposed length is within the stated limit.",
+    "wrong": "Not quite. Check interface compatibility, distance, mobility or coverage as stated in the scenario."
+  },
+  {
+    "id": "diag-fibre-copper-only",
+    "category": "diagnose",
+    "title": "Check fibre on copper-only interfaces",
+    "text": "A fibre-optic cable is proposed between two devices that provide only copper Ethernet interfaces.",
+    "left": {
+      "name": "Device A",
+      "desc": "Connection endpoint",
+      "iface": "Copper / optical / wireless as stated",
+      "icon": "router"
+    },
+    "right": {
+      "name": "Device B",
+      "desc": "Connection endpoint",
+      "iface": "Copper / optical / wireless as stated",
+      "icon": "switch"
+    },
+    "choices": [
+      "suitable",
+      "unsuitable"
+    ],
+    "correct": "unsuitable",
+    "hint": "Check both physical compatibility and the complete link requirement.",
+    "success": "Correct. The proposed medium is incompatible with the available interfaces.",
+    "wrong": "Not quite. Check interface compatibility, distance, mobility or coverage as stated in the scenario."
+  },
+  {
+    "id": "diag-copper-optical-only",
+    "category": "diagnose",
+    "title": "Check copper on optical-only interfaces",
+    "text": "A copper Ethernet cable is proposed between two devices that provide only optical interfaces for this link.",
+    "left": {
+      "name": "Device A",
+      "desc": "Connection endpoint",
+      "iface": "Copper / optical / wireless as stated",
+      "icon": "router"
+    },
+    "right": {
+      "name": "Device B",
+      "desc": "Connection endpoint",
+      "iface": "Copper / optical / wireless as stated",
+      "icon": "switch"
+    },
+    "choices": [
+      "suitable",
+      "unsuitable"
+    ],
+    "correct": "unsuitable",
+    "hint": "Check both physical compatibility and the complete link requirement.",
+    "success": "Correct. The proposed medium and connectors do not match the optical interfaces.",
+    "wrong": "Not quite. Check interface compatibility, distance, mobility or coverage as stated in the scenario."
+  },
+  {
+    "id": "diag-valid-fibre",
+    "category": "diagnose",
+    "title": "Check a compatible fibre link",
+    "text": "Compatible optical interfaces, compatible LC connectors and the correct fibre type are provided at both ends.",
+    "left": {
+      "name": "Device A",
+      "desc": "Connection endpoint",
+      "iface": "Copper / optical / wireless as stated",
+      "icon": "router"
+    },
+    "right": {
+      "name": "Device B",
+      "desc": "Connection endpoint",
+      "iface": "Copper / optical / wireless as stated",
+      "icon": "switch"
+    },
+    "choices": [
+      "suitable",
+      "unsuitable"
+    ],
+    "correct": "suitable",
+    "hint": "Check both physical compatibility and the complete link requirement.",
+    "success": "Correct. The optical interfaces, connectors and fibre medium are specified as compatible.",
+    "wrong": "Not quite. Check interface compatibility, distance, mobility or coverage as stated in the scenario."
+  },
+  {
+    "id": "diag-valid-wireless",
+    "category": "diagnose",
+    "title": "Check a covered wireless link",
+    "text": "A mobile laptop with a wireless interface is within Office-AP coverage and must remain mobile.",
+    "left": {
+      "name": "Device A",
+      "desc": "Connection endpoint",
+      "iface": "Copper / optical / wireless as stated",
+      "icon": "router"
+    },
+    "right": {
+      "name": "Device B",
+      "desc": "Connection endpoint",
+      "iface": "Copper / optical / wireless as stated",
+      "icon": "switch"
+    },
+    "choices": [
+      "suitable",
+      "unsuitable"
+    ],
+    "correct": "suitable",
+    "hint": "Check both physical compatibility and the complete link requirement.",
+    "success": "Correct. The available wireless interfaces and coverage satisfy the mobility requirement.",
+    "wrong": "Not quite. Check interface compatibility, distance, mobility or coverage as stated in the scenario."
+  },
+  {
+    "id": "diag-no-wireless-coverage",
+    "category": "diagnose",
+    "title": "Check a wireless link outside coverage",
+    "text": "A laptop and Office-AP both support wireless, but the required work area is explicitly outside the available Office-AP coverage.",
+    "left": {
+      "name": "Device A",
+      "desc": "Connection endpoint",
+      "iface": "Copper / optical / wireless as stated",
+      "icon": "router"
+    },
+    "right": {
+      "name": "Device B",
+      "desc": "Connection endpoint",
+      "iface": "Copper / optical / wireless as stated",
+      "icon": "switch"
+    },
+    "choices": [
+      "suitable",
+      "unsuitable"
+    ],
+    "correct": "unsuitable",
+    "hint": "Check both physical compatibility and the complete link requirement.",
+    "success": "Correct. Matching interfaces alone are not enough when the required area has no stated wireless coverage.",
+    "wrong": "Not quite. Check interface compatibility, distance, mobility or coverage as stated in the scenario."
+  },
+  {
+    "id": "decision-300m",
+    "category": "decision",
+    "title": "Choose the best connection for a 300 m link",
+    "text": "Both devices have compatible copper and optical interfaces. The required link is 300 m and the supplied copper option has a 100 m limit.",
+    "left": {
+      "name": "Endpoint A",
+      "desc": "Network endpoint",
+      "iface": "Interfaces as stated in the scenario",
+      "icon": "router"
+    },
+    "right": {
+      "name": "Endpoint B",
+      "desc": "Network endpoint",
+      "iface": "Interfaces as stated in the scenario",
+      "icon": "switch"
+    },
+    "choices": [
+      "copper",
+      "fibre",
+      "wireless"
+    ],
+    "correct": "fibre",
+    "hint": "When more than one technology is possible, use the interface availability and the stated requirement together.",
+    "success": "Correct. The distance requirement exceeds the supplied copper limit.",
+    "wrong": "Not quite. Use the stated requirement—such as distance, mobility or interface availability—to decide."
+  },
+  {
+    "id": "decision-20m",
+    "category": "decision",
+    "title": "Choose for a short fixed 20 m link",
+    "text": "Both devices have compatible copper and optical interfaces. They are fixed, 20 m apart, and no special distance or mobility requirement is stated.",
+    "left": {
+      "name": "Endpoint A",
+      "desc": "Network endpoint",
+      "iface": "Interfaces as stated in the scenario",
+      "icon": "router"
+    },
+    "right": {
+      "name": "Endpoint B",
+      "desc": "Network endpoint",
+      "iface": "Interfaces as stated in the scenario",
+      "icon": "switch"
+    },
+    "choices": [
+      "copper",
+      "fibre",
+      "wireless"
+    ],
+    "correct": "copper",
+    "hint": "When more than one technology is possible, use the interface availability and the stated requirement together.",
+    "success": "Correct. The short fixed link is satisfied by the compatible copper option.",
+    "wrong": "Not quite. Use the stated requirement—such as distance, mobility or interface availability—to decide."
+  },
+  {
+    "id": "decision-mobile-dual",
+    "category": "decision",
+    "title": "Choose for a laptop with copper and wireless interfaces",
+    "text": "The laptop has both copper and wireless interfaces. The user must stay connected while moving within Office-AP coverage.",
+    "left": {
+      "name": "Endpoint A",
+      "desc": "Network endpoint",
+      "iface": "Interfaces as stated in the scenario",
+      "icon": "router"
+    },
+    "right": {
+      "name": "Endpoint B",
+      "desc": "Network endpoint",
+      "iface": "Interfaces as stated in the scenario",
+      "icon": "switch"
+    },
+    "choices": [
+      "copper",
+      "fibre",
+      "wireless"
+    ],
+    "correct": "wireless",
+    "hint": "When more than one technology is possible, use the interface availability and the stated requirement together.",
+    "success": "Correct. The mobility requirement makes wireless the appropriate choice.",
+    "wrong": "Not quite. Use the stated requirement—such as distance, mobility or interface availability—to decide."
+  },
+  {
+    "id": "decision-150m",
+    "category": "decision",
+    "title": "Choose for a 150 m infrastructure link",
+    "text": "Both devices provide copper and compatible optical interfaces. The supplied copper option is limited to 100 m and the required link is 150 m.",
+    "left": {
+      "name": "Endpoint A",
+      "desc": "Network endpoint",
+      "iface": "Interfaces as stated in the scenario",
+      "icon": "router"
+    },
+    "right": {
+      "name": "Endpoint B",
+      "desc": "Network endpoint",
+      "iface": "Interfaces as stated in the scenario",
+      "icon": "switch"
+    },
+    "choices": [
+      "copper",
+      "fibre",
+      "wireless"
+    ],
+    "correct": "fibre",
+    "hint": "When more than one technology is possible, use the interface availability and the stated requirement together.",
+    "success": "Correct. The stated 150 m requirement exceeds the supplied copper limit.",
+    "wrong": "Not quite. Use the stated requirement—such as distance, mobility or interface availability—to decide."
+  },
+  {
+    "id": "decision-fixed-40m",
+    "category": "decision",
+    "title": "Choose for a fixed 40 m connection",
+    "text": "Both endpoints support copper and optical connections. The devices are fixed and 40 m apart; the supplied copper option supports up to 100 m.",
+    "left": {
+      "name": "Endpoint A",
+      "desc": "Network endpoint",
+      "iface": "Interfaces as stated in the scenario",
+      "icon": "router"
+    },
+    "right": {
+      "name": "Endpoint B",
+      "desc": "Network endpoint",
+      "iface": "Interfaces as stated in the scenario",
+      "icon": "switch"
+    },
+    "choices": [
+      "copper",
+      "fibre",
+      "wireless"
+    ],
+    "correct": "copper",
+    "hint": "When more than one technology is possible, use the interface availability and the stated requirement together.",
+    "success": "Correct. The compatible copper option satisfies the stated fixed-link requirement.",
+    "wrong": "Not quite. Use the stated requirement—such as distance, mobility or interface availability—to decide."
+  },
+  {
+    "id": "decision-mobile-covered",
+    "category": "decision",
+    "title": "Choose for a covered mobile work area",
+    "text": "A laptop offers both copper and wireless interfaces. The user must move around a work area fully covered by Office-AP.",
+    "left": {
+      "name": "Endpoint A",
+      "desc": "Network endpoint",
+      "iface": "Interfaces as stated in the scenario",
+      "icon": "router"
+    },
+    "right": {
+      "name": "Endpoint B",
+      "desc": "Network endpoint",
+      "iface": "Interfaces as stated in the scenario",
+      "icon": "switch"
+    },
+    "choices": [
+      "copper",
+      "fibre",
+      "wireless"
+    ],
+    "correct": "wireless",
+    "hint": "When more than one technology is possible, use the interface availability and the stated requirement together.",
+    "success": "Correct. Wireless satisfies the mobility requirement without a physical client cable.",
+    "wrong": "Not quite. Use the stated requirement—such as distance, mobility or interface availability—to decide."
+  },
+  {
+    "id": "decision-optical-only",
+    "category": "decision",
+    "title": "Choose when only optical interfaces are available",
+    "text": "The two devices must be linked and the only available interfaces for this connection are compatible optical interfaces.",
+    "left": {
+      "name": "Endpoint A",
+      "desc": "Network endpoint",
+      "iface": "Interfaces as stated in the scenario",
+      "icon": "router"
+    },
+    "right": {
+      "name": "Endpoint B",
+      "desc": "Network endpoint",
+      "iface": "Interfaces as stated in the scenario",
+      "icon": "switch"
+    },
+    "choices": [
+      "copper",
+      "fibre",
+      "wireless"
+    ],
+    "correct": "fibre",
+    "hint": "When more than one technology is possible, use the interface availability and the stated requirement together.",
+    "success": "Correct. The available interface type determines that a compatible fibre link is required.",
+    "wrong": "Not quite. Use the stated requirement—such as distance, mobility or interface availability—to decide."
   }
 ];
 
@@ -577,100 +1502,1936 @@ const components = {
 // category (copper, wireless, fibre) and then shuffles the order.
 const buildBank = [
   {
-    id:"build-copper-office-pc", category:"copper",
-    title:"Build the Office-PC copper connection",
-    text:"Assemble the complete physical path between Office-PC and SW1. Use every slot.",
-    left:"Office-PC", right:"SW1",
-    slots:[
-      {label:"PC interface",correct:"copper_if"},
-      {label:"Connector",correct:"eightp8c"},
-      {label:"Transmission medium",correct:"copper_cable"},
-      {label:"Connector",correct:"eightp8c"},
-      {label:"Switch interface",correct:"copper_if"}
+    "id": "build-copper-office-pc",
+    "category": "copper",
+    "title": "Build the Office-PC copper connection",
+    "text": "Assemble the complete copper path between Office-PC and SW1. Use every slot.",
+    "left": "Office-PC",
+    "right": "SW1",
+    "slots": [
+      {
+        "label": "PC interface",
+        "correct": "copper_if"
+      },
+      {
+        "label": "Connector",
+        "correct": "eightp8c"
+      },
+      {
+        "label": "Transmission medium",
+        "correct": "copper_cable"
+      },
+      {
+        "label": "Connector",
+        "correct": "eightp8c"
+      },
+      {
+        "label": "Switch interface",
+        "correct": "copper_if"
+      }
     ],
-    tray:["copper_if","copper_if","eightp8c","eightp8c","copper_cable","optical_if","lc","fibre_cable"],
-    hint:"Begin at Office-PC. What physical interface does it use? Then follow the path from the device into the cable and back into SW1.",
-    success:"Correct. You built the full copper path: copper interface → RJ-45 connector → twisted-pair cable → RJ-45 connector → copper interface."
+    "tray": [
+      "copper_if",
+      "copper_if",
+      "eightp8c",
+      "eightp8c",
+      "copper_cable",
+      "optical_if",
+      "lc",
+      "fibre_cable",
+      "radio"
+    ],
+    "hint": "Follow the physical path from the first device: interface → connector → medium → connector → interface.",
+    "success": "Correct. The complete copper path is copper Ethernet interface → RJ-45 connector → twisted-pair copper cable → RJ-45 connector → copper Ethernet interface."
   },
   {
-    id:"build-copper-printer", category:"copper",
-    title:"Build the printer-to-switch copper connection",
-    text:"Assemble the complete physical path between the Office Printer and SW1.",
-    left:"Office Printer", right:"SW1",
-    slots:[
-      {label:"Printer interface",correct:"copper_if"},
-      {label:"Connector",correct:"eightp8c"},
-      {label:"Transmission medium",correct:"copper_cable"},
-      {label:"Connector",correct:"eightp8c"},
-      {label:"Switch interface",correct:"copper_if"}
+    "id": "build-copper-fixed-device",
+    "category": "copper",
+    "title": "Build a fixed-device copper connection",
+    "text": "Assemble the complete copper path between Fixed Device and SW1. Use every slot.",
+    "left": "Fixed Device",
+    "right": "SW1",
+    "slots": [
+      {
+        "label": "Device interface",
+        "correct": "copper_if"
+      },
+      {
+        "label": "Connector",
+        "correct": "eightp8c"
+      },
+      {
+        "label": "Transmission medium",
+        "correct": "copper_cable"
+      },
+      {
+        "label": "Connector",
+        "correct": "eightp8c"
+      },
+      {
+        "label": "Switch interface",
+        "correct": "copper_if"
+      }
     ],
-    tray:["copper_if","copper_if","eightp8c","eightp8c","copper_cable","wireless_if","radio","lc"],
-    hint:"The printer and switch use compatible copper Ethernet interfaces. Build outward from the first interface.",
-    success:"Correct. The complete copper path is interface → connector → twisted-pair cable → connector → interface."
-  },
-
-  {
-    id:"build-wireless-staff", category:"wireless",
-    title:"Build the Staff-Laptop wireless connection",
-    text:"Assemble the wireless path between Staff-Laptop and Office-AP. Notice which physical components are not needed.",
-    left:"Staff-Laptop", right:"Office-AP",
-    slots:[
-      {label:"Laptop interface",correct:"wireless_if"},
-      {label:"Transmission medium",correct:"radio"},
-      {label:"AP interface",correct:"ap_radio"}
+    "tray": [
+      "copper_if",
+      "copper_if",
+      "eightp8c",
+      "eightp8c",
+      "copper_cable",
+      "optical_if",
+      "lc",
+      "fibre_cable",
+      "radio"
     ],
-    tray:["wireless_if","radio","ap_radio","eightp8c","copper_cable","lc"],
-    hint:"There is no physical cable between the laptop and access point. Think in terms of interface → medium → interface.",
-    success:"Correct. The wireless path is interface → radio transmission medium → access-point radio interface. No cable connector is required."
-  },
-  {
-    id:"build-wireless-meeting", category:"wireless",
-    title:"Build a meeting-room wireless connection",
-    text:"Assemble the wireless path between Meeting-Laptop and Office-AP.",
-    left:"Meeting-Laptop", right:"Office-AP",
-    slots:[
-      {label:"Laptop interface",correct:"wireless_if"},
-      {label:"Transmission medium",correct:"radio"},
-      {label:"AP interface",correct:"ap_radio"}
-    ],
-    tray:["radio","wireless_if","eightp8c","ap_radio","copper_if","copper_cable"],
-    hint:"Wireless still requires interfaces at both ends, but it does not use a physical cable between them.",
-    success:"Correct. The complete wireless path is wireless interface → radio medium → access-point radio interface."
-  },
-
-  {
-    id:"build-fibre-network-link", category:"fibre",
-    title:"Build an optical network link",
-    text:"Assemble a compatible fibre connection between two network devices with optical interfaces.",
-    left:"Network Device A", right:"Network Device B",
-    slots:[
-      {label:"Optical interface",correct:"optical_if"},
-      {label:"Connector",correct:"lc"},
-      {label:"Transmission medium",correct:"fibre_cable"},
-      {label:"Connector",correct:"lc"},
-      {label:"Optical interface",correct:"optical_if"}
-    ],
-    tray:["optical_if","optical_if","lc","lc","fibre_cable","copper_if","eightp8c","copper_cable"],
-    hint:"Follow the same logic as the copper build, but use the optical components.",
-    success:"Correct. You built the full fibre path: optical interface/transceiver → LC connector → fibre-optic cable → LC connector → optical interface/transceiver."
+    "hint": "Follow the physical path from the first device: interface → connector → medium → connector → interface.",
+    "success": "Correct. The complete copper path is copper Ethernet interface → RJ-45 connector → twisted-pair copper cable → RJ-45 connector → copper Ethernet interface."
   },
   {
-    id:"build-fibre-switch-link", category:"fibre",
-    title:"Build a fibre switch-to-switch link",
-    text:"Assemble the complete optical connection between SW1 and a remote switch.",
-    left:"SW1", right:"Remote Switch",
-    slots:[
-      {label:"Optical interface",correct:"optical_if"},
-      {label:"Connector",correct:"lc"},
-      {label:"Transmission medium",correct:"fibre_cable"},
-      {label:"Connector",correct:"lc"},
-      {label:"Optical interface",correct:"optical_if"}
+    "id": "build-copper-device-pair",
+    "category": "copper",
+    "title": "Build a copper link between two network devices",
+    "text": "Assemble the complete copper path between Network Device A and Network Device B. Use every slot.",
+    "left": "Network Device A",
+    "right": "Network Device B",
+    "slots": [
+      {
+        "label": "Device A interface",
+        "correct": "copper_if"
+      },
+      {
+        "label": "Connector",
+        "correct": "eightp8c"
+      },
+      {
+        "label": "Transmission medium",
+        "correct": "copper_cable"
+      },
+      {
+        "label": "Connector",
+        "correct": "eightp8c"
+      },
+      {
+        "label": "Device B interface",
+        "correct": "copper_if"
+      }
     ],
-    tray:["lc","optical_if","copper_cable","fibre_cable","optical_if","eightp8c","lc","copper_if"],
-    hint:"The physical sequence is the same at each end: optical interface connects to the fibre through the compatible connector.",
-    success:"Correct. Both switches connect through optical interfaces, LC connectors and the fibre-optic medium."
+    "tray": [
+      "copper_if",
+      "copper_if",
+      "eightp8c",
+      "eightp8c",
+      "copper_cable",
+      "optical_if",
+      "lc",
+      "fibre_cable",
+      "radio"
+    ],
+    "hint": "Follow the physical path from the first device: interface → connector → medium → connector → interface.",
+    "success": "Correct. The complete copper path is copper Ethernet interface → RJ-45 connector → twisted-pair copper cable → RJ-45 connector → copper Ethernet interface."
+  },
+  {
+    "id": "build-copper-desk-endpoint",
+    "category": "copper",
+    "title": "Build a desk-endpoint copper connection",
+    "text": "Assemble the complete copper path between Desk Endpoint and SW1. Use every slot.",
+    "left": "Desk Endpoint",
+    "right": "SW1",
+    "slots": [
+      {
+        "label": "Endpoint interface",
+        "correct": "copper_if"
+      },
+      {
+        "label": "Connector",
+        "correct": "eightp8c"
+      },
+      {
+        "label": "Transmission medium",
+        "correct": "copper_cable"
+      },
+      {
+        "label": "Connector",
+        "correct": "eightp8c"
+      },
+      {
+        "label": "Switch interface",
+        "correct": "copper_if"
+      }
+    ],
+    "tray": [
+      "copper_if",
+      "copper_if",
+      "eightp8c",
+      "eightp8c",
+      "copper_cable",
+      "optical_if",
+      "lc",
+      "fibre_cable",
+      "radio"
+    ],
+    "hint": "Follow the physical path from the first device: interface → connector → medium → connector → interface.",
+    "success": "Correct. The complete copper path is copper Ethernet interface → RJ-45 connector → twisted-pair copper cable → RJ-45 connector → copper Ethernet interface."
+  },
+  {
+    "id": "build-copper-local-infra",
+    "category": "copper",
+    "title": "Build a local infrastructure copper link",
+    "text": "Assemble the complete copper path between Network Device A and SW1. Use every slot.",
+    "left": "Network Device A",
+    "right": "SW1",
+    "slots": [
+      {
+        "label": "Device interface",
+        "correct": "copper_if"
+      },
+      {
+        "label": "Connector",
+        "correct": "eightp8c"
+      },
+      {
+        "label": "Transmission medium",
+        "correct": "copper_cable"
+      },
+      {
+        "label": "Connector",
+        "correct": "eightp8c"
+      },
+      {
+        "label": "Switch interface",
+        "correct": "copper_if"
+      }
+    ],
+    "tray": [
+      "copper_if",
+      "copper_if",
+      "eightp8c",
+      "eightp8c",
+      "copper_cable",
+      "optical_if",
+      "lc",
+      "fibre_cable",
+      "radio"
+    ],
+    "hint": "Follow the physical path from the first device: interface → connector → medium → connector → interface.",
+    "success": "Correct. The complete copper path is copper Ethernet interface → RJ-45 connector → twisted-pair copper cable → RJ-45 connector → copper Ethernet interface."
+  },
+  {
+    "id": "build-copper-fixed-laptop",
+    "category": "copper",
+    "title": "Build a fixed-desk laptop connection",
+    "text": "Assemble the complete copper path between Staff-Laptop and SW1. Use every slot.",
+    "left": "Staff-Laptop",
+    "right": "SW1",
+    "slots": [
+      {
+        "label": "Laptop interface",
+        "correct": "copper_if"
+      },
+      {
+        "label": "Connector",
+        "correct": "eightp8c"
+      },
+      {
+        "label": "Transmission medium",
+        "correct": "copper_cable"
+      },
+      {
+        "label": "Connector",
+        "correct": "eightp8c"
+      },
+      {
+        "label": "Switch interface",
+        "correct": "copper_if"
+      }
+    ],
+    "tray": [
+      "copper_if",
+      "copper_if",
+      "eightp8c",
+      "eightp8c",
+      "copper_cable",
+      "optical_if",
+      "lc",
+      "fibre_cable",
+      "radio"
+    ],
+    "hint": "Follow the physical path from the first device: interface → connector → medium → connector → interface.",
+    "success": "Correct. The complete copper path is copper Ethernet interface → RJ-45 connector → twisted-pair copper cable → RJ-45 connector → copper Ethernet interface."
+  },
+  {
+    "id": "build-copper-short-link",
+    "category": "copper",
+    "title": "Build a short copper Ethernet link",
+    "text": "Assemble the complete copper path between Endpoint A and Endpoint B. Use every slot.",
+    "left": "Endpoint A",
+    "right": "Endpoint B",
+    "slots": [
+      {
+        "label": "Endpoint A interface",
+        "correct": "copper_if"
+      },
+      {
+        "label": "Connector",
+        "correct": "eightp8c"
+      },
+      {
+        "label": "Transmission medium",
+        "correct": "copper_cable"
+      },
+      {
+        "label": "Connector",
+        "correct": "eightp8c"
+      },
+      {
+        "label": "Endpoint B interface",
+        "correct": "copper_if"
+      }
+    ],
+    "tray": [
+      "copper_if",
+      "copper_if",
+      "eightp8c",
+      "eightp8c",
+      "copper_cable",
+      "optical_if",
+      "lc",
+      "fibre_cable",
+      "radio"
+    ],
+    "hint": "Follow the physical path from the first device: interface → connector → medium → connector → interface.",
+    "success": "Correct. The complete copper path is copper Ethernet interface → RJ-45 connector → twisted-pair copper cable → RJ-45 connector → copper Ethernet interface."
+  },
+  {
+    "id": "build-wireless-staff",
+    "category": "wireless",
+    "title": "Build the Staff-Laptop wireless connection",
+    "text": "Assemble the wireless path between Staff-Laptop and Office-AP.",
+    "left": "Staff-Laptop",
+    "right": "Office-AP",
+    "slots": [
+      {
+        "label": "Client interface",
+        "correct": "wireless_if"
+      },
+      {
+        "label": "Transmission medium",
+        "correct": "radio"
+      },
+      {
+        "label": "AP interface",
+        "correct": "ap_radio"
+      }
+    ],
+    "tray": [
+      "wireless_if",
+      "radio",
+      "ap_radio",
+      "eightp8c",
+      "copper_cable",
+      "lc",
+      "fibre_cable"
+    ],
+    "hint": "A wireless client link still has interfaces at both ends, but there is no physical client cable between them.",
+    "success": "Correct. The wireless path is wireless network interface → radio transmission medium → access-point radio interface."
+  },
+  {
+    "id": "build-wireless-meeting",
+    "category": "wireless",
+    "title": "Build a meeting-room wireless connection",
+    "text": "Assemble the wireless path between Staff-Laptop and Office-AP.",
+    "left": "Staff-Laptop",
+    "right": "Office-AP",
+    "slots": [
+      {
+        "label": "Client interface",
+        "correct": "wireless_if"
+      },
+      {
+        "label": "Transmission medium",
+        "correct": "radio"
+      },
+      {
+        "label": "AP interface",
+        "correct": "ap_radio"
+      }
+    ],
+    "tray": [
+      "wireless_if",
+      "radio",
+      "ap_radio",
+      "eightp8c",
+      "copper_cable",
+      "lc",
+      "fibre_cable"
+    ],
+    "hint": "A wireless client link still has interfaces at both ends, but there is no physical client cable between them.",
+    "success": "Correct. The wireless path is wireless network interface → radio transmission medium → access-point radio interface."
+  },
+  {
+    "id": "build-wireless-hotdesk",
+    "category": "wireless",
+    "title": "Build a hot-desk wireless connection",
+    "text": "Assemble the wireless path between Staff-Laptop and Office-AP.",
+    "left": "Staff-Laptop",
+    "right": "Office-AP",
+    "slots": [
+      {
+        "label": "Client interface",
+        "correct": "wireless_if"
+      },
+      {
+        "label": "Transmission medium",
+        "correct": "radio"
+      },
+      {
+        "label": "AP interface",
+        "correct": "ap_radio"
+      }
+    ],
+    "tray": [
+      "wireless_if",
+      "radio",
+      "ap_radio",
+      "eightp8c",
+      "copper_cable",
+      "lc",
+      "fibre_cable"
+    ],
+    "hint": "A wireless client link still has interfaces at both ends, but there is no physical client cable between them.",
+    "success": "Correct. The wireless path is wireless network interface → radio transmission medium → access-point radio interface."
+  },
+  {
+    "id": "build-wireless-training",
+    "category": "wireless",
+    "title": "Build a training-room wireless connection",
+    "text": "Assemble the wireless path between Staff-Laptop and Office-AP.",
+    "left": "Staff-Laptop",
+    "right": "Office-AP",
+    "slots": [
+      {
+        "label": "Client interface",
+        "correct": "wireless_if"
+      },
+      {
+        "label": "Transmission medium",
+        "correct": "radio"
+      },
+      {
+        "label": "AP interface",
+        "correct": "ap_radio"
+      }
+    ],
+    "tray": [
+      "wireless_if",
+      "radio",
+      "ap_radio",
+      "eightp8c",
+      "copper_cable",
+      "lc",
+      "fibre_cable"
+    ],
+    "hint": "A wireless client link still has interfaces at both ends, but there is no physical client cable between them.",
+    "success": "Correct. The wireless path is wireless network interface → radio transmission medium → access-point radio interface."
+  },
+  {
+    "id": "build-wireless-mobile",
+    "category": "wireless",
+    "title": "Build a mobile office wireless connection",
+    "text": "Assemble the wireless path between Mobile Device and Office-AP.",
+    "left": "Mobile Device",
+    "right": "Office-AP",
+    "slots": [
+      {
+        "label": "Client interface",
+        "correct": "wireless_if"
+      },
+      {
+        "label": "Transmission medium",
+        "correct": "radio"
+      },
+      {
+        "label": "AP interface",
+        "correct": "ap_radio"
+      }
+    ],
+    "tray": [
+      "wireless_if",
+      "radio",
+      "ap_radio",
+      "eightp8c",
+      "copper_cable",
+      "lc",
+      "fibre_cable"
+    ],
+    "hint": "A wireless client link still has interfaces at both ends, but there is no physical client cable between them.",
+    "success": "Correct. The wireless path is wireless network interface → radio transmission medium → access-point radio interface."
+  },
+  {
+    "id": "build-wireless-roaming",
+    "category": "wireless",
+    "title": "Build a roaming-user wireless connection",
+    "text": "Assemble the wireless path between Staff-Laptop and Office-AP.",
+    "left": "Staff-Laptop",
+    "right": "Office-AP",
+    "slots": [
+      {
+        "label": "Client interface",
+        "correct": "wireless_if"
+      },
+      {
+        "label": "Transmission medium",
+        "correct": "radio"
+      },
+      {
+        "label": "AP interface",
+        "correct": "ap_radio"
+      }
+    ],
+    "tray": [
+      "wireless_if",
+      "radio",
+      "ap_radio",
+      "eightp8c",
+      "copper_cable",
+      "lc",
+      "fibre_cable"
+    ],
+    "hint": "A wireless client link still has interfaces at both ends, but there is no physical client cable between them.",
+    "success": "Correct. The wireless path is wireless network interface → radio transmission medium → access-point radio interface."
+  },
+  {
+    "id": "build-wireless-temporary",
+    "category": "wireless",
+    "title": "Build a temporary-work-area wireless connection",
+    "text": "Assemble the wireless path between Staff-Laptop and Office-AP.",
+    "left": "Staff-Laptop",
+    "right": "Office-AP",
+    "slots": [
+      {
+        "label": "Client interface",
+        "correct": "wireless_if"
+      },
+      {
+        "label": "Transmission medium",
+        "correct": "radio"
+      },
+      {
+        "label": "AP interface",
+        "correct": "ap_radio"
+      }
+    ],
+    "tray": [
+      "wireless_if",
+      "radio",
+      "ap_radio",
+      "eightp8c",
+      "copper_cable",
+      "lc",
+      "fibre_cable"
+    ],
+    "hint": "A wireless client link still has interfaces at both ends, but there is no physical client cable between them.",
+    "success": "Correct. The wireless path is wireless network interface → radio transmission medium → access-point radio interface."
+  },
+  {
+    "id": "build-fibre-device-link",
+    "category": "fibre",
+    "title": "Build an optical network link",
+    "text": "Assemble the complete optical path between Network Device A and Network Device B. Use every slot.",
+    "left": "Network Device A",
+    "right": "Network Device B",
+    "slots": [
+      {
+        "label": "Optical interface",
+        "correct": "optical_if"
+      },
+      {
+        "label": "Connector",
+        "correct": "lc"
+      },
+      {
+        "label": "Transmission medium",
+        "correct": "fibre_cable"
+      },
+      {
+        "label": "Connector",
+        "correct": "lc"
+      },
+      {
+        "label": "Optical interface",
+        "correct": "optical_if"
+      }
+    ],
+    "tray": [
+      "optical_if",
+      "optical_if",
+      "lc",
+      "lc",
+      "fibre_cable",
+      "copper_if",
+      "eightp8c",
+      "copper_cable",
+      "radio"
+    ],
+    "hint": "Follow the same physical logic as copper, but use the optical components.",
+    "success": "Correct. The complete fibre path is optical interface/transceiver → LC connector → fibre-optic cable → LC connector → optical interface/transceiver."
+  },
+  {
+    "id": "build-fibre-switch-link",
+    "category": "fibre",
+    "title": "Build a fibre switch-to-switch link",
+    "text": "Assemble the complete optical path between SW1 and Remote Switch. Use every slot.",
+    "left": "SW1",
+    "right": "Remote Switch",
+    "slots": [
+      {
+        "label": "Optical interface",
+        "correct": "optical_if"
+      },
+      {
+        "label": "Connector",
+        "correct": "lc"
+      },
+      {
+        "label": "Transmission medium",
+        "correct": "fibre_cable"
+      },
+      {
+        "label": "Connector",
+        "correct": "lc"
+      },
+      {
+        "label": "Optical interface",
+        "correct": "optical_if"
+      }
+    ],
+    "tray": [
+      "optical_if",
+      "optical_if",
+      "lc",
+      "lc",
+      "fibre_cable",
+      "copper_if",
+      "eightp8c",
+      "copper_cable",
+      "radio"
+    ],
+    "hint": "Follow the same physical logic as copper, but use the optical components.",
+    "success": "Correct. The complete fibre path is optical interface/transceiver → LC connector → fibre-optic cable → LC connector → optical interface/transceiver."
+  },
+  {
+    "id": "build-fibre-distribution",
+    "category": "fibre",
+    "title": "Build a distribution-to-remote-switch fibre link",
+    "text": "Assemble the complete optical path between Distribution Device and Remote Switch. Use every slot.",
+    "left": "Distribution Device",
+    "right": "Remote Switch",
+    "slots": [
+      {
+        "label": "Optical interface",
+        "correct": "optical_if"
+      },
+      {
+        "label": "Connector",
+        "correct": "lc"
+      },
+      {
+        "label": "Transmission medium",
+        "correct": "fibre_cable"
+      },
+      {
+        "label": "Connector",
+        "correct": "lc"
+      },
+      {
+        "label": "Optical interface",
+        "correct": "optical_if"
+      }
+    ],
+    "tray": [
+      "optical_if",
+      "optical_if",
+      "lc",
+      "lc",
+      "fibre_cable",
+      "copper_if",
+      "eightp8c",
+      "copper_cable",
+      "radio"
+    ],
+    "hint": "Follow the same physical logic as copper, but use the optical components.",
+    "success": "Correct. The complete fibre path is optical interface/transceiver → LC connector → fibre-optic cable → LC connector → optical interface/transceiver."
+  },
+  {
+    "id": "build-fibre-infra",
+    "category": "fibre",
+    "title": "Build a fibre infrastructure link",
+    "text": "Assemble the complete optical path between Network Device A and SW1. Use every slot.",
+    "left": "Network Device A",
+    "right": "SW1",
+    "slots": [
+      {
+        "label": "Optical interface",
+        "correct": "optical_if"
+      },
+      {
+        "label": "Connector",
+        "correct": "lc"
+      },
+      {
+        "label": "Transmission medium",
+        "correct": "fibre_cable"
+      },
+      {
+        "label": "Connector",
+        "correct": "lc"
+      },
+      {
+        "label": "Optical interface",
+        "correct": "optical_if"
+      }
+    ],
+    "tray": [
+      "optical_if",
+      "optical_if",
+      "lc",
+      "lc",
+      "fibre_cable",
+      "copper_if",
+      "eightp8c",
+      "copper_cable",
+      "radio"
+    ],
+    "hint": "Follow the same physical logic as copper, but use the optical components.",
+    "success": "Correct. The complete fibre path is optical interface/transceiver → LC connector → fibre-optic cable → LC connector → optical interface/transceiver."
+  },
+  {
+    "id": "build-fibre-remote",
+    "category": "fibre",
+    "title": "Build a fibre link to a remote switch",
+    "text": "Assemble the complete optical path between Network Device A and Remote Switch. Use every slot.",
+    "left": "Network Device A",
+    "right": "Remote Switch",
+    "slots": [
+      {
+        "label": "Optical interface",
+        "correct": "optical_if"
+      },
+      {
+        "label": "Connector",
+        "correct": "lc"
+      },
+      {
+        "label": "Transmission medium",
+        "correct": "fibre_cable"
+      },
+      {
+        "label": "Connector",
+        "correct": "lc"
+      },
+      {
+        "label": "Optical interface",
+        "correct": "optical_if"
+      }
+    ],
+    "tray": [
+      "optical_if",
+      "optical_if",
+      "lc",
+      "lc",
+      "fibre_cable",
+      "copper_if",
+      "eightp8c",
+      "copper_cable",
+      "radio"
+    ],
+    "hint": "Follow the same physical logic as copper, but use the optical components.",
+    "success": "Correct. The complete fibre path is optical interface/transceiver → LC connector → fibre-optic cable → LC connector → optical interface/transceiver."
+  },
+  {
+    "id": "build-fibre-uplink",
+    "category": "fibre",
+    "title": "Build an optical uplink",
+    "text": "Assemble the complete optical path between Distribution Device and Network Device B. Use every slot.",
+    "left": "Distribution Device",
+    "right": "Network Device B",
+    "slots": [
+      {
+        "label": "Optical interface",
+        "correct": "optical_if"
+      },
+      {
+        "label": "Connector",
+        "correct": "lc"
+      },
+      {
+        "label": "Transmission medium",
+        "correct": "fibre_cable"
+      },
+      {
+        "label": "Connector",
+        "correct": "lc"
+      },
+      {
+        "label": "Optical interface",
+        "correct": "optical_if"
+      }
+    ],
+    "tray": [
+      "optical_if",
+      "optical_if",
+      "lc",
+      "lc",
+      "fibre_cable",
+      "copper_if",
+      "eightp8c",
+      "copper_cable",
+      "radio"
+    ],
+    "hint": "Follow the same physical logic as copper, but use the optical components.",
+    "success": "Correct. The complete fibre path is optical interface/transceiver → LC connector → fibre-optic cable → LC connector → optical interface/transceiver."
+  },
+  {
+    "id": "build-fibre-optical-pair",
+    "category": "fibre",
+    "title": "Build a link between two optical interfaces",
+    "text": "Assemble the complete optical path between Endpoint A and Endpoint B. Use every slot.",
+    "left": "Endpoint A",
+    "right": "Endpoint B",
+    "slots": [
+      {
+        "label": "Optical interface",
+        "correct": "optical_if"
+      },
+      {
+        "label": "Connector",
+        "correct": "lc"
+      },
+      {
+        "label": "Transmission medium",
+        "correct": "fibre_cable"
+      },
+      {
+        "label": "Connector",
+        "correct": "lc"
+      },
+      {
+        "label": "Optical interface",
+        "correct": "optical_if"
+      }
+    ],
+    "tray": [
+      "optical_if",
+      "optical_if",
+      "lc",
+      "lc",
+      "fibre_cable",
+      "copper_if",
+      "eightp8c",
+      "copper_cable",
+      "radio"
+    ],
+    "hint": "Follow the same physical logic as copper, but use the optical components.",
+    "success": "Correct. The complete fibre path is optical interface/transceiver → LC connector → fibre-optic cable → LC connector → optical interface/transceiver."
   }
 ];
+
+
+const diagnosisBank = [
+  {
+    "id": "diag-fibre-on-copper",
+    "category": "compatibility",
+    "title": "Fibre proposed for copper-only interfaces",
+    "text": "Inspect the proposed connection and identify whether the physical components are compatible.",
+    "left": {
+      "name": "Office-PC",
+      "desc": "Fixed desktop computer",
+      "iface": "Copper Ethernet interface only",
+      "icon": "pc"
+    },
+    "right": {
+      "name": "SW1",
+      "desc": "Office access switch",
+      "iface": "Copper Ethernet interface only",
+      "icon": "switch"
+    },
+    "proposal": "Fibre-optic cable with LC connectors",
+    "detail": "No optical interface or transceiver is available at either end.",
+    "diagnosisOptions": [
+      {
+        "id": "valid",
+        "text": "The connection is suitable as proposed."
+      },
+      {
+        "id": "interface",
+        "text": "The medium and connectors do not match the available interfaces."
+      },
+      {
+        "id": "distance",
+        "text": "The only issue is the distance requirement."
+      }
+    ],
+    "correctDiagnosis": "interface",
+    "explanationOptions": [
+      {
+        "id": "e1",
+        "text": "A fibre link requires compatible optical interfaces/transceivers at both ends; copper-only interfaces cannot use the proposed fibre link directly."
+      },
+      {
+        "id": "e2",
+        "text": "Any connector can be used with any network interface if the devices support Ethernet."
+      },
+      {
+        "id": "e3",
+        "text": "The transmission medium is unimportant as long as both devices are powered on."
+      }
+    ],
+    "correctExplanation": "e1",
+    "hint": "Start with the interfaces at both ends, then check the connector and transmission medium.",
+    "success": "Correct. A fibre link requires compatible optical interfaces/transceivers at both ends; copper-only interfaces cannot use the proposed fibre link directly."
+  },
+  {
+    "id": "diag-copper-on-optical",
+    "category": "compatibility",
+    "title": "Copper proposed for optical-only interfaces",
+    "text": "Inspect the proposed connection and identify whether the physical components are compatible.",
+    "left": {
+      "name": "Network Device A",
+      "desc": "Network infrastructure device",
+      "iface": "Optical interface only",
+      "icon": "router"
+    },
+    "right": {
+      "name": "Network Device B",
+      "desc": "Network infrastructure device",
+      "iface": "Optical interface only",
+      "icon": "switch"
+    },
+    "proposal": "Twisted-pair copper cable with RJ-45 connectors",
+    "detail": "Both devices provide optical interfaces only for this link.",
+    "diagnosisOptions": [
+      {
+        "id": "valid",
+        "text": "The connection is suitable as proposed."
+      },
+      {
+        "id": "interface",
+        "text": "The proposed copper connection is incompatible with the available interfaces."
+      },
+      {
+        "id": "distance",
+        "text": "The only issue is the distance requirement."
+      }
+    ],
+    "correctDiagnosis": "interface",
+    "explanationOptions": [
+      {
+        "id": "e1",
+        "text": "The cable type and connector must match compatible physical interfaces at both ends."
+      },
+      {
+        "id": "e2",
+        "text": "Any connector can be used with any network interface if the devices support Ethernet."
+      },
+      {
+        "id": "e3",
+        "text": "The transmission medium is unimportant as long as both devices are powered on."
+      }
+    ],
+    "correctExplanation": "e1",
+    "hint": "Start with the interfaces at both ends, then check the connector and transmission medium.",
+    "success": "Correct. The cable type and connector must match compatible physical interfaces at both ends."
+  },
+  {
+    "id": "diag-valid-copper",
+    "category": "compatibility",
+    "title": "Check a complete copper connection",
+    "text": "Inspect the proposed connection and identify whether the physical components are compatible.",
+    "left": {
+      "name": "Office-PC",
+      "desc": "Fixed desktop computer",
+      "iface": "Copper Ethernet interface",
+      "icon": "pc"
+    },
+    "right": {
+      "name": "SW1",
+      "desc": "Office access switch",
+      "iface": "Copper Ethernet interface",
+      "icon": "switch"
+    },
+    "proposal": "Copper interface → RJ-45 → twisted-pair copper cable → RJ-45 → copper interface",
+    "detail": "The link is within the supplied copper distance limit.",
+    "diagnosisOptions": [
+      {
+        "id": "valid",
+        "text": "The connection is suitable as proposed."
+      },
+      {
+        "id": "interface",
+        "text": "The proposed medium/connectors do not match the available interfaces."
+      },
+      {
+        "id": "distance",
+        "text": "The only issue is the distance requirement."
+      }
+    ],
+    "correctDiagnosis": "valid",
+    "explanationOptions": [
+      {
+        "id": "e1",
+        "text": "The interfaces, connectors and transmission medium are compatible, and the stated link requirement is satisfied."
+      },
+      {
+        "id": "e2",
+        "text": "Any connector can be used with any network interface if the devices support Ethernet."
+      },
+      {
+        "id": "e3",
+        "text": "The transmission medium is unimportant as long as both devices are powered on."
+      }
+    ],
+    "correctExplanation": "e1",
+    "hint": "Start with the interfaces at both ends, then check the connector and transmission medium.",
+    "success": "Correct. The interfaces, connectors and transmission medium are compatible, and the stated link requirement is satisfied."
+  },
+  {
+    "id": "diag-valid-fibre-compat",
+    "category": "compatibility",
+    "title": "Check a complete fibre connection",
+    "text": "Inspect the proposed connection and identify whether the physical components are compatible.",
+    "left": {
+      "name": "Network Device A",
+      "desc": "Network infrastructure device",
+      "iface": "Optical interface",
+      "icon": "router"
+    },
+    "right": {
+      "name": "Network Device B",
+      "desc": "Network infrastructure device",
+      "iface": "Optical interface",
+      "icon": "switch"
+    },
+    "proposal": "Optical interface → LC → fibre-optic cable → LC → optical interface",
+    "detail": "The fibre type and optical interfaces are specified as compatible.",
+    "diagnosisOptions": [
+      {
+        "id": "valid",
+        "text": "The connection is suitable as proposed."
+      },
+      {
+        "id": "interface",
+        "text": "The proposed medium/connectors do not match the available interfaces."
+      },
+      {
+        "id": "distance",
+        "text": "The only issue is the distance requirement."
+      }
+    ],
+    "correctDiagnosis": "valid",
+    "explanationOptions": [
+      {
+        "id": "e1",
+        "text": "The optical interfaces, LC connectors and fibre medium are specified as compatible."
+      },
+      {
+        "id": "e2",
+        "text": "Any connector can be used with any network interface if the devices support Ethernet."
+      },
+      {
+        "id": "e3",
+        "text": "The transmission medium is unimportant as long as both devices are powered on."
+      }
+    ],
+    "correctExplanation": "e1",
+    "hint": "Start with the interfaces at both ends, then check the connector and transmission medium.",
+    "success": "Correct. The optical interfaces, LC connectors and fibre medium are specified as compatible."
+  },
+  {
+    "id": "diag-rj45-to-optical",
+    "category": "compatibility",
+    "title": "RJ-45 proposed for an optical interface",
+    "text": "Inspect the proposed connection and identify whether the physical components are compatible.",
+    "left": {
+      "name": "Network Device A",
+      "desc": "Network infrastructure device",
+      "iface": "Optical interface only",
+      "icon": "router"
+    },
+    "right": {
+      "name": "SW1",
+      "desc": "Network switch",
+      "iface": "Optical interface only",
+      "icon": "switch"
+    },
+    "proposal": "Copper patch cable with RJ-45 connectors",
+    "detail": "No copper Ethernet interface is provided for this link.",
+    "diagnosisOptions": [
+      {
+        "id": "valid",
+        "text": "The connection is suitable as proposed."
+      },
+      {
+        "id": "interface",
+        "text": "The proposed connector and medium do not match the optical interfaces."
+      },
+      {
+        "id": "distance",
+        "text": "The only issue is the distance requirement."
+      }
+    ],
+    "correctDiagnosis": "interface",
+    "explanationOptions": [
+      {
+        "id": "e1",
+        "text": "RJ-45 copper connectivity requires compatible copper Ethernet interfaces; the shown link has optical interfaces only."
+      },
+      {
+        "id": "e2",
+        "text": "Any connector can be used with any network interface if the devices support Ethernet."
+      },
+      {
+        "id": "e3",
+        "text": "The transmission medium is unimportant as long as both devices are powered on."
+      }
+    ],
+    "correctExplanation": "e1",
+    "hint": "Start with the interfaces at both ends, then check the connector and transmission medium.",
+    "success": "Correct. RJ-45 copper connectivity requires compatible copper Ethernet interfaces; the shown link has optical interfaces only."
+  },
+  {
+    "id": "diag-lc-to-copper",
+    "category": "compatibility",
+    "title": "LC fibre connectors proposed for copper Ethernet ports",
+    "text": "Inspect the proposed connection and identify whether the physical components are compatible.",
+    "left": {
+      "name": "Endpoint A",
+      "desc": "Network endpoint",
+      "iface": "Copper Ethernet interface only",
+      "icon": "pc"
+    },
+    "right": {
+      "name": "SW1",
+      "desc": "Office access switch",
+      "iface": "Copper Ethernet interface only",
+      "icon": "switch"
+    },
+    "proposal": "Fibre cable with LC connectors",
+    "detail": "Both endpoints expose copper Ethernet interfaces only.",
+    "diagnosisOptions": [
+      {
+        "id": "valid",
+        "text": "The connection is suitable as proposed."
+      },
+      {
+        "id": "interface",
+        "text": "The fibre connectors and medium are incompatible with the available copper interfaces."
+      },
+      {
+        "id": "distance",
+        "text": "The only issue is the distance requirement."
+      }
+    ],
+    "correctDiagnosis": "interface",
+    "explanationOptions": [
+      {
+        "id": "e1",
+        "text": "The interface type, connector and transmission medium must be physically compatible as a complete path."
+      },
+      {
+        "id": "e2",
+        "text": "Any connector can be used with any network interface if the devices support Ethernet."
+      },
+      {
+        "id": "e3",
+        "text": "The transmission medium is unimportant as long as both devices are powered on."
+      }
+    ],
+    "correctExplanation": "e1",
+    "hint": "Start with the interfaces at both ends, then check the connector and transmission medium.",
+    "success": "Correct. The interface type, connector and transmission medium must be physically compatible as a complete path."
+  },
+  {
+    "id": "diag-valid-wireless-compat",
+    "category": "compatibility",
+    "title": "Check a complete wireless path",
+    "text": "Inspect the proposed connection and identify whether the physical components are compatible.",
+    "left": {
+      "name": "Staff-Laptop",
+      "desc": "Mobile user device",
+      "iface": "Wireless network interface",
+      "icon": "laptop"
+    },
+    "right": {
+      "name": "Office-AP",
+      "desc": "Wireless access point",
+      "iface": "Wireless radio interface",
+      "icon": "ap"
+    },
+    "proposal": "Wireless interface → radio transmission medium → AP radio interface",
+    "detail": "The laptop is inside Office-AP coverage.",
+    "diagnosisOptions": [
+      {
+        "id": "valid",
+        "text": "The connection is suitable as proposed."
+      },
+      {
+        "id": "interface",
+        "text": "The proposed medium/connectors do not match the available interfaces."
+      },
+      {
+        "id": "distance",
+        "text": "The only issue is the distance requirement."
+      }
+    ],
+    "correctDiagnosis": "valid",
+    "explanationOptions": [
+      {
+        "id": "e1",
+        "text": "Wireless interfaces exchange information through radio signals, so a physical client cable is not required."
+      },
+      {
+        "id": "e2",
+        "text": "Any connector can be used with any network interface if the devices support Ethernet."
+      },
+      {
+        "id": "e3",
+        "text": "The transmission medium is unimportant as long as both devices are powered on."
+      }
+    ],
+    "correctExplanation": "e1",
+    "hint": "Start with the interfaces at both ends, then check the connector and transmission medium.",
+    "success": "Correct. Wireless interfaces exchange information through radio signals, so a physical client cable is not required."
+  },
+  {
+    "id": "diag-140m-copper",
+    "category": "requirement",
+    "title": "Copper link beyond the supplied limit",
+    "text": "Decide whether the proposed link meets the complete stated requirement.",
+    "left": {
+      "name": "Endpoint A",
+      "desc": "Network endpoint",
+      "iface": "Compatible interfaces as stated",
+      "icon": "router"
+    },
+    "right": {
+      "name": "Endpoint B",
+      "desc": "Network endpoint",
+      "iface": "Compatible interfaces as stated",
+      "icon": "switch"
+    },
+    "proposal": "140 m twisted-pair copper link",
+    "detail": "The supplied maximum channel length for this copper option is 100 m.",
+    "diagnosisOptions": [
+      {
+        "id": "valid",
+        "text": "The connection is suitable under the stated requirements."
+      },
+      {
+        "id": "distance",
+        "text": "The proposed link does not satisfy the stated distance requirement."
+      },
+      {
+        "id": "interface",
+        "text": "The devices cannot use the stated interface technology at all."
+      }
+    ],
+    "correctDiagnosis": "distance",
+    "explanationOptions": [
+      {
+        "id": "e1",
+        "text": "Physical compatibility alone is not enough; the completed link must also remain within the supported link requirements."
+      },
+      {
+        "id": "e2",
+        "text": "If a connector fits, the link length no longer matters."
+      },
+      {
+        "id": "e3",
+        "text": "Fibre must always be selected whenever it exists, regardless of the requirement."
+      }
+    ],
+    "correctExplanation": "e1",
+    "hint": "Check the interface compatibility first, then compare the proposed distance with the supplied limit.",
+    "success": "Correct. Physical compatibility alone is not enough; the completed link must also remain within the supported link requirements."
+  },
+  {
+    "id": "diag-75m-copper",
+    "category": "requirement",
+    "title": "Copper link within the supplied limit",
+    "text": "Decide whether the proposed link meets the complete stated requirement.",
+    "left": {
+      "name": "Endpoint A",
+      "desc": "Network endpoint",
+      "iface": "Compatible interfaces as stated",
+      "icon": "router"
+    },
+    "right": {
+      "name": "Endpoint B",
+      "desc": "Network endpoint",
+      "iface": "Compatible interfaces as stated",
+      "icon": "switch"
+    },
+    "proposal": "75 m twisted-pair copper link with RJ-45 connectors",
+    "detail": "The supplied maximum channel length for this copper option is 100 m.",
+    "diagnosisOptions": [
+      {
+        "id": "valid",
+        "text": "The connection is suitable under the stated requirements."
+      },
+      {
+        "id": "distance",
+        "text": "The proposed link does not satisfy the stated distance requirement."
+      },
+      {
+        "id": "interface",
+        "text": "The devices cannot use the stated interface technology at all."
+      }
+    ],
+    "correctDiagnosis": "valid",
+    "explanationOptions": [
+      {
+        "id": "e1",
+        "text": "The interfaces and connectors are compatible, and 75 m remains within the supplied 100 m limit."
+      },
+      {
+        "id": "e2",
+        "text": "If a connector fits, the link length no longer matters."
+      },
+      {
+        "id": "e3",
+        "text": "Fibre must always be selected whenever it exists, regardless of the requirement."
+      }
+    ],
+    "correctExplanation": "e1",
+    "hint": "Check the interface compatibility first, then compare the proposed distance with the supplied limit.",
+    "success": "Correct. The interfaces and connectors are compatible, and 75 m remains within the supplied 100 m limit."
+  },
+  {
+    "id": "diag-120m-copper",
+    "category": "requirement",
+    "title": "Check a 120 m copper proposal",
+    "text": "Decide whether the proposed link meets the complete stated requirement.",
+    "left": {
+      "name": "Endpoint A",
+      "desc": "Network endpoint",
+      "iface": "Compatible interfaces as stated",
+      "icon": "router"
+    },
+    "right": {
+      "name": "Endpoint B",
+      "desc": "Network endpoint",
+      "iface": "Compatible interfaces as stated",
+      "icon": "switch"
+    },
+    "proposal": "120 m twisted-pair copper link",
+    "detail": "The supplied maximum channel length for this copper option is 100 m.",
+    "diagnosisOptions": [
+      {
+        "id": "valid",
+        "text": "The connection is suitable under the stated requirements."
+      },
+      {
+        "id": "distance",
+        "text": "The proposed link does not satisfy the stated distance requirement."
+      },
+      {
+        "id": "interface",
+        "text": "The devices cannot use the stated interface technology at all."
+      }
+    ],
+    "correctDiagnosis": "distance",
+    "explanationOptions": [
+      {
+        "id": "e1",
+        "text": "The 120 m requirement is greater than the supplied 100 m copper limit even though the interfaces themselves are compatible."
+      },
+      {
+        "id": "e2",
+        "text": "If a connector fits, the link length no longer matters."
+      },
+      {
+        "id": "e3",
+        "text": "Fibre must always be selected whenever it exists, regardless of the requirement."
+      }
+    ],
+    "correctExplanation": "e1",
+    "hint": "Check the interface compatibility first, then compare the proposed distance with the supplied limit.",
+    "success": "Correct. The 120 m requirement is greater than the supplied 100 m copper limit even though the interfaces themselves are compatible."
+  },
+  {
+    "id": "diag-90m-copper",
+    "category": "requirement",
+    "title": "Check a 90 m copper proposal",
+    "text": "Decide whether the proposed link meets the complete stated requirement.",
+    "left": {
+      "name": "Endpoint A",
+      "desc": "Network endpoint",
+      "iface": "Compatible interfaces as stated",
+      "icon": "router"
+    },
+    "right": {
+      "name": "Endpoint B",
+      "desc": "Network endpoint",
+      "iface": "Compatible interfaces as stated",
+      "icon": "switch"
+    },
+    "proposal": "90 m twisted-pair copper link",
+    "detail": "The supplied maximum channel length for this copper option is 100 m.",
+    "diagnosisOptions": [
+      {
+        "id": "valid",
+        "text": "The connection is suitable under the stated requirements."
+      },
+      {
+        "id": "distance",
+        "text": "The proposed link does not satisfy the stated distance requirement."
+      },
+      {
+        "id": "interface",
+        "text": "The devices cannot use the stated interface technology at all."
+      }
+    ],
+    "correctDiagnosis": "valid",
+    "explanationOptions": [
+      {
+        "id": "e1",
+        "text": "The compatible copper link remains inside the supplied 100 m maximum channel length."
+      },
+      {
+        "id": "e2",
+        "text": "If a connector fits, the link length no longer matters."
+      },
+      {
+        "id": "e3",
+        "text": "Fibre must always be selected whenever it exists, regardless of the requirement."
+      }
+    ],
+    "correctExplanation": "e1",
+    "hint": "Check the interface compatibility first, then compare the proposed distance with the supplied limit.",
+    "success": "Correct. The compatible copper link remains inside the supplied 100 m maximum channel length."
+  },
+  {
+    "id": "diag-300m-dual",
+    "category": "requirement",
+    "title": "Check a 300 m copper proposal when fibre is also available",
+    "text": "Decide whether the proposed link meets the complete stated requirement.",
+    "left": {
+      "name": "Endpoint A",
+      "desc": "Network endpoint",
+      "iface": "Compatible interfaces as stated",
+      "icon": "router"
+    },
+    "right": {
+      "name": "Endpoint B",
+      "desc": "Network endpoint",
+      "iface": "Compatible interfaces as stated",
+      "icon": "switch"
+    },
+    "proposal": "300 m copper Ethernet link",
+    "detail": "Both endpoints have copper and compatible optical interfaces. The supplied copper option is limited to 100 m.",
+    "diagnosisOptions": [
+      {
+        "id": "valid",
+        "text": "The connection is suitable under the stated requirements."
+      },
+      {
+        "id": "distance",
+        "text": "The proposed link does not satisfy the stated distance requirement."
+      },
+      {
+        "id": "interface",
+        "text": "The devices cannot use the stated interface technology at all."
+      }
+    ],
+    "correctDiagnosis": "distance",
+    "explanationOptions": [
+      {
+        "id": "e1",
+        "text": "Having a compatible copper interface does not make every link length suitable; the available optical option is appropriate for the stated 300 m requirement."
+      },
+      {
+        "id": "e2",
+        "text": "If a connector fits, the link length no longer matters."
+      },
+      {
+        "id": "e3",
+        "text": "Fibre must always be selected whenever it exists, regardless of the requirement."
+      }
+    ],
+    "correctExplanation": "e1",
+    "hint": "Check the interface compatibility first, then compare the proposed distance with the supplied limit.",
+    "success": "Correct. Having a compatible copper interface does not make every link length suitable; the available optical option is appropriate for the stated 300 m requirement."
+  },
+  {
+    "id": "diag-40m-dual",
+    "category": "requirement",
+    "title": "Check a 40 m copper proposal",
+    "text": "Decide whether the proposed link meets the complete stated requirement.",
+    "left": {
+      "name": "Endpoint A",
+      "desc": "Network endpoint",
+      "iface": "Compatible interfaces as stated",
+      "icon": "router"
+    },
+    "right": {
+      "name": "Endpoint B",
+      "desc": "Network endpoint",
+      "iface": "Compatible interfaces as stated",
+      "icon": "switch"
+    },
+    "proposal": "40 m copper Ethernet link",
+    "detail": "Both endpoints support copper and optical links. The supplied copper option supports up to 100 m.",
+    "diagnosisOptions": [
+      {
+        "id": "valid",
+        "text": "The connection is suitable under the stated requirements."
+      },
+      {
+        "id": "distance",
+        "text": "The proposed link does not satisfy the stated distance requirement."
+      },
+      {
+        "id": "interface",
+        "text": "The devices cannot use the stated interface technology at all."
+      }
+    ],
+    "correctDiagnosis": "valid",
+    "explanationOptions": [
+      {
+        "id": "e1",
+        "text": "The compatible 40 m copper link is within the supplied limit, so fibre is not required merely because it is available."
+      },
+      {
+        "id": "e2",
+        "text": "If a connector fits, the link length no longer matters."
+      },
+      {
+        "id": "e3",
+        "text": "Fibre must always be selected whenever it exists, regardless of the requirement."
+      }
+    ],
+    "correctExplanation": "e1",
+    "hint": "Check the interface compatibility first, then compare the proposed distance with the supplied limit.",
+    "success": "Correct. The compatible 40 m copper link is within the supplied limit, so fibre is not required merely because it is available."
+  },
+  {
+    "id": "diag-150m-dual",
+    "category": "requirement",
+    "title": "Check a 150 m copper proposal",
+    "text": "Decide whether the proposed link meets the complete stated requirement.",
+    "left": {
+      "name": "Endpoint A",
+      "desc": "Network endpoint",
+      "iface": "Compatible interfaces as stated",
+      "icon": "router"
+    },
+    "right": {
+      "name": "Endpoint B",
+      "desc": "Network endpoint",
+      "iface": "Compatible interfaces as stated",
+      "icon": "switch"
+    },
+    "proposal": "150 m copper Ethernet link",
+    "detail": "Both endpoints have copper and optical interfaces. The supplied copper option is limited to 100 m.",
+    "diagnosisOptions": [
+      {
+        "id": "valid",
+        "text": "The connection is suitable under the stated requirements."
+      },
+      {
+        "id": "distance",
+        "text": "The proposed link does not satisfy the stated distance requirement."
+      },
+      {
+        "id": "interface",
+        "text": "The devices cannot use the stated interface technology at all."
+      }
+    ],
+    "correctDiagnosis": "distance",
+    "explanationOptions": [
+      {
+        "id": "e1",
+        "text": "The 150 m requirement exceeds the supplied copper limit, so the compatible optical option should be used instead."
+      },
+      {
+        "id": "e2",
+        "text": "If a connector fits, the link length no longer matters."
+      },
+      {
+        "id": "e3",
+        "text": "Fibre must always be selected whenever it exists, regardless of the requirement."
+      }
+    ],
+    "correctExplanation": "e1",
+    "hint": "Check the interface compatibility first, then compare the proposed distance with the supplied limit.",
+    "success": "Correct. The 150 m requirement exceeds the supplied copper limit, so the compatible optical option should be used instead."
+  },
+  {
+    "id": "diag-mobile-copper",
+    "category": "mobility",
+    "title": "A cable is proposed for a user who must remain mobile",
+    "text": "Decide whether the proposal matches the user's connectivity requirement.",
+    "left": {
+      "name": "Staff-Laptop",
+      "desc": "User endpoint",
+      "iface": "Copper and/or wireless interfaces as stated",
+      "icon": "laptop"
+    },
+    "right": {
+      "name": "Office Network",
+      "desc": "Network access",
+      "iface": "Office-AP or SW1 as stated",
+      "icon": "ap"
+    },
+    "proposal": "Keep the laptop connected using a copper cable while the user moves around.",
+    "detail": "The laptop has copper and wireless interfaces, and Office-AP coverage is available.",
+    "diagnosisOptions": [
+      {
+        "id": "valid",
+        "text": "The proposed connection is suitable for the stated requirement."
+      },
+      {
+        "id": "mobility",
+        "text": "The proposed physical connection does not satisfy the mobility requirement."
+      },
+      {
+        "id": "requirement",
+        "text": "The interface types may match, but another stated requirement is not satisfied."
+      }
+    ],
+    "correctDiagnosis": "mobility",
+    "explanationOptions": [
+      {
+        "id": "e1",
+        "text": "A technically usable fixed connection can still be unsuitable for the task; wireless better matches the requirement to remain connected while moving."
+      },
+      {
+        "id": "e2",
+        "text": "Every laptop must always use wireless, regardless of the task."
+      },
+      {
+        "id": "e3",
+        "text": "Mobility and coverage do not affect connection selection."
+      }
+    ],
+    "correctExplanation": "e1",
+    "hint": "Check not only whether the link can work, but whether it meets the stated mobility or coverage requirement.",
+    "success": "Correct. A technically usable fixed connection can still be unsuitable for the task; wireless better matches the requirement to remain connected while moving."
+  },
+  {
+    "id": "diag-valid-wireless",
+    "category": "mobility",
+    "title": "Check a wireless mobile connection",
+    "text": "Decide whether the proposal matches the user's connectivity requirement.",
+    "left": {
+      "name": "Staff-Laptop",
+      "desc": "User endpoint",
+      "iface": "Copper and/or wireless interfaces as stated",
+      "icon": "laptop"
+    },
+    "right": {
+      "name": "Office Network",
+      "desc": "Network access",
+      "iface": "Office-AP or SW1 as stated",
+      "icon": "ap"
+    },
+    "proposal": "Wireless interface → radio transmission medium → access-point radio interface",
+    "detail": "The laptop is within Office-AP coverage and must remain mobile.",
+    "diagnosisOptions": [
+      {
+        "id": "valid",
+        "text": "The proposed connection is suitable for the stated requirement."
+      },
+      {
+        "id": "mobility",
+        "text": "The proposed physical connection does not satisfy the mobility requirement."
+      },
+      {
+        "id": "requirement",
+        "text": "The interface types may match, but another stated requirement is not satisfied."
+      }
+    ],
+    "correctDiagnosis": "valid",
+    "explanationOptions": [
+      {
+        "id": "e1",
+        "text": "Wireless interfaces exchange information through radio signals and satisfy the stated mobility requirement."
+      },
+      {
+        "id": "e2",
+        "text": "Every laptop must always use wireless, regardless of the task."
+      },
+      {
+        "id": "e3",
+        "text": "Mobility and coverage do not affect connection selection."
+      }
+    ],
+    "correctExplanation": "e1",
+    "hint": "Check not only whether the link can work, but whether it meets the stated mobility or coverage requirement.",
+    "success": "Correct. Wireless interfaces exchange information through radio signals and satisfy the stated mobility requirement."
+  },
+  {
+    "id": "diag-no-coverage",
+    "category": "mobility",
+    "title": "Wireless chosen outside the available coverage area",
+    "text": "Decide whether the proposal matches the user's connectivity requirement.",
+    "left": {
+      "name": "Staff-Laptop",
+      "desc": "User endpoint",
+      "iface": "Copper and/or wireless interfaces as stated",
+      "icon": "laptop"
+    },
+    "right": {
+      "name": "Office Network",
+      "desc": "Network access",
+      "iface": "Office-AP or SW1 as stated",
+      "icon": "ap"
+    },
+    "proposal": "Use the existing Office-AP wireless connection in the uncovered work area.",
+    "detail": "The scenario explicitly states that the required work area is outside Office-AP coverage.",
+    "diagnosisOptions": [
+      {
+        "id": "valid",
+        "text": "The proposed connection is suitable for the stated requirement."
+      },
+      {
+        "id": "mobility",
+        "text": "The proposed physical connection does not satisfy the mobility requirement."
+      },
+      {
+        "id": "requirement",
+        "text": "The interface types may match, but another stated requirement is not satisfied."
+      }
+    ],
+    "correctDiagnosis": "requirement",
+    "explanationOptions": [
+      {
+        "id": "e1",
+        "text": "Matching wireless interfaces are necessary, but the link must also be usable where it is required."
+      },
+      {
+        "id": "e2",
+        "text": "Every laptop must always use wireless, regardless of the task."
+      },
+      {
+        "id": "e3",
+        "text": "Mobility and coverage do not affect connection selection."
+      }
+    ],
+    "correctExplanation": "e1",
+    "hint": "Check not only whether the link can work, but whether it meets the stated mobility or coverage requirement.",
+    "success": "Correct. Matching wireless interfaces are necessary, but the link must also be usable where it is required."
+  },
+  {
+    "id": "diag-fixed-copper-valid",
+    "category": "mobility",
+    "title": "Copper proposed for a laptop that remains fixed at one desk",
+    "text": "Decide whether the proposal matches the user's connectivity requirement.",
+    "left": {
+      "name": "Staff-Laptop",
+      "desc": "User endpoint",
+      "iface": "Copper and/or wireless interfaces as stated",
+      "icon": "laptop"
+    },
+    "right": {
+      "name": "Office Network",
+      "desc": "Network access",
+      "iface": "Office-AP or SW1 as stated",
+      "icon": "ap"
+    },
+    "proposal": "Use the laptop's copper Ethernet interface and a compatible copper link to SW1.",
+    "detail": "The user remains at the desk and mobility is not required for this task.",
+    "diagnosisOptions": [
+      {
+        "id": "valid",
+        "text": "The proposed connection is suitable for the stated requirement."
+      },
+      {
+        "id": "mobility",
+        "text": "The proposed physical connection does not satisfy the mobility requirement."
+      },
+      {
+        "id": "requirement",
+        "text": "The interface types may match, but another stated requirement is not satisfied."
+      }
+    ],
+    "correctDiagnosis": "valid",
+    "explanationOptions": [
+      {
+        "id": "e1",
+        "text": "Wireless is not mandatory merely because the endpoint is a laptop; the fixed-use requirement can be met by the compatible copper connection."
+      },
+      {
+        "id": "e2",
+        "text": "Every laptop must always use wireless, regardless of the task."
+      },
+      {
+        "id": "e3",
+        "text": "Mobility and coverage do not affect connection selection."
+      }
+    ],
+    "correctExplanation": "e1",
+    "hint": "Check not only whether the link can work, but whether it meets the stated mobility or coverage requirement.",
+    "success": "Correct. Wireless is not mandatory merely because the endpoint is a laptop; the fixed-use requirement can be met by the compatible copper connection."
+  },
+  {
+    "id": "diag-mobile-fibre",
+    "category": "mobility",
+    "title": "Fibre is proposed directly to a mobile laptop",
+    "text": "Decide whether the proposal matches the user's connectivity requirement.",
+    "left": {
+      "name": "Staff-Laptop",
+      "desc": "User endpoint",
+      "iface": "Copper and/or wireless interfaces as stated",
+      "icon": "laptop"
+    },
+    "right": {
+      "name": "Office Network",
+      "desc": "Network access",
+      "iface": "Office-AP or SW1 as stated",
+      "icon": "ap"
+    },
+    "proposal": "Use a fibre cable from the moving laptop to the network.",
+    "detail": "The laptop must remain mobile and is within Office-AP coverage.",
+    "diagnosisOptions": [
+      {
+        "id": "valid",
+        "text": "The proposed connection is suitable for the stated requirement."
+      },
+      {
+        "id": "mobility",
+        "text": "The proposed physical connection does not satisfy the mobility requirement."
+      },
+      {
+        "id": "requirement",
+        "text": "The interface types may match, but another stated requirement is not satisfied."
+      }
+    ],
+    "correctDiagnosis": "mobility",
+    "explanationOptions": [
+      {
+        "id": "e1",
+        "text": "A cabled client connection restricts movement; the available wireless connection better matches the stated mobile use."
+      },
+      {
+        "id": "e2",
+        "text": "Every laptop must always use wireless, regardless of the task."
+      },
+      {
+        "id": "e3",
+        "text": "Mobility and coverage do not affect connection selection."
+      }
+    ],
+    "correctExplanation": "e1",
+    "hint": "Check not only whether the link can work, but whether it meets the stated mobility or coverage requirement.",
+    "success": "Correct. A cabled client connection restricts movement; the available wireless connection better matches the stated mobile use."
+  },
+  {
+    "id": "diag-wireless-covered",
+    "category": "mobility",
+    "title": "Wireless selected for a covered roaming user",
+    "text": "Decide whether the proposal matches the user's connectivity requirement.",
+    "left": {
+      "name": "Staff-Laptop",
+      "desc": "User endpoint",
+      "iface": "Copper and/or wireless interfaces as stated",
+      "icon": "laptop"
+    },
+    "right": {
+      "name": "Office Network",
+      "desc": "Network access",
+      "iface": "Office-AP or SW1 as stated",
+      "icon": "ap"
+    },
+    "proposal": "Use the laptop's wireless interface through Office-AP.",
+    "detail": "The user moves within the stated Office-AP coverage area.",
+    "diagnosisOptions": [
+      {
+        "id": "valid",
+        "text": "The proposed connection is suitable for the stated requirement."
+      },
+      {
+        "id": "mobility",
+        "text": "The proposed physical connection does not satisfy the mobility requirement."
+      },
+      {
+        "id": "requirement",
+        "text": "The interface types may match, but another stated requirement is not satisfied."
+      }
+    ],
+    "correctDiagnosis": "valid",
+    "explanationOptions": [
+      {
+        "id": "e1",
+        "text": "The wireless interfaces and stated coverage support connectivity while the user moves."
+      },
+      {
+        "id": "e2",
+        "text": "Every laptop must always use wireless, regardless of the task."
+      },
+      {
+        "id": "e3",
+        "text": "Mobility and coverage do not affect connection selection."
+      }
+    ],
+    "correctExplanation": "e1",
+    "hint": "Check not only whether the link can work, but whether it meets the stated mobility or coverage requirement.",
+    "success": "Correct. The wireless interfaces and stated coverage support connectivity while the user moves."
+  },
+  {
+    "id": "diag-wireless-fixed-valid",
+    "category": "mobility",
+    "title": "Wireless proposed for a fixed laptop inside coverage",
+    "text": "Decide whether the proposal matches the user's connectivity requirement.",
+    "left": {
+      "name": "Staff-Laptop",
+      "desc": "User endpoint",
+      "iface": "Copper and/or wireless interfaces as stated",
+      "icon": "laptop"
+    },
+    "right": {
+      "name": "Office Network",
+      "desc": "Network access",
+      "iface": "Office-AP or SW1 as stated",
+      "icon": "ap"
+    },
+    "proposal": "Use the laptop's wireless interface through Office-AP.",
+    "detail": "The laptop remains at one desk, but wireless coverage is available and no wired-only requirement is stated.",
+    "diagnosisOptions": [
+      {
+        "id": "valid",
+        "text": "The proposed connection is suitable for the stated requirement."
+      },
+      {
+        "id": "mobility",
+        "text": "The proposed physical connection does not satisfy the mobility requirement."
+      },
+      {
+        "id": "requirement",
+        "text": "The interface types may match, but another stated requirement is not satisfied."
+      }
+    ],
+    "correctDiagnosis": "valid",
+    "explanationOptions": [
+      {
+        "id": "e1",
+        "text": "A fixed device does not automatically require copper; the available wireless connection can still satisfy the stated requirement."
+      },
+      {
+        "id": "e2",
+        "text": "Every laptop must always use wireless, regardless of the task."
+      },
+      {
+        "id": "e3",
+        "text": "Mobility and coverage do not affect connection selection."
+      }
+    ],
+    "correctExplanation": "e1",
+    "hint": "Check not only whether the link can work, but whether it meets the stated mobility or coverage requirement.",
+    "success": "Correct. A fixed device does not automatically require copper; the available wireless connection can still satisfy the stated requirement."
+  }
+];
+
 
 const $ = id => document.getElementById(id);
 
@@ -694,39 +3455,60 @@ function safeWriteStorage(key,value){
   try{ localStorage.setItem(key,JSON.stringify(value)); }catch(e){}
 }
 
-function pickDifferent(pool,lastIds){
-  const preferred=pool.filter(q=>!lastIds.includes(q.id));
-  const candidates=preferred.length ? preferred : pool;
-  return candidates[Math.floor(Math.random()*candidates.length)];
+function pickFromCycle(pool,historyKey,category){
+  let history=safeReadStorage(historyKey);
+  if(!history || Array.isArray(history)) history={};
+  let used=Array.isArray(history[category]) ? history[category] : [];
+
+  let available=pool.filter(q=>!used.includes(q.id));
+
+  // Once all seven variants in this category have been used, begin a new cycle.
+  if(available.length===0){
+    used=[];
+    available=[...pool];
+  }
+
+  const chosen=available[Math.floor(Math.random()*available.length)];
+  used.push(chosen.id);
+  history[category]=used;
+  safeWriteStorage(historyKey,history);
+  return chosen;
 }
 
 function createPhase1Attempt(){
-  const last=safeReadStorage("netActivity121_lastPhase1");
   const categories=["copper","wireless","fibre","diagnose","decision"];
   const selected=categories.map(cat=>{
     const pool=phase1Bank.filter(q=>q.category===cat);
-    return pickDifferent(pool,last);
+    return pickFromCycle(pool,"netActivity121_phase1History_v3",cat);
   });
-  safeWriteStorage("netActivity121_lastPhase1",selected.map(q=>q.id));
   return shuffle(selected);
 }
 
 function createBuildAttempt(){
-  const last=safeReadStorage("netActivity121_lastBuilds");
   const categories=["copper","wireless","fibre"];
   const selected=categories.map(cat=>{
     const pool=buildBank.filter(q=>q.category===cat);
-    return pickDifferent(pool,last);
+    return pickFromCycle(pool,"netActivity121_buildHistory_v3",cat);
   });
-  safeWriteStorage("netActivity121_lastBuilds",selected.map(q=>q.id));
+  return shuffle(selected);
+}
+
+function createDiagnosisAttempt(){
+  const categories=["compatibility","requirement","mobility"];
+  const selected=categories.map(cat=>{
+    const pool=diagnosisBank.filter(q=>q.category===cat);
+    return pickFromCycle(pool,"netActivity121_diagnosisHistory_v3",cat);
+  });
   return shuffle(selected);
 }
 
 let phase1Scenarios=createPhase1Attempt();
 let builds=createBuildAttempt();
+let diagnoses=createDiagnosisAttempt();
 
 let p1Index=0, p1Selected=null, p1Answered=false;
 let buildIndex=0, selectedComponentId=null, placed=[], componentInstances=[];
+let diagnosisIndex=0, selectedDiagnosis=null, selectedExplanation=null, diagnosisPassed=false;
 
 function renderPhase1(){
   const s=phase1Scenarios[p1Index];
@@ -835,7 +3617,6 @@ $("nextBtn").addEventListener("click",()=>{
     $("transitionCard").classList.remove("hidden");
     $("pill1").classList.remove("active");
     $("pill1").classList.add("done");
-    $("pill2").classList.remove("locked");
     $("progressText").textContent=`${phase1Scenarios.length} of ${phase1Scenarios.length}`;
     $("progressFill").style.width="100%";
   }
@@ -847,12 +3628,7 @@ function updatePhase1Progress(){
   $("progressFill").style.width=`${(p1Index/phase1Scenarios.length)*100}%`;
 }
 
-$("startBuildBtn").addEventListener("click",()=>{
-  $("transitionCard").classList.add("hidden");
-  $("phase2Card").classList.remove("hidden");
-  $("pill2").classList.add("active");
-  renderBuild();
-});
+$("startBuildBtn").addEventListener("click",()=>openPhase2());
 
 function renderBuild(){
   const b=builds[buildIndex];
@@ -1094,7 +3870,7 @@ $("nextBuildBtn").addEventListener("click",()=>{
     renderBuild();
   }else{
     $("phase2Card").classList.add("hidden");
-    $("masteryCard").classList.add("show");
+    $("transition3Card").classList.remove("hidden");
     $("pill2").classList.remove("active");
     $("pill2").classList.add("done");
     $("progressText").textContent=`${builds.length} of ${builds.length}`;
@@ -1108,21 +3884,212 @@ function updateBuildProgress(){
   $("progressFill").style.width=`${(buildIndex/builds.length)*100}%`;
 }
 
+
+$("startDiagnoseBtn").addEventListener("click",()=>openPhase3());
+
+function renderDiagnosis(){
+  const q=diagnoses[diagnosisIndex];
+  selectedDiagnosis=null;
+  selectedExplanation=null;
+  diagnosisPassed=false;
+
+  $("diagnoseNum").textContent=`Diagnosis ${diagnosisIndex+1}`;
+  $("diagnoseTitle").textContent=q.title;
+  $("diagnoseText").textContent=q.text;
+
+  $("diagLeftName").textContent=q.left.name;
+  $("diagLeftDesc").textContent=q.left.desc;
+  $("diagLeftInterface").textContent=q.left.iface;
+  $("diagLeftIcon").innerHTML=icons[q.left.icon];
+
+  $("diagRightName").textContent=q.right.name;
+  $("diagRightDesc").textContent=q.right.desc;
+  $("diagRightInterface").textContent=q.right.iface;
+  $("diagRightIcon").innerHTML=icons[q.right.icon];
+
+  $("proposalMain").textContent=q.proposal;
+  $("proposalDetail").textContent=q.detail;
+
+  $("diagnosisMessage").className="message";
+  $("diagnosisMessage").textContent="";
+  $("explanationPanel").classList.add("hidden");
+  $("checkExplanationBtn").classList.add("hidden");
+  $("nextDiagnosisBtn").classList.add("hidden");
+  $("checkDiagnosisBtn").classList.remove("hidden");
+
+  renderDiagnosticOptions("diagnosisChoices",shuffle(q.diagnosisOptions),"diagnosis");
+  $("explanationChoices").innerHTML="";
+  updateDiagnosisProgress();
+}
+
+function renderDiagnosticOptions(containerId,options,type){
+  const row=$(containerId);
+  row.innerHTML="";
+  options.forEach(opt=>{
+    const el=document.createElement("div");
+    el.className="diagnose-choice";
+    el.dataset.id=opt.id;
+    el.textContent=opt.text;
+    el.addEventListener("click",()=>{
+      row.querySelectorAll(".diagnose-choice").forEach(c=>c.classList.remove("selected"));
+      el.classList.add("selected");
+      if(type==="diagnosis") selectedDiagnosis=opt.id;
+      else selectedExplanation=opt.id;
+    });
+    row.appendChild(el);
+  });
+}
+
+$("checkDiagnosisBtn").addEventListener("click",()=>{
+  const q=diagnoses[diagnosisIndex];
+  const msg=$("diagnosisMessage");
+
+  if(!selectedDiagnosis){
+    msg.className="message bad";
+    msg.textContent="Select a diagnosis first.";
+    return;
+  }
+
+  const selectedEl=document.querySelector(`#diagnosisChoices .diagnose-choice[data-id="${selectedDiagnosis}"]`);
+  if(selectedDiagnosis===q.correctDiagnosis){
+    diagnosisPassed=true;
+    if(selectedEl) selectedEl.classList.add("correct");
+    msg.className="message good";
+    msg.textContent="Diagnosis correct. Now explain why.";
+    $("checkDiagnosisBtn").classList.add("hidden");
+    $("explanationPanel").classList.remove("hidden");
+    $("checkExplanationBtn").classList.remove("hidden");
+    renderDiagnosticOptions("explanationChoices",shuffle(q.explanationOptions),"explanation");
+  }else{
+    if(selectedEl) selectedEl.classList.add("wrong");
+    msg.className="message bad";
+    msg.textContent="That diagnosis does not best match the information provided. Review the interfaces and the stated requirement.";
+  }
+});
+
+$("checkExplanationBtn").addEventListener("click",()=>{
+  const q=diagnoses[diagnosisIndex];
+  const msg=$("diagnosisMessage");
+
+  if(!selectedExplanation){
+    msg.className="message bad";
+    msg.textContent="Select an explanation first.";
+    return;
+  }
+
+  const selectedEl=document.querySelector(`#explanationChoices .diagnose-choice[data-id="${selectedExplanation}"]`);
+  if(selectedExplanation===q.correctExplanation){
+    if(selectedEl) selectedEl.classList.add("correct");
+    msg.className="message good";
+    msg.textContent=q.success;
+    $("checkExplanationBtn").classList.add("hidden");
+    $("nextDiagnosisBtn").classList.remove("hidden");
+  }else{
+    if(selectedEl) selectedEl.classList.add("wrong");
+    msg.className="message bad";
+    msg.textContent="The diagnosis may be correct, but this explanation does not support it. Choose the networking reason that matches the scenario.";
+  }
+});
+
+$("hintDiagnosisBtn").addEventListener("click",()=>{
+  $("diagnosisMessage").className="message hint";
+  $("diagnosisMessage").textContent=diagnoses[diagnosisIndex].hint;
+});
+
+$("resetDiagnosisBtn").addEventListener("click",renderDiagnosis);
+
+$("nextDiagnosisBtn").addEventListener("click",()=>{
+  if(diagnosisIndex<diagnoses.length-1){
+    diagnosisIndex++;
+    renderDiagnosis();
+  }else{
+    $("phase3Card").classList.add("hidden");
+    $("masteryCard").classList.add("show");
+    $("pill3").classList.remove("active");
+    $("pill3").classList.add("done");
+    $("progressText").textContent=`${diagnoses.length} of ${diagnoses.length}`;
+    $("progressFill").style.width="100%";
+  }
+});
+
+function updateDiagnosisProgress(){
+  $("progressLabel").textContent="Phase 3 progress";
+  $("progressText").textContent=`${diagnosisIndex+1} of ${diagnoses.length}`;
+  $("progressFill").style.width=`${(diagnosisIndex/diagnoses.length)*100}%`;
+}
+
+
+
+function setActivePhasePill(activeId){
+  ["pill1","pill2","pill3"].forEach(id=>$(id).classList.remove("active"));
+  $(activeId).classList.add("active");
+}
+
+function hideAllActivitySections(){
+  $("phase1Card").classList.add("hidden");
+  $("transitionCard").classList.add("hidden");
+  $("phase2Card").classList.add("hidden");
+  $("transition3Card").classList.add("hidden");
+  $("phase3Card").classList.add("hidden");
+  $("masteryCard").classList.remove("show");
+}
+
+function openPhase1(){
+  hideAllActivitySections();
+  $("phase1Card").classList.remove("hidden");
+  setActivePhasePill("pill1");
+  renderPhase1();
+}
+
+function openPhase2(){
+  hideAllActivitySections();
+  $("phase2Card").classList.remove("hidden");
+  setActivePhasePill("pill2");
+  renderBuild();
+}
+
+function openPhase3(){
+  hideAllActivitySections();
+  $("phase3Card").classList.remove("hidden");
+  setActivePhasePill("pill3");
+  renderDiagnosis();
+}
+
+function makePhasePillInteractive(pillId,openFn){
+  const pill=$(pillId);
+  pill.addEventListener("click",openFn);
+  pill.addEventListener("keydown",e=>{
+    if(e.key==="Enter" || e.key===" "){
+      e.preventDefault();
+      openFn();
+    }
+  });
+}
+
+makePhasePillInteractive("pill1",openPhase1);
+makePhasePillInteractive("pill2",openPhase2);
+makePhasePillInteractive("pill3",openPhase3);
+
 $("restartAllBtn").addEventListener("click",()=>{
   phase1Scenarios=createPhase1Attempt();
   builds=createBuildAttempt();
+  diagnoses=createDiagnosisAttempt();
 
   p1Index=0;
   buildIndex=0;
+  diagnosisIndex=0;
 
   $("masteryCard").classList.remove("show");
   $("phase1Card").classList.remove("hidden");
   $("transitionCard").classList.add("hidden");
   $("phase2Card").classList.add("hidden");
+  $("transition3Card").classList.add("hidden");
+  $("phase3Card").classList.add("hidden");
   $("pill1").className="phase-pill active";
-  $("pill2").className="phase-pill locked";
+  $("pill2").className="phase-pill";
+  $("pill3").className="phase-pill";
 
-  renderPhase1();
+  openPhase1();
 });
 
 renderPhase1();
