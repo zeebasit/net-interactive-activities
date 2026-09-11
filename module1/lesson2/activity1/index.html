@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NET Interactive Activities</title>
+<style>
+  :root{
+    --bg:#f5f7fb; --panel:#ffffff; --text:#172033; --muted:#667085;
+    --line:#d9e0ea; --accent:#1769e0; --accent-dark:#0f4faa;
+    --soft:#eef4ff; --shadow:0 12px 32px rgba(20,35,60,.08);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(180deg,#f7f9fc 0,#f3f6fa 100%);color:var(--text)}
+  .shell{max-width:1100px;margin:0 auto;padding:42px 20px 64px}
+  .eyebrow{color:var(--accent);font-weight:800;font-size:.82rem;letter-spacing:.06em;text-transform:uppercase}
+  h1{margin:.3rem 0 .55rem;font-size:clamp(2rem,4vw,3rem)}
+  .lead{max-width:780px;margin:0;color:var(--muted);line-height:1.65;font-size:1.03rem}
+  .module{margin-top:34px}
+  .module-head{display:flex;justify-content:space-between;gap:16px;align-items:end;flex-wrap:wrap;margin-bottom:14px}
+  .module-head h2{margin:0;font-size:1.45rem}
+  .module-head p{margin:0;color:var(--muted)}
+  .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:22px;display:flex;flex-direction:column;min-height:260px}
+  .number{display:inline-flex;width:max-content;padding:6px 10px;border-radius:999px;background:var(--soft);color:var(--accent-dark);font-size:.82rem;font-weight:800;margin-bottom:14px}
+  .icon{width:54px;height:54px;border-radius:14px;background:#f7f9fc;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:1.7rem;margin-bottom:14px}
+  .card h3{margin:0 0 8px;font-size:1.25rem}
+  .card p{margin:0;color:var(--muted);line-height:1.55}
+  .skills{margin-top:14px;display:flex;flex-wrap:wrap;gap:7px}
+  .tag{border:1px solid var(--line);border-radius:999px;padding:5px 9px;font-size:.78rem;color:#4e5c70;background:#fbfcfe}
+  .open{margin-top:auto;padding-top:22px}
+  .open a{display:inline-block;text-decoration:none;background:var(--accent);color:white;padding:10px 15px;border-radius:10px;font-weight:800}
+  .open a:hover{background:var(--accent-dark)}
+  .note{margin-top:30px;padding:16px 18px;border:1px solid var(--line);border-radius:14px;background:#fff;color:var(--muted);line-height:1.55}
+  @media(max-width:760px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="eyebrow">Network Infrastructure</div>
+  <h1>NET Interactive Activities</h1>
+  <p class="lead">
+    Interactive formative activities designed to reinforce the concepts covered in the NET course.
+    Activities provide immediate feedback and can be repeated with different question sets.
+  </p>
+
+  <section class="module">
+    <div class="module-head">
+      <div>
+        <h2>Module 1 · Lesson 2</h2>
+        <p>Network connections and layered communication</p>
+      </div>
+    </div>
+
+    <div class="grid">
+      <article class="card">
+        <div class="number">Activity 1.2.1</div>
+        <div class="icon">🔌</div>
+        <h3>Network Connections</h3>
+        <p>Practise selecting, building and diagnosing copper, fibre and wireless network connections.</p>
+        <div class="skills">
+          <span class="tag">Choose</span>
+          <span class="tag">Build</span>
+          <span class="tag">Diagnose</span>
+        </div>
+        <div class="open">
+          <a href="module1/lesson2/activity1/">Open Activity</a>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="number">Activity 1.2.2</div>
+        <div class="icon">🧩</div>
+        <h3>Understanding Network Layers</h3>
+        <p>Build the OSI and TCP/IP models, match broad responsibilities, compare the models and follow layered communication.</p>
+        <div class="skills">
+          <span class="tag">Build Models</span>
+          <span class="tag">Match &amp; Map</span>
+          <span class="tag">Follow &amp; Diagnose</span>
+        </div>
+        <div class="open">
+          <a href="module1/lesson2/activity2/">Open Activity</a>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <div class="note">
+    These activities are formative. They do not submit results or store student information centrally.
+  </div>
+</div>
+</body>
+</html>
