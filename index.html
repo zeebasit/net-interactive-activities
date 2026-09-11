@@ -372,7 +372,7 @@ const icons = {
 };
 
 const phase1Choices = {
-  copper:{title:"Copper Ethernet cable",desc:"Twisted-pair connection with 8P8C modular connectors",icon:"🔌"},
+  copper:{title:"Copper Ethernet cable",desc:"Twisted-pair connection with RJ-45 connectors",icon:"🔌"},
   fibre:{title:"Fibre-optic cable",desc:"Optical connection using compatible fibre interfaces",icon:"✨"},
   wireless:{title:"Wireless connection",desc:"Radio communication between wireless interfaces",icon:"📶"},
   suitable:{title:"Suitable",desc:"The proposed connection meets the stated requirements",icon:"✅"},
@@ -563,7 +563,7 @@ const phase1Bank = [
 
 const components = {
   copper_if:{name:"Copper Ethernet interface",mini:"Physical interface for a copper Ethernet connection",icon:"🖧"},
-  eightp8c:{name:"8P8C modular connector",mini:"Connector used on the twisted-pair patch cable in this activity",icon:"🔌"},
+  eightp8c:{name:"RJ-45 connector",mini:"Connector used on the twisted-pair patch cable in this activity",icon:"🔌"},
   copper_cable:{name:"Twisted-pair copper cable",mini:"Carries the signal electrically through copper conductors",icon:"〰️"},
   wireless_if:{name:"Wireless network interface",mini:"Interface that transmits and receives radio signals",icon:"📡"},
   radio:{name:"Radio transmission medium",mini:"Wireless signal travels through the surrounding space",icon:"📶"},
@@ -590,7 +590,7 @@ const buildBank = [
     ],
     tray:["copper_if","copper_if","eightp8c","eightp8c","copper_cable","optical_if","lc","fibre_cable"],
     hint:"Begin at Office-PC. What physical interface does it use? Then follow the path from the device into the cable and back into SW1.",
-    success:"Correct. You built the full copper path: copper interface → 8P8C connector → twisted-pair cable → 8P8C connector → copper interface."
+    success:"Correct. You built the full copper path: copper interface → RJ-45 connector → twisted-pair cable → RJ-45 connector → copper interface."
   },
   {
     id:"build-copper-printer", category:"copper",
