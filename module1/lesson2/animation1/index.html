@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Animation 1.2.A — Communication Through Network Layers</title>
+<style>
+  :root{
+    --bg:#f4f7fb;
+    --panel:#ffffff;
+    --text:#172033;
+    --muted:#667085;
+    --line:#d8e0eb;
+    --accent:#1769e0;
+    --accent-dark:#0f4faa;
+    --soft:#edf4ff;
+    --soft2:#f7f9fc;
+    --visited:#f0faf4;
+    --visited-line:#b9d9c7;
+    --shadow:0 12px 32px rgba(20,35,60,.08);
+    --layer-h:50px;
+    --gap:7px;
+  }
+
+  *{box-sizing:border-box}
+
+  html,body{min-height:100%}
+  body{
+    margin:0;
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    background:linear-gradient(180deg,#f8fafd 0,#f3f6fa 100%);
+    color:var(--text);
+  }
+
+  .shell{
+    max-width:1240px;
+    margin:0 auto;
+    padding:28px 20px 60px;
+  }
+
+  .eyebrow{
+    color:var(--accent);
+    font-weight:850;
+    font-size:.8rem;
+    letter-spacing:.07em;
+    text-transform:uppercase;
+  }
+
+  h1{
+    margin:.35rem 0 .45rem;
+    font-size:clamp(1.9rem,3.6vw,2.75rem);
+    line-height:1.12;
+  }
+
+  .lead{
+    margin:0;
+    max-width:920px;
+    color:var(--muted);
+    line-height:1.62;
+  }
+
+  .toolbar{
+    margin:22px 0 16px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px 14px;
+    align-items:center;
+    background:rgba(255,255,255,.86);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:12px;
+    box-shadow:var(--shadow);
+    position:sticky;
+    top:8px;
+    z-index:20;
+    backdrop-filter:blur(10px);
+  }
+
+  .group{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    flex-wrap:wrap;
+  }
+
+  .spacer{flex:1}
+
+  button{
+    border:none;
+    border-radius:10px;
+    padding:10px 14px;
+    font-weight:800;
+    cursor:pointer;
+    font-size:.92rem;
+    transition:.16s ease;
+  }
+
+  button:disabled{
+    opacity:.45;
+    cursor:not-allowed;
+  }
+
+  .primary{background:var(--accent);color:#fff}
+  .primary:hover:not(:disabled){background:var(--accent-dark)}
+  .secondary{background:#eef2f7;color:#263245}
+  .secondary:hover:not(:disabled){background:#e2e8f0}
+  .ghost{background:#fff;color:#263245;border:1px solid var(--line)}
+  .toggle{
+    background:#fff;
+    color:#435166;
+    border:1px solid var(--line);
+  }
+  .toggle.active{
+    background:var(--soft);
+    color:var(--accent-dark);
+    border-color:#9fc0f7;
+  }
+
+  .label{
+    color:var(--muted);
+    font-size:.82rem;
+    font-weight:800;
+  }
+
+  select{
+    border:1px solid var(--line);
+    border-radius:9px;
+    padding:8px 10px;
+    background:#fff;
+    color:var(--text);
+    font-weight:750;
+  }
+
+  .progress-wrap{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:12px 15px;
+    box-shadow:var(--shadow);
+    margin-bottom:18px;
+  }
+
+  .progress-row{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    font-size:.88rem;
+    margin-bottom:8px;
+  }
+
+  .progress-track{
+    height:8px;
+    background:#e7edf5;
+    border-radius:999px;
+    overflow:hidden;
+  }
+
+  .progress-fill{
+    height:100%;
+    width:0;
+    background:var(--accent);
+    transition:width .25s ease;
+  }
+
+  .stage{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:24px;
+    box-shadow:var(--shadow);
+  }
+
+  .flow-grid{
+    display:grid;
+    grid-template-columns:minmax(330px,1fr) 210px minmax(330px,1fr);
+    gap:20px;
+    align-items:center;
+  }
+
+  .device{
+    border:1px solid var(--line);
+    border-radius:17px;
+    background:#fbfcfe;
+    padding:18px;
+    min-width:0;
+  }
+
+  .device-title{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    align-items:center;
+    margin-bottom:14px;
+  }
+
+  .device-title h2{
+    margin:0;
+    font-size:1.16rem;
+  }
+
+  .direction{
+    font-size:.78rem;
+    color:var(--muted);
+    font-weight:850;
+    padding:5px 9px;
+    border-radius:999px;
+    background:#eef2f7;
+    white-space:nowrap;
+  }
+
+  .device-body{
+    position:relative;
+  }
+
+  .stack-wrap{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    gap:10px;
+    align-items:stretch;
+  }
+
+  .stack-wrap.mapping-on{
+    grid-template-columns:minmax(0,1fr) 125px;
+  }
+
+  .stack{
+    display:grid;
+    grid-auto-rows:var(--layer-h);
+    gap:var(--gap);
+    min-width:0;
+  }
+
+  .layer{
+    position:relative;
+    height:var(--layer-h);
+    border:1px solid var(--line);
+    border-radius:10px;
+    background:#fff;
+    padding:8px 12px;
+    display:grid;
+    grid-template-columns:30px minmax(0,1fr);
+    align-items:center;
+    gap:9px;
+    transition:.28s ease;
+    overflow:hidden;
+  }
+
+  .layer.active{
+    border-color:#86b2ef;
+    background:#e8f1ff;
+    box-shadow:0 6px 18px rgba(23,105,224,.12);
+    transform:scale(1.015);
+  }
+
+  .layer.visited{
+    border-color:var(--visited-line);
+    background:var(--visited);
+  }
+
+  .layer-num{
+    width:27px;
+    height:27px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:999px;
+    background:#eef2f7;
+    color:#536174;
+    font-size:.76rem;
+    font-weight:850;
+  }
+
+  .layer-name{
+    font-weight:850;
+    min-width:0;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .map-rail{
+    display:none;
+    grid-template-rows:repeat(7,var(--layer-h));
+    row-gap:var(--gap);
+  }
+
+  .mapping-on .map-rail{
+    display:grid;
+  }
+
+  .map-block{
+    border:1px solid #cbd8ea;
+    border-radius:9px;
+    background:#f2f6fb;
+    color:#42536a;
+    padding:7px 8px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    font-size:.72rem;
+    line-height:1.25;
+    font-weight:850;
+  }
+
+  .traveller{
+    position:absolute;
+    width:30px;
+    height:22px;
+    border-radius:4px;
+    background:linear-gradient(180deg,#ffd86b 0%, #ffbf3c 100%);
+    border:2px solid #d98200;
+    box-shadow:0 0 0 8px rgba(255,181,46,.14), 0 6px 14px rgba(217,130,0,.18);
+    z-index:8;
+    opacity:0;
+    pointer-events:none;
+    transition:
+      top .52s cubic-bezier(.2,.7,.2,1),
+      left .25s ease,
+      opacity .18s ease;
+  }
+
+  .traveller::before{
+    content:"";
+    position:absolute;
+    left:3px;
+    right:3px;
+    top:4px;
+    bottom:4px;
+    background:
+      linear-gradient(135deg, transparent 49%, #d98200 50%, #d98200 52%, transparent 53%) left center/50% 100% no-repeat,
+      linear-gradient(225deg, transparent 49%, #d98200 50%, #d98200 52%, transparent 53%) right center/50% 100% no-repeat;
+    opacity:.95;
+  }
+
+  .traveller::after{
+    content:"";
+    position:absolute;
+    left:5px;
+    right:5px;
+    top:4px;
+    height:8px;
+    background:
+      linear-gradient(135deg, transparent 48%, #fff3c0 49%, #fff3c0 51%, transparent 52%) left top/50% 100% no-repeat,
+      linear-gradient(225deg, transparent 48%, #fff3c0 49%, #fff3c0 51%, transparent 52%) right top/50% 100% no-repeat;
+    opacity:.95;
+  }
+
+  .medium-area{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:12px;
+  }
+
+  .medium-title{
+    font-weight:900;
+    color:#42536a;
+    text-align:center;
+  }
+
+  .medium-card{
+    width:100%;
+    min-height:190px;
+    border:2px dashed #9fb6da;
+    border-radius:17px;
+    background:#f7fbff;
+    position:relative;
+    overflow:hidden;
+    transition:.25s ease;
+  }
+
+  .medium-card.active{
+    border-color:var(--accent);
+    background:#eef6ff;
+  }
+
+  .medium-visual{
+    position:absolute;
+    inset:0;
+  }
+
+  .copper-wire,
+  .fibre-wire{
+    position:absolute;
+    left:9%;
+    right:9%;
+    top:50%;
+    transform:translateY(-50%);
+  }
+
+  .copper-wire{
+    height:15px;
+  }
+
+  .copper-wire::before,
+  .copper-wire::after{
+    content:"";
+    position:absolute;
+    left:0;
+    right:0;
+    height:4px;
+    border-radius:999px;
+    background:#c78735;
+  }
+  .copper-wire::before{top:2px;transform:rotate(.8deg)}
+  .copper-wire::after{bottom:2px;transform:rotate(-.8deg)}
+
+  .fibre-wire{
+    height:8px;
+    border-radius:999px;
+    background:#d6c4f5;
+    box-shadow:0 0 12px rgba(141,93,207,.28);
+  }
+
+  .wireless-field{
+    display:none;
+    position:absolute;
+    inset:0;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .wireless-field span{
+    position:absolute;
+    border:3px solid rgba(23,105,224,.34);
+    border-radius:50%;
+    width:34px;
+    height:34px;
+    animation:pulse 1.7s infinite;
+  }
+  .wireless-field span:nth-child(2){animation-delay:.3s}
+  .wireless-field span:nth-child(3){animation-delay:.6s}
+  .wireless-field span:nth-child(4){animation-delay:.9s}
+
+  @keyframes pulse{
+    0%{transform:scale(.55);opacity:.5}
+    100%{transform:scale(4.2);opacity:0}
+  }
+
+  .signal{
+    position:absolute;
+    top:50%;
+    left:9%;
+    transform:translate(-50%,-50%);
+    opacity:0;
+    z-index:4;
+    pointer-events:none;
+  }
+
+  .signal::before,
+  .signal::after{
+    content:"";
+    position:absolute;
+    display:block;
+  }
+
+  .signal.travel{
+    opacity:1;
+    animation:travel var(--travel-time,1.1s) linear forwards;
+  }
+
+  @keyframes travel{
+    from{left:9%}
+    to{left:91%}
+  }
+
+  /* Copper: electrical pulse */
+  .signal.copper{
+    width:72px;
+    height:20px;
+  }
+
+  .signal.copper::before{
+    inset:6px 10px 6px 0;
+    border-radius:999px;
+    background:linear-gradient(90deg, rgba(217,144,0,0) 0%, rgba(217,144,0,.45) 28%, rgba(255,213,122,.98) 72%, rgba(255,251,232,1) 100%);
+    box-shadow:0 0 10px rgba(217,144,0,.35);
+  }
+
+  .signal.copper::after{
+    width:15px;
+    height:15px;
+    right:4px;
+    top:50%;
+    transform:translateY(-50%) rotate(45deg);
+    border-radius:3px;
+    background:radial-gradient(circle at 45% 45%, #fff6c8 0%, #ffc249 45%, #d99000 100%);
+    box-shadow:0 0 14px rgba(255,190,74,.9), 0 0 30px rgba(217,144,0,.35);
+    animation:copperSpark .18s infinite alternate;
+  }
+
+  @keyframes copperSpark{
+    0%{transform:translateY(-50%) rotate(45deg) scale(.92); opacity:.9}
+    100%{transform:translateY(-50%) rotate(45deg) scale(1.08); opacity:1}
+  }
+
+  /* Fibre: light beam */
+  .signal.fibre{
+    width:96px;
+    height:18px;
+  }
+
+  .signal.fibre::before{
+    inset:5px 16px 5px 0;
+    border-radius:999px;
+    background:linear-gradient(90deg, rgba(160,77,224,0) 0%, rgba(160,77,224,.32) 26%, rgba(219,177,255,.9) 68%, rgba(255,255,255,1) 100%);
+    box-shadow:0 0 10px rgba(160,77,224,.35), 0 0 22px rgba(160,77,224,.28);
+  }
+
+  .signal.fibre::after{
+    width:18px;
+    height:18px;
+    right:1px;
+    top:50%;
+    transform:translateY(-50%);
+    border-radius:50%;
+    background:radial-gradient(circle, #ffffff 0%, #f4e8ff 38%, #b971f2 72%, #8a3ad3 100%);
+    box-shadow:0 0 16px rgba(160,77,224,.95), 0 0 34px rgba(160,77,224,.45);
+    animation:fibreShimmer .42s infinite alternate;
+  }
+
+  @keyframes fibreShimmer{
+    0%{filter:brightness(1); transform:translateY(-50%) scale(.96)}
+    100%{filter:brightness(1.2); transform:translateY(-50%) scale(1.08)}
+  }
+
+  /* Wireless: radio packet with propagating ring */
+  .signal.wireless{
+    width:42px;
+    height:42px;
+  }
+
+  .signal.wireless::before{
+    width:16px;
+    height:16px;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    border-radius:50%;
+    background:radial-gradient(circle, #ffffff 0%, #d9ecff 38%, #5fa4ff 68%, #1769e0 100%);
+    box-shadow:0 0 14px rgba(23,105,224,.45);
+  }
+
+  .signal.wireless::after{
+    width:42px;
+    height:42px;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    border-radius:50%;
+    border:3px solid rgba(23,105,224,.45);
+    animation:wirelessBurst .8s infinite ease-out;
+  }
+
+  @keyframes wirelessBurst{
+    0%{transform:translate(-50%,-50%) scale(.5); opacity:.8}
+    100%{transform:translate(-50%,-50%) scale(1.5); opacity:0}
+  }
+
+
+  .medium-card[data-medium="copper"] .fibre-wire,
+  .medium-card[data-medium="copper"] .wireless-field{display:none}
+  .medium-card[data-medium="fibre"] .copper-wire,
+  .medium-card[data-medium="fibre"] .wireless-field{display:none}
+  .medium-card[data-medium="wireless"] .copper-wire,
+  .medium-card[data-medium="wireless"] .fibre-wire{display:none}
+  .medium-card[data-medium="wireless"] .wireless-field{display:flex}
+
+  .medium-note{
+    font-size:.81rem;
+    color:var(--muted);
+    text-align:center;
+    line-height:1.45;
+    max-width:190px;
+  }
+
+  .explanation{
+    margin-top:22px;
+    display:grid;
+    grid-template-columns:150px 1fr;
+    gap:16px;
+    align-items:start;
+    border:1px solid var(--line);
+    border-radius:16px;
+    background:#fbfcfe;
+    padding:18px;
+  }
+
+  .step-badge{
+    display:inline-flex;
+    justify-content:center;
+    align-items:center;
+    border-radius:999px;
+    background:var(--soft);
+    color:var(--accent-dark);
+    padding:7px 10px;
+    font-size:.84rem;
+    font-weight:850;
+  }
+
+  .explanation h3{
+    margin:0 0 6px;
+    font-size:1.08rem;
+  }
+
+  .explanation p{
+    margin:0;
+    color:var(--muted);
+    line-height:1.6;
+  }
+
+  .principle{
+    margin-top:16px;
+    border-left:4px solid var(--accent);
+    padding:12px 14px;
+    background:#f8fbff;
+    color:#415068;
+    line-height:1.55;
+    border-radius:0 10px 10px 0;
+  }
+
+  .summary{
+    display:none;
+    margin-top:18px;
+    border:1px solid #b8d8c5;
+    background:#f2faf5;
+    border-radius:16px;
+    padding:18px;
+  }
+
+  .summary.show{
+    display:block;
+    animation:fadein .35s ease;
+  }
+
+  @keyframes fadein{
+    from{opacity:0;transform:translateY(5px)}
+    to{opacity:1;transform:none}
+  }
+
+  .summary h3{
+    margin:0 0 8px;
+    font-size:1.08rem;
+  }
+
+  .summary-flow{
+    margin:12px 0 10px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:7px;
+    align-items:center;
+    color:#344255;
+    font-weight:800;
+    line-height:1.5;
+  }
+
+  .summary-flow span{
+    background:#fff;
+    border:1px solid #d5e5dc;
+    border-radius:8px;
+    padding:6px 9px;
+  }
+
+  .summary p{
+    margin:0;
+    color:#536174;
+    line-height:1.55;
+  }
+
+  .small{
+    margin-top:14px;
+    font-size:.82rem;
+    color:var(--muted);
+    line-height:1.5;
+  }
+
+  body.presentation{
+    background:#eef2f7;
+  }
+
+  body.presentation .shell{
+    max-width:none;
+    padding:12px 18px 24px;
+  }
+
+  body.presentation .eyebrow,
+  body.presentation .lead,
+  body.presentation .small{
+    display:none;
+  }
+
+  body.presentation h1{
+    font-size:1.6rem;
+    margin:0 0 10px;
+  }
+
+  body.presentation .toolbar{
+    margin:0 0 12px;
+    top:4px;
+  }
+
+  body.presentation .stage{
+    min-height:calc(100vh - 160px);
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+  }
+
+  body.presentation .flow-grid{
+    grid-template-columns:minmax(380px,1fr) 240px minmax(380px,1fr);
+  }
+
+  body.presentation .layer{
+    font-size:1.05rem;
+  }
+
+  body.presentation .device-title h2{
+    font-size:1.3rem;
+  }
+
+  @media(max-width:1000px){
+    .flow-grid{grid-template-columns:1fr}
+    .medium-card{min-height:120px}
+    .medium-note{max-width:none}
+    .explanation{grid-template-columns:1fr}
+    body.presentation .flow-grid{grid-template-columns:1fr}
+  }
+
+  @media(max-width:640px){
+    .shell{padding:20px 12px 40px}
+    .stage{padding:14px}
+    .stack-wrap.mapping-on{grid-template-columns:minmax(0,1fr) 105px}
+    .toolbar{position:static}
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="eyebrow">Module 1 · Lesson 2</div>
+  <h1>Animation 1.2.A — Communication Through Network Layers</h1>
+  <p class="lead">
+    Follow one communication from the sending application, through the selected network model,
+    across the physical medium, and upward through the receiving device. Change the model or
+    medium to compare what changes and what remains the same.
+  </p>
+
+  <div class="toolbar">
+    <div class="group">
+      <button class="primary" id="playBtn">▶ Play</button>
+      <button class="secondary" id="nextBtn">Next Step</button>
+      <button class="secondary" id="prevBtn">Previous Step</button>
+      <button class="ghost" id="restartBtn">Restart</button>
+    </div>
+
+    <div class="group">
+      <span class="label">View</span>
+      <button class="toggle active viewBtn" data-view="osi">OSI</button>
+      <button class="toggle viewBtn" data-view="tcpip">TCP/IP</button>
+      <button class="toggle viewBtn" data-view="simple">Simplified</button>
+    </div>
+
+    <div class="group">
+      <button class="toggle" id="mappingBtn">Show TCP/IP Mapping</button>
+    </div>
+
+    <div class="group">
+      <span class="label">Medium</span>
+      <select id="mediumSelect">
+        <option value="copper">Copper</option>
+        <option value="fibre">Fibre</option>
+        <option value="wireless">Wireless</option>
+      </select>
+    </div>
+
+    <div class="group">
+      <span class="label">Speed</span>
+      <select id="speedSelect">
+        <option value="1900">Slow</option>
+        <option value="1300" selected>Normal</option>
+        <option value="850">Fast</option>
+      </select>
+    </div>
+
+    <div class="spacer"></div>
+    <button class="ghost" id="presentationBtn">Presentation Mode</button>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-row">
+      <span id="progressLabel">OSI communication flow</span>
+      <strong id="progressText">Step 1</strong>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+  </div>
+
+  <section class="stage" id="stage">
+    <div class="flow-grid">
+
+      <div class="device">
+        <div class="device-title">
+          <h2>Sending Device</h2>
+          <span class="direction">Top → Bottom</span>
+        </div>
+        <div class="device-body" id="senderBody">
+          <div class="stack-wrap" id="senderWrap">
+            <div class="stack" id="senderStack"></div>
+            <div class="map-rail" id="senderMap"></div>
+          </div>
+          <div class="traveller" id="senderTraveller"></div>
+        </div>
+      </div>
+
+      <div class="medium-area">
+        <div class="medium-title" id="mediumTitle">Copper medium</div>
+        <div class="medium-card" id="mediumCard" data-medium="copper">
+          <div class="medium-visual">
+            <div class="copper-wire"></div>
+            <div class="fibre-wire"></div>
+            <div class="wireless-field">
+              <span></span><span></span><span></span><span></span>
+            </div>
+          </div>
+          <div class="signal copper" id="signal"></div>
+        </div>
+        <div class="medium-note" id="mediumNote">
+          Electrical signals travel through copper conductors.
+        </div>
+      </div>
+
+      <div class="device">
+        <div class="device-title">
+          <h2>Receiving Device</h2>
+          <span class="direction">Bottom → Top</span>
+        </div>
+        <div class="device-body" id="receiverBody">
+          <div class="stack-wrap" id="receiverWrap">
+            <div class="stack" id="receiverStack"></div>
+            <div class="map-rail" id="receiverMap"></div>
+          </div>
+          <div class="traveller" id="receiverTraveller"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="explanation">
+      <div class="step-badge" id="stepBadge">Step 1</div>
+      <div>
+        <h3 id="stepTitle"></h3>
+        <p id="stepText"></p>
+      </div>
+    </div>
+
+    <div class="principle" id="principle">
+      <strong>Key principle:</strong>
+      The sender processes communication downward through the model, while the receiver processes it upward.
+    </div>
+
+    <div class="summary" id="summary">
+      <h3>Complete communication path</h3>
+      <div class="summary-flow" id="summaryFlow"></div>
+      <p id="summaryText"></p>
+    </div>
+
+    <div class="small">
+      This introductory animation intentionally omits protocol headers, encapsulation fields, PDU names,
+      MAC addresses, IP addresses, port numbers, and protocol-specific behaviour.
+    </div>
+  </section>
+</div>
+
+<script>
+const models = {
+  osi: {
+    label:"OSI",
+    layers:[
+      {name:"Application", num:7, desc:"The communication begins with the application that creates or receives the information."},
+      {name:"Presentation", num:6, desc:"The communication continues through presentation-related functions."},
+      {name:"Session", num:5, desc:"The communication continues through session-related functions."},
+      {name:"Transport", num:4, desc:"The communication continues through transport-related functions."},
+      {name:"Network", num:3, desc:"The communication continues through network-related functions."},
+      {name:"Data Link", num:2, desc:"The communication continues through local-link functions immediately above physical transmission."},
+      {name:"Physical", num:1, desc:"The Physical layer represents transmission and reception of signals through the selected medium."}
+    ]
+  },
+  tcpip: {
+    label:"TCP/IP",
+    layers:[
+      {name:"Application", num:"A", desc:"The TCP/IP Application layer combines the functions represented by the upper OSI layers."},
+      {name:"Transport", num:"T", desc:"The communication continues through the TCP/IP Transport layer."},
+      {name:"Internet", num:"I", desc:"The communication continues through the TCP/IP Internet layer."},
+      {name:"Network Access", num:"N", desc:"The Network Access layer represents local-network access and physical transmission functions."}
+    ]
+  },
+  simple: {
+    label:"Simplified",
+    layers:[
+      {name:"Application", num:"1", desc:"The communication begins or ends at an application."},
+      {name:"Communication layers", num:"2", desc:"The communication is processed through a set of networking responsibilities."},
+      {name:"Physical", num:"3", desc:"The communication is transmitted or received as signals through the network medium."}
+    ]
+  }
+};
+
+const tcpMapping = [
+  {label:"TCP/IP Application", start:1, span:3},
+  {label:"TCP/IP Transport", start:4, span:1},
+  {label:"TCP/IP Internet", start:5, span:1},
+  {label:"TCP/IP Network Access", start:6, span:2}
+];
+
+let currentView = "osi";
+let currentStep = 0;
+let steps = [];
+let playing = false;
+let timer = null;
+let mappingVisible = false;
+
+const senderStack = document.getElementById("senderStack");
+const receiverStack = document.getElementById("receiverStack");
+const senderWrap = document.getElementById("senderWrap");
+const receiverWrap = document.getElementById("receiverWrap");
+const senderMap = document.getElementById("senderMap");
+const receiverMap = document.getElementById("receiverMap");
+const senderTraveller = document.getElementById("senderTraveller");
+const receiverTraveller = document.getElementById("receiverTraveller");
+
+const playBtn = document.getElementById("playBtn");
+const nextBtn = document.getElementById("nextBtn");
+const prevBtn = document.getElementById("prevBtn");
+const restartBtn = document.getElementById("restartBtn");
+const mappingBtn = document.getElementById("mappingBtn");
+const mediumSelect = document.getElementById("mediumSelect");
+const speedSelect = document.getElementById("speedSelect");
+const presentationBtn = document.getElementById("presentationBtn");
+
+const mediumCard = document.getElementById("mediumCard");
+const mediumTitle = document.getElementById("mediumTitle");
+const mediumNote = document.getElementById("mediumNote");
+const signal = document.getElementById("signal");
+const summary = document.getElementById("summary");
+
+function senderName(layer){
+  if(currentView==="simple" && layer.name==="Physical") return "Physical transmission";
+  return layer.name;
+}
+
+function receiverName(layer){
+  if(currentView==="simple" && layer.name==="Physical") return "Physical reception";
+  return layer.name;
+}
+
+function makeLayer(layer, index, side){
+  const el = document.createElement("div");
+  el.className = "layer";
+  el.dataset.index = index;
+  el.dataset.side = side;
+  const label = side==="sender" ? senderName(layer) : receiverName(layer);
+  el.innerHTML = `
+    <span class="layer-num">${layer.num}</span>
+    <span class="layer-name">${label}</span>
+  `;
+  return el;
+}
+
+function buildMapRail(target){
+  target.innerHTML="";
+  tcpMapping.forEach(m=>{
+    const el=document.createElement("div");
+    el.className="map-block";
+    el.style.gridRow=`${m.start} / span ${m.span}`;
+    el.textContent=m.label;
+    target.appendChild(el);
+  });
+}
+
+function buildModel(){
+  const model=models[currentView];
+  senderStack.innerHTML="";
+  receiverStack.innerHTML="";
+
+  model.layers.forEach((layer,i)=>{
+    senderStack.appendChild(makeLayer(layer,i,"sender"));
+    receiverStack.appendChild(makeLayer(layer,i,"receiver"));
+  });
+
+  if(currentView==="osi"){
+    buildMapRail(senderMap);
+    buildMapRail(receiverMap);
+  }else{
+    senderMap.innerHTML="";
+    receiverMap.innerHTML="";
+  }
+
+  mappingBtn.disabled=currentView!=="osi";
+  if(currentView!=="osi"){
+    mappingVisible=false;
+    mappingBtn.classList.remove("active");
+    mappingBtn.textContent="Show TCP/IP Mapping";
+  }
+
+  senderWrap.classList.toggle("mapping-on",currentView==="osi" && mappingVisible);
+  receiverWrap.classList.toggle("mapping-on",currentView==="osi" && mappingVisible);
+
+  buildSteps();
+  currentStep=0;
+  renderStep(true);
+}
+
+function buildSteps(){
+  const model=models[currentView];
+  steps=[];
+
+  model.layers.forEach((layer,i)=>{
+    steps.push({
+      side:"sender",
+      layerIndex:i,
+      title:`Sender — ${senderName(layer)}`,
+      text:senderText(layer,i,model.layers.length)
+    });
+  });
+
+  steps.push({
+    side:"medium",
+    title:"Signal crosses the network medium",
+    text:mediumStepText()
+  });
+
+  for(let i=model.layers.length-1;i>=0;i--){
+    const layer=model.layers[i];
+    steps.push({
+      side:"receiver",
+      layerIndex:i,
+      title:`Receiver — ${receiverName(layer)}`,
+      text:receiverText(layer,i,model.layers.length)
+    });
+  }
+}
+
+function senderText(layer,index,total){
+  if(index===0){
+    return `${layer.desc} On the sending device, processing begins at the top of the model and moves downward.`;
+  }
+  if(index===total-1){
+    return `${layer.desc} The communication has now reached the point where it can be represented as signals on the selected medium.`;
+  }
+  return `${layer.desc} The sender continues moving downward toward physical transmission.`;
+}
+
+function receiverText(layer,index,total){
+  if(index===total-1){
+    return `${layer.desc} The receiving device starts at the physical side and now begins processing upward.`;
+  }
+  if(index===0){
+    return `${layer.desc} The information has completed the upward path and reached the receiving application.`;
+  }
+  return `${layer.desc} The receiver continues moving upward toward the application.`;
+}
+
+function mediumStepText(){
+  const m=mediumSelect.value;
+  if(m==="copper"){
+    return "The Physical layer uses electrical signalling to carry the communication through copper conductors from the sender toward the receiver.";
+  }
+  if(m==="fibre"){
+    return "The Physical layer uses light to carry the communication through fibre-optic cable from the sender toward the receiver.";
+  }
+  return "The Physical layer uses radio signalling to carry the communication through the surrounding space from the sender toward the receiver.";
+}
+
+function clearVisuals(){
+  document.querySelectorAll(".layer").forEach(el=>{
+    el.classList.remove("active","visited");
+  });
+  senderTraveller.style.opacity="0";
+  receiverTraveller.style.opacity="0";
+  mediumCard.classList.remove("active");
+  signal.classList.remove("travel");
+  signal.style.opacity="0";
+  summary.classList.remove("show");
+}
+
+function markVisited(){
+  for(let i=0;i<currentStep;i++){
+    const s=steps[i];
+    if(s.side==="sender" || s.side==="receiver"){
+      const el=document.querySelector(`.layer[data-side="${s.side}"][data-index="${s.layerIndex}"]`);
+      if(el) el.classList.add("visited");
+    }
+  }
+}
+
+function positionTraveller(side, layerIndex, immediate=false){
+  const body=document.getElementById(side==="sender" ? "senderBody" : "receiverBody");
+  const traveller=side==="sender" ? senderTraveller : receiverTraveller;
+  const el=document.querySelector(`.layer[data-side="${side}"][data-index="${layerIndex}"]`);
+  if(!el || !body) return;
+
+  const bodyRect=body.getBoundingClientRect();
+  const elRect=el.getBoundingClientRect();
+  const top=elRect.top-bodyRect.top+(elRect.height/2)-12;
+  const left=side==="sender"
+    ? elRect.right-bodyRect.left-40
+    : elRect.left-bodyRect.left+10;
+
+  if(immediate){
+    traveller.style.transition="none";
+    traveller.style.top=`${top}px`;
+    traveller.style.left=`${left}px`;
+    traveller.style.opacity="1";
+    requestAnimationFrame(()=>traveller.style.transition="");
+  }else{
+    traveller.style.top=`${top}px`;
+    traveller.style.left=`${left}px`;
+    traveller.style.opacity="1";
+  }
+}
+
+function renderStep(immediate=false){
+  clearVisuals();
+  markVisited();
+
+  const step=steps[currentStep];
+
+  if(step.side==="sender" || step.side==="receiver"){
+    const el=document.querySelector(`.layer[data-side="${step.side}"][data-index="${step.layerIndex}"]`);
+    if(el) el.classList.add("active");
+    positionTraveller(step.side,step.layerIndex,immediate);
+  }
+
+  if(step.side==="medium"){
+    mediumCard.classList.add("active");
+    const delay=parseInt(speedSelect.value,10);
+    signal.style.setProperty("--travel-time",`${Math.max(.75,delay/1000)}s`);
+    signal.classList.remove("travel");
+    void signal.offsetWidth;
+    signal.style.opacity="1";
+    signal.classList.add("travel");
+  }
+
+  document.getElementById("stepBadge").textContent=`Step ${currentStep+1}`;
+  document.getElementById("stepTitle").textContent=step.title;
+  document.getElementById("stepText").textContent=step.text;
+  document.getElementById("progressLabel").textContent=`${models[currentView].label} communication flow`;
+  document.getElementById("progressText").textContent=`Step ${currentStep+1} of ${steps.length}`;
+  document.getElementById("progressFill").style.width=`${((currentStep+1)/steps.length)*100}%`;
+
+  prevBtn.disabled=currentStep===0;
+  nextBtn.disabled=currentStep===steps.length-1;
+
+  if(currentStep===steps.length-1){
+    showSummary();
+  }
+}
+
+function showSummary(){
+  const model=models[currentView];
+  const left = currentView==="simple"
+    ? ["Application","Communication layers","Physical transmission"]
+    : model.layers.map(l=>senderName(l));
+  const right = currentView==="simple"
+    ? ["Physical reception","Communication layers","Application"]
+    : [...model.layers].reverse().map(l=>receiverName(l));
+
+  const parts=[...left,"Network medium",...right];
+  const flow=document.getElementById("summaryFlow");
+  flow.innerHTML="";
+  parts.forEach((p,i)=>{
+    const chip=document.createElement("span");
+    chip.textContent=p;
+    flow.appendChild(chip);
+    if(i<parts.length-1){
+      const arrow=document.createTextNode(i<left.length ? " ↓/→ " : " ↑ ");
+      flow.appendChild(arrow);
+    }
+  });
+
+  const mediumWord = mediumSelect.value==="copper" ? "electrical signalling over copper"
+                   : mediumSelect.value==="fibre" ? "light over fibre"
+                   : "radio signalling over wireless";
+  document.getElementById("summaryText").textContent =
+    `The complete communication has moved down the sender, crossed the medium using ${mediumWord}, and moved up the receiver. Changing the physical medium changes the signalling method, but the layered communication process remains conceptually the same.`;
+  summary.classList.add("show");
+}
+
+function nextStep(){
+  if(currentStep<steps.length-1){
+    currentStep++;
+    renderStep(false);
+  }else{
+    stopPlay();
+  }
+}
+
+function previousStep(){
+  if(currentStep>0){
+    currentStep--;
+    renderStep(false);
+  }
+}
+
+function startPlay(){
+  if(playing) return;
+  playing=true;
+  playBtn.textContent="⏸ Pause";
+
+  const run=()=>{
+    if(!playing) return;
+    if(currentStep>=steps.length-1){
+      stopPlay();
+      return;
+    }
+    const delay=parseInt(speedSelect.value,10);
+    timer=setTimeout(()=>{
+      nextStep();
+      run();
+    },delay);
+  };
+  run();
+}
+
+function stopPlay(){
+  playing=false;
+  playBtn.textContent="▶ Play";
+  if(timer) clearTimeout(timer);
+  timer=null;
+}
+
+function setView(view){
+  stopPlay();
+  currentView=view;
+  document.querySelectorAll(".viewBtn").forEach(btn=>{
+    btn.classList.toggle("active",btn.dataset.view===view);
+  });
+  buildModel();
+}
+
+function toggleMapping(){
+  if(currentView!=="osi") return;
+  mappingVisible=!mappingVisible;
+  mappingBtn.classList.toggle("active",mappingVisible);
+  mappingBtn.textContent=mappingVisible ? "Hide TCP/IP Mapping" : "Show TCP/IP Mapping";
+  senderWrap.classList.toggle("mapping-on",mappingVisible);
+  receiverWrap.classList.toggle("mapping-on",mappingVisible);
+  requestAnimationFrame(()=>renderStep(true));
+}
+
+function setMedium(){
+  const medium=mediumSelect.value;
+  mediumCard.dataset.medium=medium;
+  signal.className=`signal ${medium}`;
+
+  if(medium==="copper"){
+    mediumTitle.textContent="Copper medium";
+    mediumNote.textContent="Electrical signals travel through copper conductors.";
+  }else if(medium==="fibre"){
+    mediumTitle.textContent="Fibre-optic medium";
+    mediumNote.textContent="Light travels through fibre-optic cable.";
+  }else{
+    mediumTitle.textContent="Wireless medium";
+    mediumNote.textContent="Radio signals travel through the surrounding space.";
+  }
+
+  buildSteps();
+  if(currentStep>=steps.length) currentStep=steps.length-1;
+  renderStep(true);
+}
+
+async function togglePresentation(){
+  const entering=!document.body.classList.contains("presentation");
+  document.body.classList.toggle("presentation",entering);
+  presentationBtn.textContent=entering ? "Exit Presentation" : "Presentation Mode";
+
+  try{
+    if(entering && !document.fullscreenElement){
+      await document.documentElement.requestFullscreen();
+    }else if(!entering && document.fullscreenElement){
+      await document.exitFullscreen();
+    }
+  }catch(e){
+    // CSS presentation mode still works if fullscreen is not available.
+  }
+  setTimeout(()=>renderStep(true),180);
+}
+
+document.addEventListener("fullscreenchange",()=>{
+  if(!document.fullscreenElement && document.body.classList.contains("presentation")){
+    document.body.classList.remove("presentation");
+    presentationBtn.textContent="Presentation Mode";
+    setTimeout(()=>renderStep(true),120);
+  }
+});
+
+playBtn.addEventListener("click",()=>playing ? stopPlay() : startPlay());
+nextBtn.addEventListener("click",()=>{stopPlay();nextStep();});
+prevBtn.addEventListener("click",()=>{stopPlay();previousStep();});
+restartBtn.addEventListener("click",()=>{
+  stopPlay();
+  currentStep=0;
+  renderStep(true);
+});
+
+document.querySelectorAll(".viewBtn").forEach(btn=>{
+  btn.addEventListener("click",()=>setView(btn.dataset.view));
+});
+
+mappingBtn.addEventListener("click",toggleMapping);
+mediumSelect.addEventListener("change",setMedium);
+speedSelect.addEventListener("change",()=>{
+  if(playing){
+    stopPlay();
+    startPlay();
+  }
+  renderStep(true);
+});
+presentationBtn.addEventListener("click",togglePresentation);
+
+window.addEventListener("resize",()=>renderStep(true));
+
+buildModel();
+setMedium();
+renderStep(true);
+</script>
+</body>
+</html>
