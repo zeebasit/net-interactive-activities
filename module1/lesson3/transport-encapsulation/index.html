@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Transport Layer Encapsulation Animation</title>
+<style>
+  :root{
+    --navy:#0b2f6b;
+    --blue:#dcecff;
+    --blue2:#bcd9ff;
+    --purple:#eee4ff;
+    --purple2:#d9c4ff;
+    --ink:#152238;
+    --muted:#5c6b7a;
+    --line:#163a76;
+    --bg:#ffffff;
+    --green:#e7f6ec;
+  }
+
+  *{box-sizing:border-box}
+
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:Inter, "Segoe UI", Arial, sans-serif;
+  }
+
+  .page{
+    width:min(1180px, 96vw);
+    margin:0 auto;
+    padding:24px 14px 34px;
+  }
+
+  h1{
+    margin:0 0 8px;
+    text-align:center;
+    color:var(--navy);
+    font-size:clamp(28px, 4vw, 48px);
+    line-height:1.1;
+  }
+
+  .subtitle{
+    margin:0 auto 18px;
+    max-width:900px;
+    text-align:center;
+    color:var(--muted);
+    font-size:clamp(14px, 2vw, 19px);
+  }
+
+  .scene{
+    position:relative;
+    height:700px;
+    border:1px solid #d7deea;
+    border-radius:18px;
+    overflow:hidden;
+    background:
+      radial-gradient(circle at 12% 15%, rgba(188,217,255,.22), transparent 28%),
+      radial-gradient(circle at 86% 82%, rgba(217,196,255,.20), transparent 30%),
+      #fff;
+    box-shadow:0 10px 28px rgba(13,47,107,.08);
+  }
+
+  .layer-label{
+    position:absolute;
+    left:50%;
+    transform:translateX(-50%);
+    color:var(--navy);
+    font-weight:800;
+    letter-spacing:.01em;
+    text-align:center;
+  }
+
+  .layer-label.app{ top:46px; font-size:28px; }
+  .layer-label.transport{ top:390px; font-size:30px; opacity:1; }
+
+  .computer{
+    position:absolute;
+    left:60px;
+    top:130px;
+    width:250px;
+    height:190px;
+    border:3px solid var(--line);
+    border-radius:18px;
+    background:#f4f9ff;
+    padding:22px;
+    box-shadow:0 7px 18px rgba(13,47,107,.08);
+    opacity:0;
+    transform:translateY(10px);
+    animation:appear .7s .2s forwards;
+  }
+
+  .computer .monitor{
+    width:110px;
+    height:72px;
+    margin:0 auto 12px;
+    border:5px solid var(--navy);
+    border-radius:8px;
+    position:relative;
+    background:white;
+  }
+  .computer .monitor::after{
+    content:"";
+    position:absolute;
+    left:50%;
+    bottom:-22px;
+    width:52px;
+    height:5px;
+    background:var(--navy);
+    transform:translateX(-50%);
+    box-shadow:0 10px 0 8px white, 0 10px 0 10px var(--navy);
+  }
+
+  .computer .name{
+    margin-top:28px;
+    text-align:center;
+    font-weight:800;
+    color:var(--navy);
+    font-size:22px;
+  }
+  .computer .appname{
+    text-align:center;
+    color:var(--muted);
+    font-size:16px;
+    margin-top:3px;
+  }
+
+  .thought{
+    position:absolute;
+    left:345px;
+    top:155px;
+    width:250px;
+    padding:14px 16px;
+    border:2px solid #9bb6d8;
+    border-radius:16px;
+    background:#fff;
+    font-weight:700;
+    color:var(--navy);
+    opacity:0;
+    transform:translateX(-10px);
+    animation:appearX .6s 1.2s forwards, vanish .5s 3.4s forwards;
+  }
+
+  .app-pdu{
+    position:absolute;
+    left:50%;
+    top:110px;
+    width:min(500px, 47vw);
+    height:150px;
+    transform:translateX(-50%) scale(.96);
+    border:3px solid var(--line);
+    border-radius:10px;
+    background:linear-gradient(180deg,var(--purple),#f7f1ff);
+    box-shadow:0 7px 16px rgba(77,48,134,.10);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    opacity:0;
+    animation:popIn 1.0s 3.0s forwards;
+  }
+
+  .app-pdu .pdu-title{
+    font-size:25px;
+    font-weight:800;
+    color:#131313;
+    margin-bottom:9px;
+  }
+  .app-pdu .request{
+    font-size:22px;
+    color:#242424;
+  }
+
+  .moving-pdu{
+    position:absolute;
+    left:50%;
+    top:110px;
+    width:min(500px, 47vw);
+    height:150px;
+    transform:translateX(-50%) scale(.96);
+    border:3px solid var(--line);
+    border-radius:10px;
+    background:linear-gradient(180deg,var(--purple),#f7f1ff);
+    box-shadow:0 7px 16px rgba(77,48,134,.10);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    opacity:0;
+    z-index:3;
+    animation:copyAppear .5s 6.8s forwards, carryDown 1.8s 7.3s forwards, vanish .5s 9.25s forwards;
+  }
+
+  .moving-pdu .pdu-title{
+    font-size:25px;
+    font-weight:800;
+    color:#131313;
+    margin-bottom:9px;
+  }
+
+  .moving-pdu .request{
+    font-size:22px;
+    color:#242424;
+  }
+
+
+  .make-caption{
+    position:absolute;
+    left:50%;
+    top:275px;
+    transform:translateX(-50%);
+    font-size:19px;
+    font-weight:700;
+    color:var(--navy);
+    opacity:0;
+    animation:fadeIn .7s 4.4s forwards, vanish .6s 7.0s forwards;
+  }
+
+  .down-arrow{
+    position:absolute;
+    left:50%;
+    top:310px;
+    width:6px;
+    height:62px;
+    background:var(--navy);
+    transform:translateX(-50%);
+    opacity:0;
+    animation:fadeIn .8s 5.4s forwards, vanish .5s 7.4s forwards;
+  }
+  .down-arrow::after{
+    content:"";
+    position:absolute;
+    left:50%;
+    bottom:-14px;
+    transform:translateX(-50%);
+    border-left:16px solid transparent;
+    border-right:16px solid transparent;
+    border-top:20px solid var(--navy);
+  }
+
+  .transport-work{
+    position:absolute;
+    left:50%;
+    top:465px;
+    width:min(860px, 84vw);
+    height:170px;
+    transform:translateX(-50%);
+    display:flex;
+    align-items:stretch;
+    justify-content:center;
+    gap:0;
+  }
+
+  .tcp-header{
+    width:42%;
+    border:3px solid var(--line);
+    border-right:0;
+    border-radius:10px 0 0 10px;
+    background:linear-gradient(180deg,var(--blue),#eef6ff);
+    padding:20px 22px;
+    opacity:0;
+    transform:translateX(-70px);
+    animation:slideHeader 1.2s 8.8s forwards;
+  }
+
+  .tcp-header h3{
+    margin:0 0 14px;
+    font-size:25px;
+    color:#111;
+  }
+
+  .field{
+    font-size:20px;
+    margin:7px 0;
+  }
+  .field strong{
+    color:var(--navy);
+  }
+
+  .payload{
+    width:58%;
+    border:3px solid var(--line);
+    border-radius:0 10px 10px 0;
+    background:linear-gradient(180deg,var(--purple),#f8f2ff);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    opacity:0;
+    transform:translateX(70px);
+    animation:slidePayload 1.2s 7.8s forwards;
+  }
+
+  .payload .pdu-title{
+    font-size:25px;
+    font-weight:800;
+    margin-bottom:9px;
+  }
+  .payload .request{ font-size:21px; }
+
+  .segment-bracket{
+    position:absolute;
+    left:50%;
+    top:650px;
+    transform:translateX(-50%);
+    width:min(860px,84vw);
+    text-align:center;
+    color:var(--navy);
+    font-size:23px;
+    font-weight:800;
+    opacity:0;
+    animation:fadeIn .8s 10.5s forwards;
+  }
+
+  .segment-bracket::before{
+    content:"";
+    position:absolute;
+    left:0;
+    right:0;
+    top:-12px;
+    border-top:3px solid var(--navy);
+  }
+
+  .segment-bracket span{
+    background:white;
+    padding:0 15px;
+    position:relative;
+    top:-27px;
+  }
+
+  .status{
+    position:absolute;
+    right:26px;
+    top:26px;
+    padding:8px 12px;
+    border-radius:999px;
+    background:var(--green);
+    border:1px solid #b9ddc4;
+    color:#245d35;
+    font-size:14px;
+    font-weight:800;
+    opacity:0;
+    animation:fadeIn .8s 11.2s forwards;
+  }
+
+  .controls{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    margin-top:16px;
+  }
+
+  button{
+    border:0;
+    border-radius:10px;
+    padding:10px 18px;
+    font-size:15px;
+    font-weight:800;
+    cursor:pointer;
+  }
+
+  .replay{
+    background:var(--navy);
+    color:#fff;
+  }
+  .pause{
+    background:#edf3fb;
+    color:var(--navy);
+    border:1px solid #c8d5e8;
+  }
+
+  .note{
+    max-width:880px;
+    margin:14px auto 0;
+    color:#526173;
+    text-align:center;
+    font-size:14px;
+  }
+
+  @keyframes copyAppear{
+    to{opacity:.92; transform:translateX(-50%) scale(.92)}
+  }
+
+  @keyframes carryDown{
+    0%{
+      top:110px;
+      left:50%;
+      opacity:.92;
+      transform:translateX(-50%) scale(.92);
+    }
+    100%{
+      top:465px;
+      left:50%;
+      opacity:.92;
+      transform:translateX(4%) scale(.88);
+    }
+  }
+
+
+  @keyframes appear{
+    to{opacity:1; transform:translateY(0)}
+  }
+  @keyframes appearX{
+    to{opacity:1; transform:translateX(0)}
+  }
+  @keyframes fadeIn{
+    to{opacity:1}
+  }
+  @keyframes vanish{
+    to{opacity:0}
+  }
+  @keyframes popIn{
+    to{opacity:1; transform:translateX(-50%) scale(1)}
+  }
+  @keyframes slideHeader{
+    to{opacity:1; transform:translateX(0)}
+  }
+  @keyframes slidePayload{
+    to{opacity:1; transform:translateX(0)}
+  }
+
+  .paused *{
+    animation-play-state:paused !important;
+  }
+
+  @media (max-width:820px){
+    .scene{height:750px}
+    .computer{
+      left:20px;
+      top:120px;
+      width:190px;
+      height:160px;
+      padding:16px;
+    }
+    .computer .monitor{
+      width:86px; height:56px;
+    }
+    .computer .name{font-size:18px}
+    .computer .appname{font-size:13px}
+    .thought{display:none}
+    .app-pdu{
+      top:115px;
+      width:58vw;
+      height:140px;
+      left:66%;
+    }
+    .make-caption{top:275px}
+
+    .moving-pdu{
+      top:115px;
+      width:58vw;
+      height:140px;
+      left:66%;
+    }
+    .transport-work{
+      top:485px;
+      width:92vw;
+      height:185px;
+    }
+    .tcp-header{
+      padding:15px 14px;
+      width:47%;
+    }
+    .payload{width:53%}
+    .field{font-size:16px}
+    .tcp-header h3,
+    .payload .pdu-title{font-size:20px}
+    .payload .request{font-size:17px}
+    .segment-bracket{
+      top:690px;
+      width:92vw;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001ms !important; animation-delay:0ms !important}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Transport Layer Encapsulation</h1>
+  <p class="subtitle">
+    Follow the same HTTP web request from the Application layer to the Transport layer while both layers remain visible.
+  </p>
+
+  <div class="scene" id="scene">
+    <div class="layer-label app">Application Layer</div>
+
+    <div class="computer">
+      <div class="monitor"></div>
+      <div class="name">Source Computer</div>
+      <div class="appname">Web Browser</div>
+    </div>
+
+    <div class="thought">Browser creates an HTTP web request</div>
+
+    <div class="app-pdu">
+      <div>
+        <div class="pdu-title">Application Data</div>
+        <div class="request">HTTP Web Request</div>
+      </div>
+    </div>
+
+    <div class="moving-pdu">
+      <div>
+        <div class="pdu-title">Application Data</div>
+        <div class="request">HTTP Web Request</div>
+      </div>
+    </div>
+
+    <div class="make-caption">Application Layer PDU — Data</div>
+    <div class="down-arrow"></div>
+
+    <div class="layer-label transport">Transport Layer</div>
+
+    <div class="transport-work">
+      <div class="tcp-header">
+        <h3>TCP Header</h3>
+        <div class="field"><strong>Source Port:</strong> 49152</div>
+        <div class="field"><strong>Destination Port:</strong> 80</div>
+        <div class="field">Other TCP control information</div>
+      </div>
+
+      <div class="payload">
+        <div>
+          <div class="pdu-title">Application Data</div>
+          <div class="request">HTTP Web Request</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="segment-bracket"><span>Transport Layer PDU — TCP Segment</span></div>
+    <div class="status">Application data is now the TCP payload</div>
+  </div>
+
+  <div class="controls">
+    <button class="replay" onclick="replayAnimation()">Replay animation</button>
+    <button class="pause" id="pauseBtn" onclick="togglePause()">Pause</button>
+  </div>
+
+  <div class="note">
+    Scope intentionally stops at the Transport layer. No IP, MAC, Ethernet, or Physical-layer concepts are introduced.
+  </div>
+</div>
+
+<script>
+  const scene = document.getElementById('scene');
+  const pauseBtn = document.getElementById('pauseBtn');
+  let paused = false;
+
+  function replayAnimation(){
+    scene.classList.remove('paused');
+    paused = false;
+    pauseBtn.textContent = 'Pause';
+
+    const clone = scene.cloneNode(true);
+    scene.parentNode.replaceChild(clone, scene);
+
+    window.scene = clone;
+  }
+
+  function togglePause(){
+    const currentScene = document.getElementById('scene');
+    paused = !paused;
+    currentScene.classList.toggle('paused', paused);
+    pauseBtn.textContent = paused ? 'Resume' : 'Pause';
+  }
+</script>
+</body>
+</html>
