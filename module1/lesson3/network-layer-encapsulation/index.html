@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Application to Network Layer Encapsulation</title>
+
+<style>
+:root{
+  --navy:#0b2f6b;
+  --line:#163a76;
+  --ink:#152238;
+  --muted:#5c6b7a;
+
+  --app:#eee4ff;
+  --app2:#f8f3ff;
+
+  --tcp:#dcecff;
+  --tcp2:#eef6ff;
+
+  --ip:#ffe5a8;
+  --ip2:#fff3d3;
+
+  --green:#e7f6ec;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:#fff;
+  color:var(--ink);
+  font-family:Inter,"Segoe UI",Arial,sans-serif;
+}
+
+.page{
+  width:min(1220px,97vw);
+  margin:0 auto;
+  padding:22px 12px 34px;
+}
+
+h1{
+  margin:0 0 7px;
+  text-align:center;
+  color:var(--navy);
+  font-size:clamp(28px,4vw,48px);
+}
+
+.subtitle{
+  max-width:950px;
+  margin:0 auto 18px;
+  text-align:center;
+  color:var(--muted);
+  font-size:clamp(14px,1.8vw,18px);
+}
+
+.scene{
+  position:relative;
+  height:1060px;
+  overflow:hidden;
+  border:1px solid #d7deea;
+  border-radius:18px;
+  background:
+    radial-gradient(circle at 10% 12%, rgba(188,217,255,.18), transparent 28%),
+    radial-gradient(circle at 88% 88%, rgba(255,229,168,.20), transparent 30%),
+    #fff;
+  box-shadow:0 10px 28px rgba(13,47,107,.08);
+}
+
+.layer-label{
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  color:var(--navy);
+  font-weight:800;
+  text-align:center;
+  letter-spacing:.01em;
+}
+
+.layer-label.app{top:38px;font-size:28px}
+.layer-label.transport{top:385px;font-size:30px}
+.layer-label.network{top:742px;font-size:30px}
+
+/* Source computer */
+.computer{
+  position:absolute;
+  left:48px;
+  top:110px;
+  width:225px;
+  height:180px;
+  border:3px solid var(--line);
+  border-radius:18px;
+  background:#f4f9ff;
+  padding:20px;
+  box-shadow:0 7px 18px rgba(13,47,107,.08);
+  opacity:0;
+  transform:translateY(10px);
+  animation:appear .8s .3s forwards;
+}
+
+.monitor{
+  width:100px;
+  height:66px;
+  margin:0 auto 12px;
+  border:5px solid var(--navy);
+  border-radius:8px;
+  position:relative;
+  background:#fff;
+}
+
+.monitor::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  bottom:-20px;
+  width:48px;
+  height:5px;
+  background:var(--navy);
+  transform:translateX(-50%);
+  box-shadow:0 9px 0 7px #fff, 0 9px 0 9px var(--navy);
+}
+
+.computer .name{
+  margin-top:26px;
+  text-align:center;
+  font-weight:800;
+  color:var(--navy);
+  font-size:20px;
+}
+
+.computer .appname{
+  margin-top:3px;
+  text-align:center;
+  color:var(--muted);
+  font-size:15px;
+}
+
+.thought{
+  position:absolute;
+  left:295px;
+  top:135px;
+  width:240px;
+  padding:13px 15px;
+  border:2px solid #9bb6d8;
+  border-radius:16px;
+  background:#fff;
+  color:var(--navy);
+  font-weight:700;
+  opacity:0;
+  transform:translateX(-10px);
+  animation:appearX .7s 1.4s forwards, vanish .6s 4.0s forwards;
+}
+
+/* Application layer */
+.app-pdu{
+  position:absolute;
+  left:61%;
+  top:96px;
+  width:min(500px,44vw);
+  height:145px;
+  transform:translateX(-50%) scale(.96);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  border:3px solid var(--line);
+  border-radius:10px;
+  background:linear-gradient(180deg,var(--app),var(--app2));
+  box-shadow:0 7px 16px rgba(77,48,134,.10);
+  opacity:0;
+  animation:popIn 1s 3.1s forwards;
+}
+
+.pdu-title{
+  font-size:24px;
+  font-weight:800;
+  color:#131313;
+  margin-bottom:7px;
+}
+
+.request{
+  font-size:20px;
+  color:#242424;
+}
+
+.app-caption{
+  position:absolute;
+  left:61%;
+  top:255px;
+  transform:translateX(-50%);
+  color:var(--navy);
+  font-weight:700;
+  font-size:18px;
+  opacity:0;
+  animation:fadeIn .7s 4.4s forwards;
+}
+
+/* Application -> Transport transient copy */
+.app-copy{
+  position:absolute;
+  left:61%;
+  top:96px;
+  width:min(500px,44vw);
+  height:145px;
+  transform:translateX(-50%) scale(.92);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  border:3px solid var(--line);
+  border-radius:10px;
+  background:linear-gradient(180deg,var(--app),var(--app2));
+  box-shadow:0 7px 16px rgba(77,48,134,.10);
+  opacity:0;
+  z-index:4;
+  animation:
+    copyAppear .5s 6.4s forwards,
+    appToTransport 2.0s 7.0s forwards,
+    vanish .4s 9.15s forwards;
+}
+
+.arrow1-label{
+  position:absolute;
+  left:50%;
+  top:305px;
+  transform:translateX(-50%);
+  color:var(--navy);
+  font-weight:800;
+  font-size:19px;
+  opacity:0;
+  animation:fadeIn .8s 5.1s forwards, vanish .5s 8.4s forwards;
+}
+
+.arrow1{
+  position:absolute;
+  left:50%;
+  top:334px;
+  width:6px;
+  height:38px;
+  background:var(--navy);
+  transform:translateX(-50%);
+  opacity:0;
+  animation:fadeIn .8s 5.6s forwards, vanish .5s 8.5s forwards;
+}
+
+.arrow1::after,
+.arrow2::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  bottom:-14px;
+  transform:translateX(-50%);
+  border-left:15px solid transparent;
+  border-right:15px solid transparent;
+  border-top:19px solid var(--navy);
+}
+
+/* Transport layer */
+.transport-work{
+  position:absolute;
+  left:50%;
+  top:447px;
+  width:min(870px,86vw);
+  height:170px;
+  transform:translateX(-50%);
+  display:flex;
+}
+
+.tcp-header{
+  width:42%;
+  padding:18px 20px;
+  border:3px solid var(--line);
+  border-right:0;
+  border-radius:10px 0 0 10px;
+  background:linear-gradient(180deg,var(--tcp),var(--tcp2));
+  opacity:0;
+  transform:translateX(-70px);
+  animation:slideIn .95s 10.3s forwards;
+}
+
+.tcp-header h3,
+.ip-header h3{
+  margin:0 0 12px;
+  font-size:24px;
+  color:#111;
+}
+
+.field{
+  margin:6px 0;
+  font-size:19px;
+}
+
+.field strong{color:var(--navy)}
+
+.transport-payload{
+  width:58%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  border:3px solid var(--line);
+  border-radius:0 10px 10px 0;
+  background:linear-gradient(180deg,var(--app),var(--app2));
+  opacity:0;
+  transform:translateX(70px);
+  animation:slideInRight .95s 9.4s forwards;
+}
+
+.transport-caption{
+  position:absolute;
+  left:50%;
+  top:630px;
+  transform:translateX(-50%);
+  width:min(870px,86vw);
+  color:var(--navy);
+  font-size:22px;
+  font-weight:800;
+  text-align:center;
+  opacity:0;
+  animation:fadeIn .7s 11.3s forwards;
+}
+
+.transport-caption::before{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  top:-10px;
+  border-top:3px solid var(--navy);
+}
+
+.transport-caption span{
+  position:relative;
+  top:-25px;
+  padding:0 15px;
+  background:#fff;
+}
+
+/* Transport -> Network transient copy */
+.segment-copy{
+  position:absolute;
+  left:50%;
+  top:447px;
+  width:min(870px,86vw);
+  height:170px;
+  transform:translateX(-50%) scale(.98);
+  display:flex;
+  opacity:0;
+  z-index:5;
+  animation:
+    segmentAppear .5s 13.0s forwards,
+    segmentToNetwork 2.2s 13.7s forwards,
+    vanish .4s 16.05s forwards;
+}
+
+.segment-copy .tcp-mini{
+  width:42%;
+  padding:18px 20px;
+  border:3px solid var(--line);
+  border-right:0;
+  border-radius:10px 0 0 10px;
+  background:linear-gradient(180deg,var(--tcp),var(--tcp2));
+}
+
+.segment-copy .app-mini{
+  width:58%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  border:3px solid var(--line);
+  border-radius:0 10px 10px 0;
+  background:linear-gradient(180deg,var(--app),var(--app2));
+}
+
+.arrow2-label{
+  position:absolute;
+  left:50%;
+  top:684px;
+  transform:translateX(-50%);
+  color:var(--navy);
+  font-weight:800;
+  font-size:19px;
+  opacity:0;
+  animation:fadeIn .8s 12.0s forwards, vanish .5s 15.5s forwards;
+}
+
+.arrow2{
+  position:absolute;
+  left:50%;
+  top:710px;
+  width:6px;
+  height:30px;
+  background:var(--navy);
+  transform:translateX(-50%);
+  opacity:0;
+  animation:fadeIn .8s 12.4s forwards, vanish .5s 15.6s forwards;
+}
+
+/* Network layer */
+.network-work{
+  position:absolute;
+  left:50%;
+  top:810px;
+  width:min(1050px,92vw);
+  height:180px;
+  transform:translateX(-50%);
+  display:flex;
+}
+
+.ip-header{
+  width:30%;
+  padding:20px 18px;
+  border:3px solid var(--line);
+  border-right:0;
+  border-radius:10px 0 0 10px;
+  background:linear-gradient(180deg,var(--ip),var(--ip2));
+  opacity:0;
+  transform:translateX(-80px);
+  animation:slideIn 1.05s 17.0s forwards;
+}
+
+.network-tcp{
+  width:29%;
+  padding:20px 17px;
+  border-top:3px solid var(--line);
+  border-bottom:3px solid var(--line);
+  border-right:0;
+  background:linear-gradient(180deg,var(--tcp),var(--tcp2));
+  opacity:0;
+  animation:fadeIn .8s 16.1s forwards;
+}
+
+.network-app{
+  width:41%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  border:3px solid var(--line);
+  border-radius:0 10px 10px 0;
+  background:linear-gradient(180deg,var(--app),var(--app2));
+  opacity:0;
+  animation:fadeIn .8s 16.1s forwards;
+}
+
+.network-caption{
+  position:absolute;
+  left:50%;
+  top:1007px;
+  transform:translateX(-50%);
+  width:min(1050px,92vw);
+  color:var(--navy);
+  font-size:22px;
+  font-weight:800;
+  text-align:center;
+  opacity:0;
+  animation:fadeIn .8s 18.2s forwards;
+}
+
+.network-caption::before{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  top:-10px;
+  border-top:3px solid var(--navy);
+}
+
+.network-caption span{
+  position:relative;
+  top:-25px;
+  padding:0 15px;
+  background:#fff;
+}
+
+.status{
+  position:absolute;
+  right:22px;
+  top:22px;
+  padding:8px 12px;
+  border-radius:999px;
+  background:var(--green);
+  border:1px solid #b9ddc4;
+  color:#245d35;
+  font-size:14px;
+  font-weight:800;
+  opacity:0;
+  animation:fadeIn .7s 18.8s forwards;
+}
+
+/* Controls */
+.controls{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  margin-top:16px;
+}
+
+button{
+  border:0;
+  border-radius:10px;
+  padding:10px 18px;
+  font-size:15px;
+  font-weight:800;
+  cursor:pointer;
+}
+
+.replay{
+  background:var(--navy);
+  color:#fff;
+}
+
+.pause{
+  background:#edf3fb;
+  color:var(--navy);
+  border:1px solid #c8d5e8;
+}
+
+.note{
+  max-width:900px;
+  margin:14px auto 0;
+  text-align:center;
+  color:#526173;
+  font-size:14px;
+}
+
+/* Animation */
+@keyframes appear{
+  to{opacity:1;transform:translateY(0)}
+}
+
+@keyframes appearX{
+  to{opacity:1;transform:translateX(0)}
+}
+
+@keyframes fadeIn{
+  to{opacity:1}
+}
+
+@keyframes vanish{
+  to{opacity:0}
+}
+
+@keyframes popIn{
+  to{opacity:1;transform:translateX(-50%) scale(1)}
+}
+
+@keyframes copyAppear{
+  to{opacity:.9}
+}
+
+@keyframes appToTransport{
+  0%{
+    left:61%;
+    top:96px;
+    opacity:.9;
+    transform:translateX(-50%) scale(.92);
+  }
+  100%{
+    left:58%;
+    top:458px;
+    opacity:.9;
+    transform:translateX(-5%) scale(.82);
+  }
+}
+
+@keyframes slideIn{
+  to{opacity:1;transform:translateX(0)}
+}
+
+@keyframes slideInRight{
+  to{opacity:1;transform:translateX(0)}
+}
+
+@keyframes segmentAppear{
+  to{opacity:.9}
+}
+
+@keyframes segmentToNetwork{
+  0%{
+    top:447px;
+    opacity:.9;
+    transform:translateX(-50%) scale(.98);
+  }
+  100%{
+    top:818px;
+    opacity:.9;
+    transform:translateX(-16%) scale(.78);
+  }
+}
+
+.paused *{
+  animation-play-state:paused !important;
+}
+
+@media (max-width:850px){
+  .scene{height:1120px}
+
+  .computer{
+    left:18px;
+    top:105px;
+    width:180px;
+    height:155px;
+    padding:14px;
+  }
+
+  .monitor{width:82px;height:52px}
+  .computer .name{font-size:17px}
+  .computer .appname{font-size:13px}
+  .thought{display:none}
+
+  .app-pdu,
+  .app-copy{
+    left:66%;
+    width:58vw;
+    height:140px;
+  }
+
+  .app-caption{left:66%}
+
+  .transport-work,
+  .segment-copy{
+    width:93vw;
+    height:185px;
+  }
+
+  .tcp-header,
+  .segment-copy .tcp-mini{
+    width:47%;
+    padding:14px 12px;
+  }
+
+  .transport-payload,
+  .segment-copy .app-mini{
+    width:53%;
+  }
+
+  .field{font-size:15px}
+  .tcp-header h3,.ip-header h3{font-size:19px}
+  .pdu-title{font-size:20px}
+  .request{font-size:17px}
+
+  .transport-caption{
+    width:93vw;
+  }
+
+  .network-work{
+    width:96vw;
+    height:205px;
+  }
+
+  .ip-header{
+    width:34%;
+    padding:15px 10px;
+  }
+
+  .network-tcp{
+    width:31%;
+    padding:15px 10px;
+  }
+
+  .network-app{width:35%}
+
+  .network-caption{
+    width:96vw;
+    top:1035px;
+  }
+
+  @keyframes appToTransport{
+    0%{
+      left:66%;
+      top:96px;
+      opacity:.9;
+      transform:translateX(-50%) scale(.92);
+    }
+    100%{
+      left:58%;
+      top:462px;
+      opacity:.9;
+      transform:translateX(-2%) scale(.78);
+    }
+  }
+
+  @keyframes segmentToNetwork{
+    0%{
+      top:447px;
+      opacity:.9;
+      transform:translateX(-50%) scale(.98);
+    }
+    100%{
+      top:823px;
+      opacity:.9;
+      transform:translateX(-11%) scale(.68);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{
+    animation-duration:.001ms !important;
+    animation-delay:0ms !important;
+  }
+}
+</style>
+</head>
+
+<body>
+<div class="page">
+  <h1>Encapsulation: Application → Transport → Network</h1>
+
+  <p class="subtitle">
+    Follow the same HTTP web request as it moves through the Application, Transport and Network layers. Completed layers remain visible so the developing PDU can be compared at every stage.
+  </p>
+
+  <div class="scene" id="scene">
+
+    <!-- APPLICATION -->
+    <div class="layer-label app">Application Layer</div>
+
+    <div class="computer">
+      <div class="monitor"></div>
+      <div class="name">Source Computer</div>
+      <div class="appname">Web Browser</div>
+    </div>
+
+    <div class="thought">Browser creates an HTTP web request</div>
+
+    <div class="app-pdu">
+      <div>
+        <div class="pdu-title">Application Data</div>
+        <div class="request">HTTP Web Request</div>
+      </div>
+    </div>
+
+    <div class="app-copy">
+      <div>
+        <div class="pdu-title">Application Data</div>
+        <div class="request">HTTP Web Request</div>
+      </div>
+    </div>
+
+    <div class="app-caption">Application Layer PDU — Data</div>
+
+    <div class="arrow1-label">TCP adds a header</div>
+    <div class="arrow1"></div>
+
+    <!-- TRANSPORT -->
+    <div class="layer-label transport">Transport Layer</div>
+
+    <div class="transport-work">
+      <div class="tcp-header">
+        <h3>TCP Header</h3>
+        <div class="field"><strong>Source Port:</strong> 49152</div>
+        <div class="field"><strong>Destination Port:</strong> 80</div>
+        <div class="field">Other TCP control information</div>
+      </div>
+
+      <div class="transport-payload">
+        <div>
+          <div class="pdu-title">Application Data</div>
+          <div class="request">HTTP Web Request</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="transport-caption">
+      <span>Transport Layer PDU — TCP Segment</span>
+    </div>
+
+    <div class="segment-copy">
+      <div class="tcp-mini">
+        <h3>TCP Header</h3>
+        <div class="field"><strong>Source Port:</strong> 49152</div>
+        <div class="field"><strong>Destination Port:</strong> 80</div>
+      </div>
+
+      <div class="app-mini">
+        <div>
+          <div class="pdu-title">Application Data</div>
+          <div class="request">HTTP Web Request</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow2-label">IP adds a header</div>
+    <div class="arrow2"></div>
+
+    <!-- NETWORK -->
+    <div class="layer-label network">Network Layer</div>
+
+    <div class="network-work">
+      <div class="ip-header">
+        <h3>IP Header</h3>
+        <div class="field"><strong>Source IP Address</strong></div>
+        <div class="field"><strong>Destination IP Address</strong></div>
+      </div>
+
+      <div class="network-tcp">
+        <h3>TCP Header</h3>
+        <div class="field"><strong>Source Port:</strong> 49152</div>
+        <div class="field"><strong>Destination Port:</strong> 80</div>
+      </div>
+
+      <div class="network-app">
+        <div>
+          <div class="pdu-title">Application Data</div>
+          <div class="request">HTTP Web Request</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="network-caption">
+      <span>Network Layer PDU — IP Packet</span>
+    </div>
+
+    <div class="status">TCP segment is now the payload of the IP packet</div>
+
+  </div>
+
+  <div class="controls">
+    <button class="replay" onclick="replayAnimation()">Replay animation</button>
+    <button class="pause" id="pauseBtn" onclick="togglePause()">Pause</button>
+  </div>
+
+  <div class="note">
+    Scope stops at the Network layer. No MAC addressing, Ethernet framing, ARP, subnetting, routing-table details, or Physical-layer concepts are introduced.
+  </div>
+</div>
+
+<script>
+let paused = false;
+
+function replayAnimation(){
+  const currentScene = document.getElementById("scene");
+  currentScene.classList.remove("paused");
+  paused = false;
+
+  const clone = currentScene.cloneNode(true);
+  currentScene.parentNode.replaceChild(clone,currentScene);
+
+  document.getElementById("pauseBtn").textContent="Pause";
+}
+
+function togglePause(){
+  const currentScene = document.getElementById("scene");
+  paused = !paused;
+  currentScene.classList.toggle("paused",paused);
+  document.getElementById("pauseBtn").textContent = paused ? "Resume" : "Pause";
+}
+</script>
+
+</body>
+</html>
