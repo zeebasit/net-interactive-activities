@@ -896,6 +896,31 @@ button{
 }
 </style>
 
+
+<style>
+/* Signal-following pulse refinement */
+.signal-pulse,
+.signal-pulse-legacy{
+  display:none !important;
+}
+
+.wave{
+  overflow:visible;
+}
+
+.wave svg{
+  overflow:visible;
+}
+
+.signal-dot{
+  fill:#ffffff;
+  stroke:#1970d6;
+  stroke-width:5;
+  filter:drop-shadow(0 0 0 rgba(25,112,214,0)) drop-shadow(0 0 10px rgba(25,112,214,.18));
+  opacity:0;
+}
+</style>
+
 </head>
 
 <body>
@@ -1156,8 +1181,9 @@ button{
 
         <div class="link-area">
           <div class="wave">
-            <svg viewBox="0 0 1000 100" preserveAspectRatio="none" aria-hidden="true">
+            <svg id="transmissionSignalSvg" viewBox="0 0 1000 100" preserveAspectRatio="none" aria-hidden="true">
               <path
+                id="signalPath"
                 d="M0,55
                    C45,10 90,100 135,55
                    S225,10 270,55
@@ -1171,10 +1197,11 @@ button{
                 stroke-width="7"
                 stroke-linecap="round"
               />
+              <circle id="signalDot" class="signal-dot" cx="0" cy="55" r="12"></circle>
             </svg>
           </div>
           <div class="copper-line"></div>
-          <div class="signal-pulse"></div>
+          <div class="signal-pulse-legacy" aria-hidden="true"></div>
           <div class="medium-label">Copper Ethernet Medium</div>
         </div>
 
@@ -1224,6 +1251,13 @@ button{
 let paused = false;
 let playbackRate = 0.75;
 
+let signalClock = 0;              // unscaled animation time in seconds
+let lastSignalFrame = null;
+let signalRafId = null;
+
+const SIGNAL_START = 16.2;        // when transmission pulse begins in the overall timeline
+const SIGNAL_DURATION = 3.2;      // duration of the pulse travel
+
 function applyPlaybackRate(){
   const currentScene = document.getElementById("scene");
   if(!currentScene) return;
@@ -1239,6 +1273,67 @@ function updateSpeed(value){
   applyPlaybackRate();
 }
 
+function positionSignalDot(progress){
+  const path = document.getElementById("signalPath");
+  const dot = document.getElementById("signalDot");
+  if(!path || !dot) return;
+
+  const totalLength = path.getTotalLength();
+  const point = path.getPointAtLength(totalLength * progress);
+
+  dot.setAttribute("cx", point.x);
+  dot.setAttribute("cy", point.y);
+  dot.style.opacity = "1";
+}
+
+function updateSignalPulseVisual(){
+  const dot = document.getElementById("signalDot");
+  if(!dot) return;
+
+  if(signalClock < SIGNAL_START){
+    dot.style.opacity = "0";
+    return;
+  }
+
+  const elapsed = signalClock - SIGNAL_START;
+
+  if(elapsed <= SIGNAL_DURATION){
+    const progress = Math.max(0, Math.min(1, elapsed / SIGNAL_DURATION));
+    positionSignalDot(progress);
+  } else {
+    dot.style.opacity = "0";
+  }
+}
+
+function signalAnimationLoop(timestamp){
+  if(lastSignalFrame === null){
+    lastSignalFrame = timestamp;
+  }
+
+  const deltaSeconds = (timestamp - lastSignalFrame) / 1000;
+  lastSignalFrame = timestamp;
+
+  if(!paused){
+    signalClock += deltaSeconds * playbackRate;
+    updateSignalPulseVisual();
+  }
+
+  signalRafId = requestAnimationFrame(signalAnimationLoop);
+}
+
+function startSignalAnimationLoop(resetClock=false){
+  if(signalRafId !== null){
+    cancelAnimationFrame(signalRafId);
+  }
+
+  if(resetClock){
+    signalClock = 0;
+  }
+
+  lastSignalFrame = null;
+  signalRafId = requestAnimationFrame(signalAnimationLoop);
+}
+
 function replayAnimation(){
   const currentScene = document.getElementById("scene");
   currentScene.classList.remove("paused");
@@ -1251,6 +1346,7 @@ function replayAnimation(){
 
   requestAnimationFrame(()=>{
     applyPlaybackRate();
+    startSignalAnimationLoop(true);
   });
 }
 
@@ -1263,6 +1359,7 @@ function togglePause(){
 
 window.addEventListener("load",()=>{
   updateSpeed(document.getElementById("speedSlider").value);
+  startSignalAnimationLoop(true);
 });
 </script>
 </body>
