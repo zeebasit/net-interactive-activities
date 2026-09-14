@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Activity 1.3.2 — Application Delivery Investigation</title>
+<title>Activity 1.3.2 — Network Communication Investigation</title>
 <style>
 :root{
   --bg:#f5f7fb;--panel:#fff;--text:#172033;--muted:#667085;--line:#d9e0ea;
@@ -58,7 +58,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .message.hint{display:block;background:var(--hintbg);color:var(--hint);border:1px solid #efd792}
 .questions{display:flex;flex-direction:column;gap:16px;margin-top:14px}
 .qcard{border:1px solid var(--line);border-radius:14px;background:#fff;padding:16px}
-.qtext{font-weight:850;line-height:1.45;margin-bottom:11px}
+.qtype{display:inline-block;margin-bottom:8px;padding:4px 8px;border-radius:999px;background:#eef4ff;color:#0f4faa;font-size:.74rem;font-weight:850;text-transform:uppercase;letter-spacing:.03em}.qtext{font-weight:850;line-height:1.45;margin-bottom:11px}
 .options{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .option{border:1px solid var(--line);border-radius:10px;padding:11px;background:#fbfcfe;cursor:pointer;font-weight:700;line-height:1.35}
 .option:hover{border-color:#9fb6da}.option.selected{border-color:var(--accent);background:var(--soft);outline:2px solid rgba(23,105,224,.08)}
@@ -84,8 +84,8 @@ button:disabled{opacity:.5;cursor:not-allowed}
   <div class="hero">
     <div>
       <div class="eyebrow">Module 1 · Lesson 3</div>
-      <h1>Activity 1.3.2 — Application Delivery Investigation</h1>
-      <p class="lead">Analyse realistic Transport-layer scenarios. Commit your own explanation first, test the reasoning with structured checks, then compare it with the course analysis. An optional AI-review prompt is provided at the end of each scenario.</p>
+      <h1>Activity 1.3.2 — Network Communication Investigation</h1>
+      <p class="lead">Analyse realistic layered-network scenarios across Application, Transport, Network, Data Link and Physical communication. Commit your own explanation first, test the reasoning with structured checks, then compare it with the course analysis. An optional AI-review prompt is provided at the end of each scenario.</p>
       <div class="phase-nav">
         <div class="phase-pill active" id="pill1">1 · Analyse</div>
         <div class="phase-pill" id="pill2">2 · Check Reasoning</div>
@@ -182,7 +182,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
   <section class="card final-card hidden" id="completeCard">
     <div style="font-size:3rem">✓</div>
     <h2>Investigation complete</h2>
-    <p class="instruction" style="max-width:760px;margin:0 auto">You analysed three Transport-layer application-delivery scenarios, tested your reasoning, verified it against course explanations and reflected on your initial conclusions.</p>
+    <p class="instruction" style="max-width:760px;margin:0 auto">You analysed three layered-network scenarios, tested your reasoning, verified it against course explanations and reflected on your initial conclusions.</p>
     <div class="summary" id="summary"></div>
     <button class="primary" id="restartBtn">Start a New Attempt</button>
     <div class="credit">Created by Zeeshan Basit</div>
@@ -202,108 +202,2339 @@ function drawCycle(pool,count,key){
 }
 
 const scenarioBank=[
-{
- id:"s01",heading:"Multiple applications, one network interface",goal:"Explain how Transport-layer port numbers distinguish simultaneous application communications.",
- title:"Office-PC is using the network for three applications at the same time.",
- text:"A web browser, an email application and an internal chat application are all active on Office-PC. The computer has one active network interface, but each application communication has a different source port.",
- left:"Office-PC",leftNote:"Browser · Email · Chat",right:"Remote Services",rightNote:"Web · Mail · Chat",
- facts:[["Browser","Source port 49152"],["Email","Source port 49153"],["Chat","Source port 49154"]],
- prompt:"Why can these three application communications share the same network connection without the operating system confusing them?",
- questions:[
-  {q:"Which information most directly distinguishes the three application communications on Office-PC?",options:["Their different source port numbers","The single IP address of Office-PC","The MAC address alone","The physical cable"],answer:0,feedback:"Source ports allow the Transport layer and operating system to distinguish concurrent application communications."},
-  {q:"What does the IP address identify at this level of the discussion?",options:["The host/network interface, not the individual application communication","The browser only","The source port","The email application only"],answer:0,feedback:"IP addressing identifies the host/interface at the Network layer; ports distinguish application/service contexts at the Transport layer."},
-  {q:"If all three applications used the network simultaneously, what is the key Transport-layer idea?",options:["Multiplexing multiple application communications using ports","Giving each application a separate physical cable","Giving each application a different MAC address","Removing application identifiers"],answer:0,feedback:"Transport can multiplex multiple application communications over the same network connection by keeping them distinguishable with port information."}
- ],
- hint:"Separate the role of the host's IP address from the role of Transport-layer port numbers.",
- analysis:"Office-PC can support several application communications at the same time because the Transport layer uses port numbers to distinguish them. The IP address identifies the host/network interface at the Network layer, while the port information identifies the relevant application or service context at the Transport layer. Different source ports allow the operating system to keep the browser, email and chat communications separate even though they share the same network interface."
-},
-{
- id:"s02",heading:"Returning traffic to the correct application",goal:"Use a destination port to identify which existing application communication should receive incoming data.",
- title:"Three application communications are active on Office-PC when a response arrives.",
- text:"Office-PC previously created three outgoing communications. A returning Transport-layer PDU arrives with destination port 49153.",
- left:"Remote Service",leftNote:"Response traffic",right:"Office-PC",rightNote:"Active application communications",
- facts:[["Browser","Source port 49152"],["Email","Source port 49153"],["Chat","Source port 49154"]],
- prompt:"Which application communication should receive the incoming data, and why?",
- questions:[
-  {q:"Which active communication matches destination port 49153?",options:["Email","Browser","Chat","All three"],answer:0,feedback:"The returning destination port matches the source port used by the email communication."},
-  {q:"Why is the destination port useful on the receiving host?",options:["It helps associate incoming Transport-layer data with the correct application communication","It identifies the physical cable","It replaces the destination IP address","It selects the MAC address"],answer:0,feedback:"The receiving system uses Transport-layer port information to associate incoming data with the appropriate application/service context."},
-  {q:"Would the IP address alone distinguish Browser, Email and Chat on the same Office-PC?",options:["No — they share the host address, so Transport-layer port information is needed","Yes — each application automatically receives a unique IP address","Yes — the IP address identifies the exact application","No — because applications use only MAC addresses"],answer:0,feedback:"The host's IP address gets the communication to the host; port information helps distinguish the application communication."}
- ],
- hint:"Compare the incoming destination port with the source ports used by the active application communications.",
- analysis:"The incoming data should be associated with the email communication because its destination port, 49153, matches the source port used when that communication was created. The host's IP address identifies Office-PC, but it does not by itself distinguish the browser, email and chat communications running on that same host. Transport-layer port information provides that distinction."
-},
-{
- id:"s03",heading:"A web request is sent to the wrong service port",goal:"Diagnose a destination-port mismatch without relying on memorising port numbers.",
- title:"The intended web service is explicitly shown as listening on port 80.",
- text:"Office-PC creates an HTTP web request using source port 49152. The web server is shown as listening on port 80, but the outgoing Transport-layer information contains destination port 5001.",
- left:"Office-PC",leftNote:"Web Browser",right:"Web Server",rightNote:"Web service listens on port 80",
- facts:[["Source Port","49152"],["Configured Destination","5001"],["Intended Service","Port 80"]],
- prompt:"Analyse the problem. What is wrong with this Transport-layer information, and what should be corrected?",
- questions:[
-  {q:"Which value is inconsistent with the scenario?",options:["Destination port 5001","Source port 49152","The existence of an IP address","The HTTP request"],answer:0,feedback:"The scenario explicitly states that the intended web service is listening on port 80."},
-  {q:"What should the destination port represent?",options:["The service/application expected at the receiving host","The sending application on Office-PC","The physical interface number","The destination MAC address"],answer:0,feedback:"The destination port identifies the service/application context expected at the receiver."},
-  {q:"What is the appropriate conceptual correction?",options:["Use destination port 80 for the intended service","Change the source port to 80 and keep destination 5001","Remove both port numbers","Replace the destination port with a MAC address"],answer:0,feedback:"Because the scenario defines the intended service as listening on port 80, that is the destination port the request should target."}
- ],
- hint:"The activity already tells you which port the intended receiving service uses. Compare that with the configured destination port.",
- analysis:"The problem is the destination port. The scenario states that the intended web service is listening on port 80, but the request is being sent to destination port 5001. The source port identifies the sending application communication on Office-PC, while the destination port identifies the service expected at the receiving host. The destination port should therefore be corrected to 80."
-},
-{
- id:"s04",heading:"Evaluate an administrator's claim",goal:"Distinguish host identification from application/service identification.",
- title:"An administrator says that the destination IP address is enough to deliver data to the correct application.",
- text:"A server has one IP address and is running several network services at the same time. The administrator argues that, because the packet has the correct destination IP address, no Transport-layer port information is necessary.",
- left:"Client",leftNote:"Requests a service",right:"Server",rightNote:"Several services · One IP address",
- facts:[["Server IP","One host address"],["Services","Several active"],["Claim","Ports are unnecessary"]],
- prompt:"Evaluate the administrator's statement. Which part is correct, and which part is incomplete or wrong?",
- questions:[
-  {q:"What does the destination IP address primarily identify here?",options:["The destination host/network interface","The exact server application","The source application","The transport process"],answer:0,feedback:"The destination IP address identifies the receiving host/interface at the Network layer."},
-  {q:"What additional information helps identify the intended receiving service/application context?",options:["Destination port","Source MAC address only","Physical connector type","Cable length"],answer:0,feedback:"The destination port provides the Transport-layer service/application identifier."},
-  {q:"Which evaluation is best?",options:["The claim is incomplete: IP can identify the host, but ports are needed to distinguish services/applications","The claim is fully correct because IP replaces ports","The claim is wrong because IP addresses identify only cables","Ports identify hosts while IP identifies applications"],answer:0,feedback:"Host delivery and application/service delivery are different responsibilities."}
- ],
- hint:"Ask two separate questions: Which host should receive the packet? Which service/application on that host should receive the Transport-layer data?",
- analysis:"The administrator's claim is incomplete. The destination IP address identifies the destination host/network interface, which is necessary for Network-layer delivery. However, when several services or application communications exist on the same host, Transport-layer port information is needed to distinguish which service/application context should receive the data."
-},
-{
- id:"s05",heading:"Several services on one server",goal:"Explain how one server address can support multiple services.",
- title:"Server1 provides three different network services using the same network interface.",
- text:"Clients reach the same server IP address, but the services are shown with different destination ports. The scenario defines Web as port 80, Service B as port 5001 and Service C as port 5002.",
- left:"Client Devices",leftNote:"Different service requests",right:"Server1",rightNote:"One IP · Three services",
- facts:[["Web","Destination 80"],["Service B","Destination 5001"],["Service C","Destination 5002"]],
- prompt:"How can Server1 determine which service should receive each incoming communication even though all three services use the same server IP address?",
- questions:[
-  {q:"Which field distinguishes the requested service on Server1?",options:["Destination port","Destination IP address alone","Source MAC address","Signal type"],answer:0,feedback:"Different destination ports distinguish the services sharing the same host address."},
-  {q:"What is common to all three communications in this scenario?",options:["The destination host/IP address","The destination port","The application","The service"],answer:0,feedback:"All communications target the same server host but different service ports."},
-  {q:"What concept does this demonstrate?",options:["Multiple services can share a host/network interface and be distinguished by ports","Every service requires a separate IP address","Every service requires a different physical NIC","Ports replace IP addressing completely"],answer:0,feedback:"Ports complement IP addressing by distinguishing application/service contexts on the host."}
- ],
- hint:"The server address gets the communication to Server1; compare the destination-port values to see what distinguishes the services.",
- analysis:"All three communications can use the same destination IP address because that address identifies Server1. The destination port then distinguishes which service on Server1 should receive the Transport-layer data. In this scenario, ports 80, 5001 and 5002 separate the three service contexts while the host address remains the same."
-},
-{
- id:"s06",heading:"A response is associated with the wrong application communication",goal:"Diagnose why a returning destination port matters on the client.",
- title:"A browser request leaves Office-PC using source port 49152, but the returning data is associated with destination port 49154.",
- text:"Office-PC has multiple active application communications. The browser used source port 49152 for its request. A response intended for that browser communication returns, but its Transport-layer destination port is 49154.",
- left:"Server",leftNote:"Returning response",right:"Office-PC",rightNote:"Several active communications",
- facts:[["Browser Source","49152"],["Returning Destination","49154"],["Other Active Port","49154"]],
- prompt:"Explain why the returning destination port creates a delivery problem for the browser communication.",
- questions:[
-  {q:"Which destination port should match the browser communication shown?",options:["49152","49154","80","The server IP address"],answer:0,feedback:"The returning traffic should be associated with the port used by the browser's active communication."},
-  {q:"What is the problem with destination port 49154 in this scenario?",options:["It identifies a different active application communication","It identifies the correct browser communication","It changes the destination IP address","It identifies the physical medium"],answer:0,feedback:"The receiving host would associate that port with a different application communication."},
-  {q:"What does this demonstrate?",options:["Port information is important for demultiplexing incoming data to the correct application communication","IP addresses are unnecessary","MAC addresses identify applications","Each response needs a new physical connection"],answer:0,feedback:"Incoming Transport-layer data must be associated with the appropriate application communication."}
- ],
- hint:"Compare the browser's original source port with the destination port on the returning communication.",
- analysis:"The browser communication used source port 49152, so returning Transport-layer data for that communication should be associated with destination port 49152 on Office-PC. Destination port 49154 corresponds to a different active communication in the scenario. This illustrates demultiplexing: the receiving system uses port information to direct incoming Transport-layer data to the appropriate application communication."
-}
+ {
+  "id": "s01",
+  "bucket": "layer",
+  "category": "Application Layer",
+  "heading": "Before encapsulation begins",
+  "goal": "Distinguish application data from information added by lower layers.",
+  "title": "The browser on Office-PC has just created an HTTP web request.",
+  "text": "The request has been created by the application, but it has not yet moved down through the Transport, Network, Data Link or Physical layers.",
+  "left": "Office-PC",
+  "leftNote": "Web Browser",
+  "right": "Server1",
+  "rightNote": "Intended web service",
+  "facts": [
+   [
+    "Current Stage",
+    "Application"
+   ],
+   [
+    "Message",
+    "HTTP Web Request"
+   ],
+   [
+    "Lower-layer information",
+    "Not added yet"
+   ]
+  ],
+  "prompt": "Explain what exists at this point and which information should not yet be present.",
+  "questions": [
+   {
+    "type": "Choose the best explanation",
+    "q": "Which statement best describes the request at this moment?",
+    "options": [
+     "It is application data that has not yet received lower-layer addressing information",
+     "It is already an Ethernet frame",
+     "It is already a stream of physical signals",
+     "It already contains MAC and IP headers"
+    ],
+    "answer": 0,
+    "feedback": "At this point the application has created the data; lower-layer encapsulation has not yet occurred."
+   },
+   {
+    "type": "Identify what comes later",
+    "q": "Which information should be added later rather than by the application itself?",
+    "options": [
+     "Port, IP and MAC information",
+     "The HTTP request itself",
+     "The user's request for the web page",
+     "The application message content"
+    ],
+    "answer": 0,
+    "feedback": "Transport, Network and Data Link information is added as the data moves down the stack."
+   },
+   {
+    "type": "Evaluate the statement",
+    "q": "A student says, “The browser creates the destination MAC address as part of the HTTP request.” How should this be evaluated?",
+    "options": [
+     "Incorrect — MAC information belongs to the Data Link stage, not the application message",
+     "Correct — browsers create Ethernet headers",
+     "Correct — HTTP contains the MAC address",
+     "Incorrect only because MAC belongs to Transport"
+    ],
+    "answer": 0,
+    "feedback": "Application data and Data Link addressing are separate parts of the layered process."
+   }
+  ],
+  "hint": "Focus on what the application has actually created before any lower layer receives the data.",
+  "analysis": "At this stage, the browser has created the HTTP web request as application data. Transport-layer ports, Network-layer IP addresses, Data Link MAC information and Physical-layer signalling have not yet been added. Those functions belong to lower layers and appear later during encapsulation."
+ },
+ {
+  "id": "s02",
+  "bucket": "layer",
+  "category": "Application Layer",
+  "heading": "Receiving application data",
+  "goal": "Recognise what the receiver ultimately delivers upward to the application.",
+  "title": "A web response has successfully moved up through the receiver's lower layers.",
+  "text": "The receiver has already processed the physical signal, frame, packet and Transport-layer information. The remaining content is the web response for the browser.",
+  "left": "Server1",
+  "leftNote": "Sent web response",
+  "right": "Office-PC",
+  "rightNote": "Browser receives data",
+  "facts": [
+   [
+    "Lower layers",
+    "Already processed"
+   ],
+   [
+    "Remaining content",
+    "Application data"
+   ],
+   [
+    "Destination",
+    "Browser"
+   ]
+  ],
+  "prompt": "What should happen next, and why should the browser not need to interpret MAC addresses or physical signals?",
+  "questions": [
+   {
+    "type": "Choose the next step",
+    "q": "What is delivered to the application after lower-layer decapsulation?",
+    "options": [
+     "The application data",
+     "A raw electrical signal",
+     "Only the destination MAC address",
+     "A complete Ethernet frame"
+    ],
+    "answer": 0,
+    "feedback": "After the lower-layer information has been processed and removed, the application receives its data."
+   },
+   {
+    "type": "Layer responsibility",
+    "q": "Why does the browser not need to process the Ethernet frame itself?",
+    "options": [
+     "Lower layers have already handled and removed their control information",
+     "Browsers use only MAC addresses",
+     "The frame is converted directly into HTML by the cable",
+     "The frame never reaches the receiving computer"
+    ],
+    "answer": 0,
+    "feedback": "Layering separates responsibilities; the application does not need to implement lower-layer processing."
+   },
+   {
+    "type": "Evaluate the statement",
+    "q": "“The Application layer reads the incoming radio or electrical signal directly.”",
+    "options": [
+     "Incorrect — the Physical layer receives the signal first and data moves upward through the layers",
+     "Correct — applications process all network signals",
+     "Correct only for HTTP",
+     "Incorrect because the Transport layer is below Physical"
+    ],
+    "answer": 0,
+    "feedback": "The receiving process starts at the Physical layer and proceeds upward."
+   }
+  ],
+  "hint": "Think about the reverse of encapsulation: lower-layer information is processed before the application sees its data.",
+  "analysis": "On the receiver, communication is processed upward through the stack. The Physical layer receives the signal, Data Link processes the frame, Network processes the packet and Transport processes its information. Only then is the application data delivered to the browser. The browser does not need to interpret physical signalling or Ethernet framing because those responsibilities belong to lower layers."
+ },
+ {
+  "id": "s03",
+  "bucket": "layer",
+  "category": "Application / Layering",
+  "heading": "Why layers matter",
+  "goal": "Apply abstraction and separation of responsibilities to a communication scenario.",
+  "title": "A developer claims every application should control the cable signal, MAC addressing, IP addressing and ports itself.",
+  "text": "The developer argues that this would give the application complete control of communication and make network layers unnecessary.",
+  "left": "Application",
+  "leftNote": "Developer's proposal",
+  "right": "Network Stack",
+  "rightNote": "Layered communication",
+  "facts": [
+   [
+    "Proposal",
+    "One application handles everything"
+   ],
+   [
+    "Current design",
+    "Layered responsibilities"
+   ],
+   [
+    "Issue",
+    "Complexity and interoperability"
+   ]
+  ],
+  "prompt": "Evaluate the proposal using the idea of layering and abstraction.",
+  "questions": [
+   {
+    "type": "Evaluate the claim",
+    "q": "What is the main problem with the proposal?",
+    "options": [
+     "It removes separation of responsibilities and makes applications responsible for many unrelated networking functions",
+     "It would make IP addresses shorter",
+     "It would remove all network media",
+     "It would create more application ports automatically"
+    ],
+    "answer": 0,
+    "feedback": "Layering reduces complexity by separating functions and exposing useful services between layers."
+   },
+   {
+    "type": "Choose the benefit",
+    "q": "What does abstraction allow the application to do?",
+    "options": [
+     "Use network services without needing to manage every lower-layer implementation detail",
+     "Ignore all networking completely",
+     "Choose electrical voltages directly",
+     "Replace IP with MAC addresses"
+    ],
+    "answer": 0,
+    "feedback": "Abstraction allows one layer to use the services of another without managing all of its internal details."
+   },
+   {
+    "type": "Interoperability reasoning",
+    "q": "Why do agreed layered functions help different systems communicate?",
+    "options": [
+     "They provide common expectations for how communication functions are organised",
+     "They force every device to use identical hardware",
+     "They remove the need for protocols",
+     "They make every application use the same port"
+    ],
+    "answer": 0,
+    "feedback": "Common standards and layered functions support interoperability between different systems."
+   }
+  ],
+  "hint": "Think about why an application should not need to know how copper, fibre or wireless signalling is implemented.",
+  "analysis": "The proposal defeats the purpose of layering. Layering separates communication into functions so that applications can use network services without controlling every lower-level detail. Abstraction reduces complexity, and common layered functions support interoperability because different systems can implement compatible responsibilities at each stage."
+ },
+ {
+  "id": "s04",
+  "bucket": "layer",
+  "category": "Transport Layer",
+  "heading": "Multiple applications, one network interface",
+  "goal": "Explain how Transport-layer port numbers distinguish simultaneous application communications.",
+  "title": "Office-PC is using the network for three applications at the same time.",
+  "text": "A web browser, an email application and an internal chat application are all active on Office-PC. The computer has one active network interface, but each application communication has a different source port.",
+  "left": "Office-PC",
+  "leftNote": "Browser · Email · Chat",
+  "right": "Remote Services",
+  "rightNote": "Web · Mail · Chat",
+  "facts": [
+   [
+    "Browser",
+    "Source port 49152"
+   ],
+   [
+    "Email",
+    "Source port 49153"
+   ],
+   [
+    "Chat",
+    "Source port 49154"
+   ]
+  ],
+  "prompt": "Why can these three application communications share the same network connection without the operating system confusing them?",
+  "questions": [
+   {
+    "type": "Identify the distinguishing information",
+    "q": "Which information most directly distinguishes the three application communications on Office-PC?",
+    "options": [
+     "Their different source port numbers",
+     "The single IP address of Office-PC",
+     "The MAC address alone",
+     "The physical cable"
+    ],
+    "answer": 0,
+    "feedback": "Source ports help distinguish concurrent application communications."
+   },
+   {
+    "type": "Separate layer responsibilities",
+    "q": "What does the IP address identify at this level of the discussion?",
+    "options": [
+     "The host/network interface rather than the individual application communication",
+     "The browser only",
+     "The source port",
+     "The email application only"
+    ],
+    "answer": 0,
+    "feedback": "IP addressing identifies the host/interface; ports distinguish application/service contexts."
+   },
+   {
+    "type": "Name the concept",
+    "q": "What Transport-layer concept is demonstrated by several application communications sharing the network connection?",
+    "options": [
+     "Multiplexing",
+     "Physical encoding",
+     "Framing",
+     "Logical topology"
+    ],
+    "answer": 0,
+    "feedback": "Transport multiplexes multiple application communications and keeps them distinguishable with port information."
+   }
+  ],
+  "hint": "Separate the role of the host's IP address from the role of Transport-layer port numbers.",
+  "analysis": "Office-PC can support several application communications at the same time because the Transport layer uses port numbers to distinguish them. The IP address identifies the host/network interface at the Network layer, while port information identifies the relevant application or service context at the Transport layer."
+ },
+ {
+  "id": "s05",
+  "bucket": "layer",
+  "category": "Transport Layer",
+  "heading": "Returning traffic to the correct application",
+  "goal": "Use a destination port to identify which existing application communication should receive incoming data.",
+  "title": "Three application communications are active on Office-PC when a response arrives.",
+  "text": "Office-PC previously created three outgoing communications. A returning Transport-layer PDU arrives with destination port 49153.",
+  "left": "Remote Service",
+  "leftNote": "Response traffic",
+  "right": "Office-PC",
+  "rightNote": "Active application communications",
+  "facts": [
+   [
+    "Browser",
+    "Source port 49152"
+   ],
+   [
+    "Email",
+    "Source port 49153"
+   ],
+   [
+    "Chat",
+    "Source port 49154"
+   ]
+  ],
+  "prompt": "Which application communication should receive the incoming data, and why?",
+  "questions": [
+   {
+    "type": "Apply the port mapping",
+    "q": "Which active communication matches destination port 49153?",
+    "options": [
+     "Email",
+     "Browser",
+     "Chat",
+     "All three"
+    ],
+    "answer": 0,
+    "feedback": "The returning destination port matches the source port used by the email communication."
+   },
+   {
+    "type": "Explain the function",
+    "q": "Why is the destination port useful on the receiving host?",
+    "options": [
+     "It helps associate incoming Transport-layer data with the correct application communication",
+     "It identifies the physical cable",
+     "It replaces the destination IP address",
+     "It selects the MAC address"
+    ],
+    "answer": 0,
+    "feedback": "The receiving system uses Transport-layer port information to associate incoming data with the appropriate application/service context."
+   },
+   {
+    "type": "Evaluate sufficiency",
+    "q": "Would the IP address alone distinguish Browser, Email and Chat on the same Office-PC?",
+    "options": [
+     "No — Transport-layer port information is also needed",
+     "Yes — each application automatically receives a unique IP address",
+     "Yes — the IP address identifies the exact application",
+     "No — because applications use only MAC addresses"
+    ],
+    "answer": 0,
+    "feedback": "The host's IP address identifies the host; port information helps distinguish the application communication."
+   }
+  ],
+  "hint": "Compare the incoming destination port with the source ports used by the active application communications.",
+  "analysis": "The incoming data should be associated with the email communication because its destination port, 49153, matches the source port used when that communication was created. The host's IP address identifies Office-PC, while Transport-layer port information distinguishes the active application communications on that host."
+ },
+ {
+  "id": "s06",
+  "bucket": "layer",
+  "category": "Transport Layer",
+  "heading": "A request targets the wrong service port",
+  "goal": "Diagnose a destination-port mismatch without turning the activity into port-number memorisation.",
+  "title": "The intended web service is explicitly shown as listening on port 80.",
+  "text": "Office-PC creates an HTTP web request using source port 49152. The server's web service is shown as listening on port 80, but the outgoing Transport-layer information contains destination port 5001.",
+  "left": "Office-PC",
+  "leftNote": "Web Browser",
+  "right": "Server1",
+  "rightNote": "Web service listens on port 80",
+  "facts": [
+   [
+    "Source Port",
+    "49152"
+   ],
+   [
+    "Configured Destination",
+    "5001"
+   ],
+   [
+    "Intended Service",
+    "Port 80"
+   ]
+  ],
+  "prompt": "Analyse the problem. What is wrong with the Transport-layer information, and what should be corrected?",
+  "questions": [
+   {
+    "type": "Identify the mismatch",
+    "q": "Which value is inconsistent with the scenario?",
+    "options": [
+     "Destination port 5001",
+     "Source port 49152",
+     "The existence of an IP address",
+     "The HTTP request"
+    ],
+    "answer": 0,
+    "feedback": "The scenario explicitly states that the intended service is listening on port 80."
+   },
+   {
+    "type": "State the role",
+    "q": "What should the destination port represent?",
+    "options": [
+     "The service/application expected at the receiving host",
+     "The sending application on Office-PC",
+     "The physical interface number",
+     "The destination MAC address"
+    ],
+    "answer": 0,
+    "feedback": "The destination port identifies the service/application context expected at the receiver."
+   },
+   {
+    "type": "Choose the correction",
+    "q": "What is the appropriate conceptual correction?",
+    "options": [
+     "Use destination port 80 for the intended service",
+     "Change the source port to 80 and keep destination 5001",
+     "Remove both port numbers",
+     "Replace the destination port with a MAC address"
+    ],
+    "answer": 0,
+    "feedback": "The request should target the port assigned to the intended receiving service in the scenario."
+   }
+  ],
+  "hint": "The activity already tells you which port the intended receiving service uses.",
+  "analysis": "The problem is the destination port. The source port identifies the sending application communication on Office-PC, while the destination port identifies the intended receiving service. Because the scenario states that the web service listens on port 80, the destination port should be 80 rather than 5001."
+ },
+ {
+  "id": "s07",
+  "bucket": "layer",
+  "category": "Transport Layer",
+  "heading": "Several services on one server",
+  "goal": "Explain how one server address can support multiple services.",
+  "title": "Server1 provides three services using the same network interface.",
+  "text": "Clients reach the same server IP address, but the services are shown with different destination ports: Web uses 80, Service B uses 5001 and Service C uses 5002.",
+  "left": "Client Devices",
+  "leftNote": "Different service requests",
+  "right": "Server1",
+  "rightNote": "One IP · Three services",
+  "facts": [
+   [
+    "Web",
+    "Destination 80"
+   ],
+   [
+    "Service B",
+    "Destination 5001"
+   ],
+   [
+    "Service C",
+    "Destination 5002"
+   ]
+  ],
+  "prompt": "How can Server1 determine which service should receive each incoming communication even though all three services use the same server IP address?",
+  "questions": [
+   {
+    "type": "Identify the field",
+    "q": "Which field distinguishes the requested service on Server1?",
+    "options": [
+     "Destination port",
+     "Destination IP address alone",
+     "Source MAC address",
+     "Signal type"
+    ],
+    "answer": 0,
+    "feedback": "Different destination ports distinguish services sharing the same host address."
+   },
+   {
+    "type": "Find what is shared",
+    "q": "What is common to all three communications?",
+    "options": [
+     "The destination host/IP address",
+     "The destination port",
+     "The application",
+     "The service"
+    ],
+    "answer": 0,
+    "feedback": "All communications target the same server host but different service ports."
+   },
+   {
+    "type": "Choose the best explanation",
+    "q": "What does this demonstrate?",
+    "options": [
+     "Ports complement IP addressing by distinguishing services on the same host",
+     "Every service requires a separate IP address",
+     "Every service requires a different physical NIC",
+     "Ports replace IP addressing completely"
+    ],
+    "answer": 0,
+    "feedback": "The IP address identifies the host while ports distinguish service/application contexts."
+   }
+  ],
+  "hint": "The server address gets the communication to Server1; compare the destination-port values.",
+  "analysis": "The same server IP address can support multiple services because the address identifies Server1 as the host, while different destination ports identify the intended service context. Ports therefore complement IP addressing rather than replacing it."
+ },
+ {
+  "id": "s08",
+  "bucket": "layer",
+  "category": "Network Layer",
+  "heading": "Correct service, wrong host address",
+  "goal": "Separate Network-layer host delivery from Transport-layer service delivery.",
+  "title": "The destination port is correct, but the destination IP address identifies the wrong host.",
+  "text": "Office-PC intends to contact the web service on Server1. The Transport destination port matches the web service, but the packet's destination IP address belongs to Server2.",
+  "left": "Office-PC",
+  "leftNote": "HTTP request",
+  "right": "Server1 / Server2",
+  "rightNote": "Two different hosts",
+  "facts": [
+   [
+    "Destination Port",
+    "Correct for web service"
+   ],
+   [
+    "Destination IP",
+    "Server2"
+   ],
+   [
+    "Intended Host",
+    "Server1"
+   ]
+  ],
+  "prompt": "Explain why a correct destination port does not compensate for the wrong destination IP address.",
+  "questions": [
+   {
+    "type": "Identify the failing layer",
+    "q": "Which part of the communication is incorrect first?",
+    "options": [
+     "Network-layer destination addressing",
+     "Application data",
+     "Physical signalling",
+     "The source port simply because it is a port"
+    ],
+    "answer": 0,
+    "feedback": "The destination IP address identifies the destination host at the Network layer."
+   },
+   {
+    "type": "Separate responsibilities",
+    "q": "What does the correct destination port tell us?",
+    "options": [
+     "Which service is intended on the receiving host, not which host should receive the packet",
+     "Which cable the packet uses",
+     "Which MAC address belongs to Office-PC",
+     "Which host the IP packet must reach"
+    ],
+    "answer": 0,
+    "feedback": "Ports identify service/application context; IP addressing identifies the host."
+   },
+   {
+    "type": "Evaluate the outcome",
+    "q": "Which statement best describes the problem?",
+    "options": [
+     "The communication is aimed at the wrong host even though the service identifier is appropriate",
+     "The correct port automatically redirects the packet to Server1",
+     "The IP address is irrelevant when a port is present",
+     "The MAC address alone will correct the IP destination"
+    ],
+    "answer": 0,
+    "feedback": "Correct Transport information cannot repair incorrect Network-layer destination addressing."
+   }
+  ],
+  "hint": "Ask separately: Which host is addressed? Which service is intended on that host?",
+  "analysis": "The destination port and destination IP address solve different problems. The port identifies the intended service/application context, while the destination IP address identifies the destination host. If the destination IP address belongs to Server2, a correct web-service port does not make the packet a packet for Server1."
+ },
+ {
+  "id": "s09",
+  "bucket": "layer",
+  "category": "Network Layer",
+  "heading": "What the packet carries",
+  "goal": "Recognise the Transport PDU as the Network-layer payload.",
+  "title": "A student draws an IP packet containing only the HTTP request.",
+  "text": "The student's diagram shows Source IP, Destination IP and the raw HTTP Web Request. The Transport-layer PDU is missing from the drawing.",
+  "left": "Transport",
+  "leftNote": "TCP Segment created",
+  "right": "Network",
+  "rightNote": "IP Packet should be created",
+  "facts": [
+   [
+    "Application Data",
+    "HTTP request"
+   ],
+   [
+    "Transport PDU",
+    "Already created"
+   ],
+   [
+    "Student packet",
+    "Skips Transport PDU"
+   ]
+  ],
+  "prompt": "Analyse what is missing from the student's packet representation.",
+  "questions": [
+   {
+    "type": "Identify the payload",
+    "q": "What should the Network layer carry as its payload?",
+    "options": [
+     "The complete Transport-layer PDU",
+     "Only the destination port",
+     "Only the HTTP request with Transport removed",
+     "The Ethernet frame"
+    ],
+    "answer": 0,
+    "feedback": "The Network layer receives the complete PDU produced by the Transport layer."
+   },
+   {
+    "type": "Identify the error",
+    "q": "What mistake did the student make?",
+    "options": [
+     "They skipped a layer in the encapsulation relationship",
+     "They added too many IP addresses",
+     "They used a frame trailer too early",
+     "They converted the packet into signals"
+    ],
+    "answer": 0,
+    "feedback": "Encapsulation carries the complete upper-layer PDU into the next lower layer."
+   },
+   {
+    "type": "Choose the correct nesting",
+    "q": "Which nesting is correct at the Network layer?",
+    "options": [
+     "IP Packet [ TCP Segment [ HTTP Data ] ]",
+     "TCP Segment [ IP Packet [ HTTP Data ] ]",
+     "HTTP Data [ Ethernet Frame ]",
+     "Signals [ IP Address ]"
+    ],
+    "answer": 0,
+    "feedback": "The TCP segment becomes the payload of the IP packet."
+   }
+  ],
+  "hint": "The Network layer receives its payload directly from the Transport layer, not directly from the application.",
+  "analysis": "The student's diagram skips the Transport-layer PDU. After Transport encapsulation, the complete Transport PDU becomes the payload of the Network-layer packet. Conceptually, the structure is an IP packet carrying a TCP segment, which in turn carries the application data."
+ },
+ {
+  "id": "s10",
+  "bucket": "layer",
+  "category": "Network Layer",
+  "heading": "IP address versus application identity",
+  "goal": "Correct a common misconception about what an IP address identifies.",
+  "title": "A student says the destination IP address identifies the web browser on the server.",
+  "text": "The student explains that the destination IP address tells the receiving computer which application should get the data.",
+  "left": "Client",
+  "leftNote": "Sends request",
+  "right": "Server1",
+  "rightNote": "Several possible services",
+  "facts": [
+   [
+    "Destination IP",
+    "Host-level logical address"
+   ],
+   [
+    "Destination Port",
+    "Service/application context"
+   ],
+   [
+    "Claim",
+    "IP identifies application"
+   ]
+  ],
+  "prompt": "Evaluate the student's explanation and replace it with a more precise one.",
+  "questions": [
+   {
+    "type": "Classify the claim",
+    "q": "How should the student's claim be classified?",
+    "options": [
+     "Incorrect — IP identifies the destination host/interface, not the application itself",
+     "Correct — IP replaces Transport ports",
+     "Correct only when HTTP is used",
+     "Incorrect because IP belongs to Physical"
+    ],
+    "answer": 0,
+    "feedback": "IP addressing and Transport-layer application identification have different responsibilities."
+   },
+   {
+    "type": "Choose the missing concept",
+    "q": "Which information helps distinguish the intended service/application context on the host?",
+    "options": [
+     "Destination port",
+     "Cable category",
+     "Frame trailer",
+     "Signal type"
+    ],
+    "answer": 0,
+    "feedback": "The destination port provides the Transport-layer service/application identifier."
+   },
+   {
+    "type": "Compare responsibilities",
+    "q": "Which pairing is most accurate?",
+    "options": [
+     "IP → host; Port → service/application context",
+     "IP → application; Port → cable",
+     "IP → MAC address; Port → host",
+     "IP → signal; Port → packet"
+    ],
+    "answer": 0,
+    "feedback": "This pairing separates Network- and Transport-layer responsibilities."
+   }
+  ],
+  "hint": "Do not ask what value is 'more important'; ask what each value identifies.",
+  "analysis": "The destination IP address identifies the destination host/network interface at the Network layer. It does not by itself identify the application or service on that host. Transport-layer port information is used to distinguish the relevant service/application context."
+ },
+ {
+  "id": "s11",
+  "bucket": "layer",
+  "category": "Network Layer",
+  "heading": "Logical addressing is already present",
+  "goal": "Recognise that lower layers carry the packet rather than recreating its Network-layer information.",
+  "title": "An IP packet has already been created and is moving down to the Data Link layer.",
+  "text": "The packet contains source and destination IP information and a Transport-layer payload. A student proposes that Data Link should remove the IP addresses before creating the frame.",
+  "left": "Network",
+  "leftNote": "IP Packet complete",
+  "right": "Data Link",
+  "rightNote": "Frame creation next",
+  "facts": [
+   [
+    "Packet",
+    "Complete"
+   ],
+   [
+    "IP addresses",
+    "Already inside packet"
+   ],
+   [
+    "Next stage",
+    "Data Link"
+   ]
+  ],
+  "prompt": "Should the IP information be removed before framing? Explain why or why not.",
+  "questions": [
+   {
+    "type": "Choose the best explanation",
+    "q": "What should Data Link do with the complete IP packet?",
+    "options": [
+     "Carry it as the frame payload",
+     "Remove the IP header and keep only ports",
+     "Convert only the IP addresses into signals",
+     "Replace it with the HTTP request"
+    ],
+    "answer": 0,
+    "feedback": "The complete Network-layer PDU becomes Data Link payload."
+   },
+   {
+    "type": "Evaluate the proposal",
+    "q": "Why is removing the IP information incorrect?",
+    "options": [
+     "It would destroy part of the Network-layer PDU that must be carried inside the frame",
+     "IP information belongs to the cable",
+     "MAC addresses are a copy of IP addresses",
+     "The Transport layer will recreate the packet later"
+    ],
+    "answer": 0,
+    "feedback": "Encapsulation preserves the upper-layer PDU inside the lower-layer PDU."
+   },
+   {
+    "type": "Identify what is new",
+    "q": "What kind of information does Data Link add instead?",
+    "options": [
+     "Local-link framing information such as MAC addresses and a trailer",
+     "A second set of source/destination ports",
+     "A new HTTP request",
+     "A replacement destination IP address"
+    ],
+    "answer": 0,
+    "feedback": "Data Link adds its own frame information around the existing packet."
+   }
+  ],
+  "hint": "Encapsulation adds new layer-specific information around the existing upper-layer PDU.",
+  "analysis": "The IP packet should remain intact as the payload of the Data Link frame. Data Link adds its own framing information around that packet; it does not remove the Network-layer information that has already been created."
+ },
+ {
+  "id": "s12",
+  "bucket": "layer",
+  "category": "Data Link Layer",
+  "heading": "Frame payload skips the Network layer",
+  "goal": "Diagnose an incorrect frame structure.",
+  "title": "A frame diagram shows a TCP segment directly between the MAC addresses and the frame trailer.",
+  "text": "The student has drawn Destination MAC, Source MAC, TCP Segment and Frame Trailer. No IP packet is shown.",
+  "left": "Network",
+  "leftNote": "IP Packet should exist",
+  "right": "Data Link",
+  "rightNote": "Ethernet Frame",
+  "facts": [
+   [
+    "Frame Header",
+    "MAC addresses"
+   ],
+   [
+    "Shown Payload",
+    "TCP Segment"
+   ],
+   [
+    "Expected Payload",
+    "Network-layer PDU"
+   ]
+  ],
+  "prompt": "What is wrong with the frame diagram, and what should appear as the payload?",
+  "questions": [
+   {
+    "type": "Identify the error",
+    "q": "Which part of the frame is wrong?",
+    "options": [
+     "The payload is shown as a TCP segment instead of the complete IP packet",
+     "The MAC addresses are too early",
+     "The trailer belongs to Transport",
+     "The frame should contain only signals"
+    ],
+    "answer": 0,
+    "feedback": "The Data Link layer receives the complete Network-layer PDU as its payload."
+   },
+   {
+    "type": "Choose the correction",
+    "q": "What should replace the shown TCP Segment payload?",
+    "options": [
+     "The complete IP Packet",
+     "The raw HTTP request",
+     "Only the destination IP address",
+     "The physical signal"
+    ],
+    "answer": 0,
+    "feedback": "The IP packet already contains the Transport PDU and application data."
+   },
+   {
+    "type": "Apply the nesting rule",
+    "q": "Which nested structure is correct?",
+    "options": [
+     "Frame [ IP Packet [ TCP Segment [ Application Data ] ] ]",
+     "IP Packet [ Frame [ TCP Segment ] ]",
+     "TCP Segment [ Frame [ IP Packet ] ]",
+     "Signals [ HTTP only ]"
+    ],
+    "answer": 0,
+    "feedback": "Each lower layer carries the complete PDU from the layer directly above."
+   }
+  ],
+  "hint": "Ask which layer sits immediately above Data Link.",
+  "analysis": "The frame payload is incorrect because the diagram skips the Network-layer PDU. Data Link should carry the complete IP packet as its payload. That IP packet already contains the Transport-layer PDU, which contains the application data."
+ },
+ {
+  "id": "s13",
+  "bucket": "layer",
+  "category": "Data Link Layer",
+  "heading": "What a MAC address identifies",
+  "goal": "Separate local-link addressing from application and Network-layer addressing.",
+  "title": "A student says the destination MAC address tells the server which web application should receive the request.",
+  "text": "The student has confused Data Link addressing with Transport-layer application/service identification.",
+  "left": "Office-PC",
+  "leftNote": "Frame sent on local link",
+  "right": "Receiving Interface",
+  "rightNote": "Data Link processing",
+  "facts": [
+   [
+    "MAC Address",
+    "Data Link information"
+   ],
+   [
+    "Port",
+    "Transport information"
+   ],
+   [
+    "Claim",
+    "MAC identifies application"
+   ]
+  ],
+  "prompt": "Evaluate the claim and explain the correct role of the destination MAC address at this level.",
+  "questions": [
+   {
+    "type": "Classify the claim",
+    "q": "How should the claim be evaluated?",
+    "options": [
+     "Incorrect — a MAC address is Data Link information for local-link delivery, not an application identifier",
+     "Correct — MAC addresses replace ports",
+     "Correct only for HTTP",
+     "Incorrect because MAC belongs to Network"
+    ],
+    "answer": 0,
+    "feedback": "MAC and port information belong to different layers and solve different problems."
+   },
+   {
+    "type": "Choose the application identifier",
+    "q": "Which information is associated with the intended service/application context?",
+    "options": [
+     "Transport-layer port information",
+     "Frame trailer",
+     "Physical signal",
+     "Destination MAC alone"
+    ],
+    "answer": 0,
+    "feedback": "Transport-layer ports distinguish service/application contexts."
+   },
+   {
+    "type": "Choose the host-level logical identifier",
+    "q": "Which information identifies the destination host at the Network layer?",
+    "options": [
+     "Destination IP address",
+     "Destination port",
+     "Frame trailer",
+     "Signal amplitude"
+    ],
+    "answer": 0,
+    "feedback": "IP addressing provides Network-layer logical addressing."
+   }
+  ],
+  "hint": "Separate three ideas: application/service context, logical host addressing and local-link addressing.",
+  "analysis": "The destination MAC address is Data Link information used for delivery on the local link. It does not identify the web application. The destination IP address provides Network-layer host addressing, while Transport-layer port information distinguishes the intended service/application context."
+ },
+ {
+  "id": "s14",
+  "bucket": "layer",
+  "category": "Data Link Layer",
+  "heading": "The frame trailer is missing",
+  "goal": "Recognise the basic frame structure taught in the lesson.",
+  "title": "A simplified Ethernet frame contains MAC addressing and an IP packet, but no trailer.",
+  "text": "The lesson representation treats the frame as having a header, payload and trailer. The student omitted the trailer entirely.",
+  "left": "Network",
+  "leftNote": "IP Packet",
+  "right": "Data Link",
+  "rightNote": "Frame structure",
+  "facts": [
+   [
+    "Header",
+    "MAC information"
+   ],
+   [
+    "Payload",
+    "IP Packet"
+   ],
+   [
+    "Trailer",
+    "Missing"
+   ]
+  ],
+  "prompt": "What is incomplete in the student's simplified frame representation?",
+  "questions": [
+   {
+    "type": "Identify the missing structure",
+    "q": "Which component is missing?",
+    "options": [
+     "The frame trailer",
+     "A second IP packet",
+     "A Transport source port outside the packet",
+     "A Physical-layer header"
+    ],
+    "answer": 0,
+    "feedback": "The simplified Data Link representation includes a trailer after the payload."
+   },
+   {
+    "type": "Place the component",
+    "q": "Where should the trailer appear conceptually?",
+    "options": [
+     "After the frame payload",
+     "Inside the HTTP request",
+     "Before the Application layer creates data",
+     "As a replacement for the MAC header"
+    ],
+    "answer": 0,
+    "feedback": "The trailer follows the payload in the simplified frame structure."
+   },
+   {
+    "type": "Identify the payload",
+    "q": "What should remain as the frame payload?",
+    "options": [
+     "The complete IP packet",
+     "Only the destination IP address",
+     "Only the TCP ports",
+     "The physical signal"
+    ],
+    "answer": 0,
+    "feedback": "The Network-layer PDU is carried as the Data Link payload."
+   }
+  ],
+  "hint": "Use the lesson's simplified structure: header, payload, trailer.",
+  "analysis": "The simplified frame representation is incomplete because the Data Link trailer is missing. The frame carries the complete IP packet as its payload, with Data Link information placed around that payload in the simplified header/payload/trailer model."
+ },
+ {
+  "id": "s15",
+  "bucket": "layer",
+  "category": "Physical Layer",
+  "heading": "What actually crosses the medium",
+  "goal": "Distinguish protocol data structures from their physical representation.",
+  "title": "A student says, “The IP packet travels through the copper cable.”",
+  "text": "The student is describing the logical Network-layer PDU as if the cable directly carried an abstract packet object.",
+  "left": "Sending NIC",
+  "leftNote": "Completed frame",
+  "right": "Copper Medium",
+  "rightNote": "Electrical signalling",
+  "facts": [
+   [
+    "Before Physical",
+    "Ethernet frame complete"
+   ],
+   [
+    "Representation",
+    "Bits"
+   ],
+   [
+    "Medium",
+    "Carries signals"
+   ]
+  ],
+  "prompt": "Rewrite the student's explanation so that it correctly describes the Physical-layer stage.",
+  "questions": [
+   {
+    "type": "Evaluate the statement",
+    "q": "What is imprecise about saying the cable directly carries an IP packet?",
+    "options": [
+     "The completed frame is represented as bits and transmitted as physical signals on the medium",
+     "Packets are never used in networking",
+     "Copper carries destination ports only",
+     "The cable converts the packet into a MAC address"
+    ],
+    "answer": 0,
+    "feedback": "The Physical layer handles representation and signalling on the medium."
+   },
+   {
+    "type": "Choose the sequence",
+    "q": "Which simplified sequence is correct at the sender?",
+    "options": [
+     "Ethernet Frame → Bits → Signals on the medium",
+     "IP Address → Port → HTTP",
+     "Signal → Frame → Bits",
+     "MAC Address → Application Data only"
+    ],
+    "answer": 0,
+    "feedback": "The completed frame is represented in binary and transmitted using the medium's signalling method."
+   },
+   {
+    "type": "Choose the medium-specific example",
+    "q": "On copper, which physical form is appropriate at this conceptual level?",
+    "options": [
+     "Electrical signalling",
+     "A TCP segment floating through the cable",
+     "A destination port",
+     "An HTTP header by itself"
+    ],
+    "answer": 0,
+    "feedback": "Copper uses electrical signalling; fibre and wireless use different physical forms."
+   }
+  ],
+  "hint": "Distinguish the logical PDU from the physical representation used by the medium.",
+  "analysis": "The statement is conceptually imprecise. By the time communication reaches the Physical layer, the Data Link frame is complete. That frame is represented as bits, and those bits are transmitted using signals appropriate to the medium, such as electrical signalling on copper."
+ },
+ {
+  "id": "s16",
+  "bucket": "layer",
+  "category": "Physical Layer",
+  "heading": "No extra networking header at Physical",
+  "goal": "Correct the misconception that every layer must add a header.",
+  "title": "A student adds a “Physical Header” after the Ethernet frame is complete.",
+  "text": "The student's diagram shows Application Data → Segment → Packet → Frame → Physical Header → Signal.",
+  "left": "Data Link",
+  "leftNote": "Frame complete",
+  "right": "Physical",
+  "rightNote": "Bits and signals",
+  "facts": [
+   [
+    "Frame",
+    "Already complete"
+   ],
+   [
+    "Student addition",
+    "Physical Header"
+   ],
+   [
+    "Expected action",
+    "Represent and transmit"
+   ]
+  ],
+  "prompt": "Is the extra Physical Header appropriate in the simplified model used in this lesson?",
+  "questions": [
+   {
+    "type": "Classify the addition",
+    "q": "How should the extra Physical Header be evaluated in this lesson model?",
+    "options": [
+     "Incorrect — the Physical stage is represented as bits/signals rather than another protocol header",
+     "Correct — every layer must add a header",
+     "Correct only on copper",
+     "Incorrect because Physical comes before Data Link"
+    ],
+    "answer": 0,
+    "feedback": "The lesson models the Physical layer as representation and transmission of the completed frame."
+   },
+   {
+    "type": "Choose what happens next",
+    "q": "What should happen after the Ethernet frame is complete?",
+    "options": [
+     "Represent it as bits and transmit those bits as signals",
+     "Add another IP header",
+     "Remove the frame payload",
+     "Replace MAC addresses with ports"
+    ],
+    "answer": 0,
+    "feedback": "Physical transmission follows frame completion."
+   },
+   {
+    "type": "Evaluate the rule",
+    "q": "Is “every layer adds a header” a reliable rule for this lesson?",
+    "options": [
+     "No — it oversimplifies the Physical stage and can create a misconception",
+     "Yes — without exception",
+     "Yes, but only for Application",
+     "No — because no layer adds control information"
+    ],
+    "answer": 0,
+    "feedback": "Encapsulation should be understood by layer function, not as a rigid rule that every layer adds a header."
+   }
+  ],
+  "hint": "Use the Physical-layer model already taught: bits and signals on the medium.",
+  "analysis": "In this lesson's simplified model, adding a new Physical-layer protocol header is not appropriate. The completed Ethernet frame is represented as bits and transmitted using physical signals. The rule “every layer adds a header” is therefore too simplistic."
+ },
+ {
+  "id": "s17",
+  "bucket": "layer",
+  "category": "Physical Layer",
+  "heading": "Receiving signals",
+  "goal": "Reason about the first step of decapsulation at the receiver.",
+  "title": "Signals arrive at the receiving network interface.",
+  "text": "The communication has crossed the medium. A student immediately sends the signals to the Network layer for IP processing.",
+  "left": "Medium",
+  "leftNote": "Incoming signals",
+  "right": "Receiver",
+  "rightNote": "Processing begins at Physical",
+  "facts": [
+   [
+    "Input",
+    "Signals"
+   ],
+   [
+    "First receiver stage",
+    "Physical"
+   ],
+   [
+    "Next logical structure",
+    "Frame after bit interpretation"
+   ]
+  ],
+  "prompt": "What is wrong with jumping directly from signals to the Network layer?",
+  "questions": [
+   {
+    "type": "Choose the first stage",
+    "q": "Which layer first deals with the incoming physical signal?",
+    "options": [
+     "Physical Layer",
+     "Network Layer",
+     "Application Layer",
+     "Transport Layer"
+    ],
+    "answer": 0,
+    "feedback": "Physical reception occurs before higher-layer processing."
+   },
+   {
+    "type": "Choose the upward order",
+    "q": "Which simplified order is correct?",
+    "options": [
+     "Signals/Bits → Data Link Frame → Network Packet → Transport PDU → Application Data",
+     "Signals → Network → Physical → Application",
+     "Application → Signals → Frame",
+     "Packet → Signal → Frame → Application"
+    ],
+    "answer": 0,
+    "feedback": "Decapsulation proceeds upward from Physical through Data Link, Network and Transport."
+   },
+   {
+    "type": "Identify the misconception",
+    "q": "Why can the Network layer not process the signal directly?",
+    "options": [
+     "The lower layers must first recover and process the structures that contain the packet",
+     "IP addresses are electrical voltages",
+     "The Network layer exists outside the receiver",
+     "Ports must be processed before bits"
+    ],
+    "answer": 0,
+    "feedback": "Higher-layer PDUs are contained inside lower-layer representations and must be reached in order."
+   }
+  ],
+  "hint": "Reverse the sender's encapsulation path.",
+  "analysis": "The receiver cannot jump directly from physical signals to Network-layer processing. Physical reception comes first, followed by Data Link processing of the frame, Network processing of the packet, Transport processing and finally delivery of application data."
+ },
+ {
+  "id": "s18",
+  "bucket": "process",
+  "category": "Encapsulation",
+  "heading": "A layer is skipped",
+  "goal": "Trace the correct encapsulation sequence from application data to frame.",
+  "title": "A student's sender diagram goes from HTTP Web Request directly to IP Packet.",
+  "text": "The diagram omits the Transport stage entirely, so no Transport PDU or port information appears before the Network-layer packet.",
+  "left": "Application",
+  "leftNote": "HTTP Web Request",
+  "right": "Network",
+  "rightNote": "IP Packet shown next",
+  "facts": [
+   [
+    "Missing Stage",
+    "Transport"
+   ],
+   [
+    "Missing Information",
+    "Ports"
+   ],
+   [
+    "Effect",
+    "Encapsulation sequence broken"
+   ]
+  ],
+  "prompt": "Explain what must occur between the application data and the IP packet.",
+  "questions": [
+   {
+    "type": "Identify the missing stage",
+    "q": "Which layer has been skipped?",
+    "options": [
+     "Transport Layer",
+     "Physical Layer",
+     "Data Link Layer after Physical",
+     "Application Layer"
+    ],
+    "answer": 0,
+    "feedback": "Transport sits between the upper application functions and the Network layer."
+   },
+   {
+    "type": "Choose the missing transformation",
+    "q": "What should happen before the Network layer receives the data?",
+    "options": [
+     "Transport adds its information and creates the Transport PDU",
+     "Data Link creates the frame first",
+     "Physical converts the request to signals",
+     "Network removes all ports"
+    ],
+    "answer": 0,
+    "feedback": "The Transport PDU becomes the payload of the Network-layer packet."
+   },
+   {
+    "type": "Choose the correct order",
+    "q": "Which order is correct?",
+    "options": [
+     "Application Data → Transport PDU → Network Packet",
+     "Application Data → Network Packet → Transport PDU",
+     "Network Packet → Application Data → Frame",
+     "Transport PDU → Application Data → Network"
+    ],
+    "answer": 0,
+    "feedback": "Encapsulation moves downward through adjacent layers in sequence."
+   }
+  ],
+  "hint": "Look at the layer immediately between Application and Network in the lesson sequence.",
+  "analysis": "The Transport stage is missing. The application data should first be processed by the Transport layer, where Transport information such as source and destination ports is added. The resulting Transport PDU then becomes the payload of the Network-layer packet."
+ },
+ {
+  "id": "s19",
+  "bucket": "process",
+  "category": "Encapsulation",
+  "heading": "What gets added and what gets carried",
+  "goal": "Distinguish new layer information from the existing upper-layer payload.",
+  "title": "The Network layer receives a complete TCP segment.",
+  "text": "A student proposes copying only the HTTP request out of the segment and discarding the Transport information before adding IP addresses.",
+  "left": "Transport",
+  "leftNote": "TCP Segment complete",
+  "right": "Network",
+  "rightNote": "IP Packet next",
+  "facts": [
+   [
+    "Existing PDU",
+    "TCP Segment"
+   ],
+   [
+    "New Information",
+    "Source/Destination IP"
+   ],
+   [
+    "Payload rule",
+    "Carry complete upper PDU"
+   ]
+  ],
+  "prompt": "Evaluate the proposal using the idea that each lower layer carries the complete PDU from the layer above.",
+  "questions": [
+   {
+    "type": "Evaluate the proposal",
+    "q": "Should Network discard the Transport information?",
+    "options": [
+     "No — the complete Transport PDU should become the packet payload",
+     "Yes — each layer deletes the layer above",
+     "Yes — ports belong outside the packet",
+     "No — because Network uses MAC addresses instead"
+    ],
+    "answer": 0,
+    "feedback": "Encapsulation preserves the upper-layer PDU inside the lower-layer PDU."
+   },
+   {
+    "type": "Classify what is new",
+    "q": "Which information is newly added by the Network layer?",
+    "options": [
+     "Source and destination IP information",
+     "Source and destination ports",
+     "MAC addresses and frame trailer",
+     "Physical signals"
+    ],
+    "answer": 0,
+    "feedback": "IP addressing is Network-layer information."
+   },
+   {
+    "type": "Classify what is carried",
+    "q": "What is carried as the packet payload?",
+    "options": [
+     "The complete Transport PDU",
+     "Only the HTTP body",
+     "The completed Ethernet frame",
+     "Only the destination port"
+    ],
+    "answer": 0,
+    "feedback": "The Transport PDU remains intact inside the packet."
+   }
+  ],
+  "hint": "Encapsulation means nesting the existing PDU inside a new layer-specific structure.",
+  "analysis": "The proposal is incorrect. The Network layer does not strip away Transport information. It carries the complete Transport PDU as its payload and adds Network-layer information such as source and destination IP addresses around that payload."
+ },
+ {
+  "id": "s20",
+  "bucket": "process",
+  "category": "Encapsulation",
+  "heading": "Frame built from the wrong object",
+  "goal": "Apply adjacent-layer payload relationships.",
+  "title": "Data Link receives both an IP packet and a copy of the original HTTP request.",
+  "text": "A student chooses the original HTTP request as the frame payload because it is the 'real data' and ignores the completed IP packet.",
+  "left": "Network",
+  "leftNote": "IP Packet complete",
+  "right": "Data Link",
+  "rightNote": "Frame creation",
+  "facts": [
+   [
+    "Available object",
+    "Complete IP Packet"
+   ],
+   [
+    "Student choice",
+    "Raw HTTP Request"
+   ],
+   [
+    "Correct input",
+    "PDU from layer above"
+   ]
+  ],
+  "prompt": "Why is choosing the raw HTTP request as the frame payload incorrect?",
+  "questions": [
+   {
+    "type": "Choose the rule",
+    "q": "Which object should Data Link receive as its payload input?",
+    "options": [
+     "The complete IP Packet",
+     "The original HTTP request directly",
+     "Only the TCP ports",
+     "Only the IP addresses"
+    ],
+    "answer": 0,
+    "feedback": "A layer receives the complete PDU produced by the layer directly above it."
+   },
+   {
+    "type": "Explain why",
+    "q": "Why is the HTTP request still present even though Data Link does not use it directly?",
+    "options": [
+     "It is nested inside the Transport PDU, which is inside the IP packet",
+     "It was copied into the MAC address",
+     "It became the frame trailer",
+     "It was converted into an IP address"
+    ],
+    "answer": 0,
+    "feedback": "Encapsulation preserves the application data inside nested lower-layer PDUs."
+   },
+   {
+    "type": "Choose the correct structure",
+    "q": "Which structure is correct?",
+    "options": [
+     "Frame [ Packet [ Transport PDU [ Application Data ] ] ]",
+     "Frame [ Application Data ] with no packet",
+     "Packet [ Frame [ Ports ] ]",
+     "Signals [ MAC only ]"
+    ],
+    "answer": 0,
+    "feedback": "The frame carries the packet, which already contains the upper-layer information."
+   }
+  ],
+  "hint": "Data Link should not reach past the Network layer to select a different payload.",
+  "analysis": "Data Link should use the complete IP packet as its payload because that packet is the PDU produced by the layer directly above. The HTTP request is still present, but it is nested inside the Transport PDU, which is itself inside the IP packet."
+ },
+ {
+  "id": "s21",
+  "bucket": "process",
+  "category": "Encapsulation",
+  "heading": "Order the sender stages",
+  "goal": "Trace the complete sender-side sequence conceptually.",
+  "title": "Five snapshots of the same communication have been mixed up.",
+  "text": "The snapshots show application data, a Transport PDU, an IP packet, an Ethernet frame and signals on the medium.",
+  "left": "Sender",
+  "leftNote": "Application",
+  "right": "Medium",
+  "rightNote": "Physical transmission",
+  "facts": [
+   [
+    "Start",
+    "HTTP Web Request"
+   ],
+   [
+    "Middle",
+    "Segment → Packet → Frame"
+   ],
+   [
+    "End",
+    "Signals"
+   ]
+  ],
+  "prompt": "Place the stages in the correct conceptual order and explain why the order matters.",
+  "questions": [
+   {
+    "type": "Order the stages",
+    "q": "Which order is correct?",
+    "options": [
+     "Application Data → Transport PDU → IP Packet → Ethernet Frame → Bits/Signals",
+     "Ethernet Frame → Application Data → IP Packet → Signals → Transport PDU",
+     "Signals → Frame → Packet → Segment → Application Data",
+     "IP Packet → Transport PDU → Frame → Application Data → Signals"
+    ],
+    "answer": 0,
+    "feedback": "The sender encapsulates downward from application data to physical transmission."
+   },
+   {
+    "type": "Identify the adjacent payload",
+    "q": "What becomes the payload of the IP packet?",
+    "options": [
+     "The complete Transport PDU",
+     "The Ethernet frame",
+     "The physical signal",
+     "Only the MAC addresses"
+    ],
+    "answer": 0,
+    "feedback": "The Network layer carries the complete Transport-layer PDU."
+   },
+   {
+    "type": "Identify the final logical PDU",
+    "q": "Which logical structure is complete immediately before Physical representation/transmission?",
+    "options": [
+     "Ethernet Frame",
+     "HTTP request only",
+     "Destination port",
+     "IP address only"
+    ],
+    "answer": 0,
+    "feedback": "The Data Link frame is complete before the Physical layer represents it for transmission."
+   }
+  ],
+  "hint": "Start with what the application creates and move down one layer at a time.",
+  "analysis": "The correct sender sequence is Application Data → Transport PDU → IP Packet → Ethernet Frame → Bits/Signals. The order matters because each lower layer receives and carries the complete PDU from the layer above while adding information for its own responsibility."
+ },
+ {
+  "id": "s22",
+  "bucket": "process",
+  "category": "Decapsulation",
+  "heading": "Order the receiver stages",
+  "goal": "Trace the reverse path from signals to application data.",
+  "title": "The receiver has captured the incoming communication, but the processing stages are listed in the wrong order.",
+  "text": "The available stages are Physical reception, Data Link frame processing, Network packet processing, Transport processing and delivery to the application.",
+  "left": "Medium",
+  "leftNote": "Incoming signals",
+  "right": "Receiver",
+  "rightNote": "Application eventually receives data",
+  "facts": [
+   [
+    "First",
+    "Physical reception"
+   ],
+   [
+    "Middle",
+    "Frame → Packet → Transport"
+   ],
+   [
+    "Last",
+    "Application Data"
+   ]
+  ],
+  "prompt": "Reconstruct the receiver-side sequence.",
+  "questions": [
+   {
+    "type": "Order the stages",
+    "q": "Which receiver order is correct?",
+    "options": [
+     "Physical → Data Link → Network → Transport → Application",
+     "Application → Network → Data Link → Physical → Transport",
+     "Network → Physical → Transport → Application → Data Link",
+     "Transport → Physical → Data Link → Application → Network"
+    ],
+    "answer": 0,
+    "feedback": "The receiver processes communication upward through the stack."
+   },
+   {
+    "type": "Identify the first structured PDU",
+    "q": "After physical reception has recovered the transmitted bits, which higher-level structure is processed next?",
+    "options": [
+     "The Data Link frame",
+     "The HTTP request directly",
+     "The Transport port only",
+     "A new IP packet created by the receiver"
+    ],
+    "answer": 0,
+    "feedback": "Data Link processing precedes Network and Transport processing."
+   },
+   {
+    "type": "Identify the final delivery",
+    "q": "What ultimately reaches the application?",
+    "options": [
+     "The application data after lower-layer information has been processed",
+     "The raw physical signal",
+     "The complete Ethernet frame unchanged",
+     "Only the destination MAC address"
+    ],
+    "answer": 0,
+    "feedback": "Decapsulation exposes the original application data as lower-layer information is processed."
+   }
+  ],
+  "hint": "Reverse the sender's path rather than inventing a separate order.",
+  "analysis": "The receiver processes the communication upward: Physical → Data Link → Network → Transport → Application. Lower-layer information is handled at its corresponding layer, eventually exposing the application data for the receiving application."
+ },
+ {
+  "id": "s23",
+  "bucket": "process",
+  "category": "Decapsulation",
+  "heading": "The receiver removes too much too early",
+  "goal": "Recognise that each layer processes only its own relevant information before passing the remaining payload upward.",
+  "title": "At Data Link, a student tries to remove the TCP ports from the incoming frame.",
+  "text": "The frame contains an IP packet, which contains a Transport PDU. The student says Data Link should remove every header it can see before passing data upward.",
+  "left": "Receiver Data Link",
+  "leftNote": "Frame processing",
+  "right": "Network / Transport",
+  "rightNote": "Higher layers still need their information",
+  "facts": [
+   [
+    "Current Layer",
+    "Data Link"
+   ],
+   [
+    "Payload",
+    "IP Packet"
+   ],
+   [
+    "TCP Ports",
+    "Inside higher-layer PDU"
+   ]
+  ],
+  "prompt": "Why should Data Link not process or remove the Transport-layer ports?",
+  "questions": [
+   {
+    "type": "Layer responsibility",
+    "q": "What should Data Link primarily process in this simplified model?",
+    "options": [
+     "Its frame information and then pass the Network-layer payload upward",
+     "All headers from every layer",
+     "Only TCP ports",
+     "The HTTP application message"
+    ],
+    "answer": 0,
+    "feedback": "Each layer is responsible for its own relevant control information."
+   },
+   {
+    "type": "Identify what moves upward",
+    "q": "What should be passed to the Network layer after Data Link processing?",
+    "options": [
+     "The IP Packet",
+     "The raw physical signal",
+     "Only the destination MAC",
+     "Only the HTTP request"
+    ],
+    "answer": 0,
+    "feedback": "The Network-layer PDU is the payload exposed after frame processing."
+   },
+   {
+    "type": "Evaluate the student's rule",
+    "q": "“A lower layer should remove every higher-layer header it can see.”",
+    "options": [
+     "Incorrect — higher-layer information remains for the corresponding higher layer to process",
+     "Correct — it speeds up decapsulation",
+     "Correct only for ports",
+     "Incorrect because no headers are ever removed"
+    ],
+    "answer": 0,
+    "feedback": "Layered processing preserves the separation of responsibilities during decapsulation."
+   }
+  ],
+  "hint": "Each layer handles its own responsibility and passes the appropriate payload upward.",
+  "analysis": "Data Link should process the frame information relevant to Data Link and expose the IP packet as the payload for the Network layer. It should not remove Transport-layer ports because those belong to a higher layer that has not yet processed the communication."
+ },
+ {
+  "id": "s24",
+  "bucket": "process",
+  "category": "Cross-layer",
+  "heading": "Correct IP, wrong port",
+  "goal": "Analyse a communication where Network-layer addressing succeeds but application delivery information is wrong.",
+  "title": "A packet is addressed to the correct server, but the destination port identifies the wrong service.",
+  "text": "The destination IP address is Server1. Server1 runs Web on port 80 and Service B on port 5001. The request is intended for Web, but the destination port is 5001.",
+  "left": "Office-PC",
+  "leftNote": "Intends Web",
+  "right": "Server1",
+  "rightNote": "Web 80 · Service B 5001",
+  "facts": [
+   [
+    "Destination IP",
+    "Correct"
+   ],
+   [
+    "Destination Port",
+    "5001"
+   ],
+   [
+    "Intended Service",
+    "Web on 80"
+   ]
+  ],
+  "prompt": "Which part of the communication is correct, which part is wrong, and what does this show about layered responsibilities?",
+  "questions": [
+   {
+    "type": "Identify what succeeds conceptually",
+    "q": "Which value correctly identifies the intended host?",
+    "options": [
+     "Destination IP address",
+     "Destination port 5001",
+     "Source port",
+     "Frame trailer"
+    ],
+    "answer": 0,
+    "feedback": "The destination IP address correctly identifies Server1."
+   },
+   {
+    "type": "Identify what fails",
+    "q": "Which value points to the wrong service context?",
+    "options": [
+     "Destination port 5001",
+     "Destination IP address",
+     "The existence of an Ethernet frame",
+     "The source MAC simply because it is a MAC"
+    ],
+    "answer": 0,
+    "feedback": "The wrong destination port identifies the wrong service context."
+   },
+   {
+    "type": "Draw the lesson",
+    "q": "What does the scenario demonstrate?",
+    "options": [
+     "Correct information at one layer does not automatically correct incorrect information at another layer",
+     "Ports make IP addresses unnecessary",
+     "IP addresses identify applications directly",
+     "MAC addresses replace both IP and ports"
+    ],
+    "answer": 0,
+    "feedback": "Layered responsibilities are related but distinct."
+   }
+  ],
+  "hint": "Separate 'correct host' from 'correct service on that host'.",
+  "analysis": "The Network-layer destination is correct because the packet identifies Server1. The Transport-layer destination is wrong because port 5001 identifies Service B rather than the intended Web service on port 80. Correct information at one layer does not repair incorrect information at another layer."
+ },
+ {
+  "id": "s25",
+  "bucket": "process",
+  "category": "Cross-layer",
+  "heading": "Correct host and service, broken frame payload",
+  "goal": "Recognise that correct Network and Transport values do not compensate for a malformed encapsulation relationship.",
+  "title": "The destination IP and port are correct, but the frame carries a TCP segment directly.",
+  "text": "Office-PC has the correct destination IP for Server1 and the correct destination port for the web service. However, the Ethernet frame is shown carrying the TCP segment directly instead of an IP packet.",
+  "left": "Office-PC",
+  "leftNote": "Correct IP and port",
+  "right": "Server1",
+  "rightNote": "Frame structure is wrong",
+  "facts": [
+   [
+    "Destination IP",
+    "Correct"
+   ],
+   [
+    "Destination Port",
+    "Correct"
+   ],
+   [
+    "Frame Payload",
+    "TCP Segment directly"
+   ]
+  ],
+  "prompt": "Explain why the communication model is still incorrect despite having the right host and service values.",
+  "questions": [
+   {
+    "type": "Identify the structural error",
+    "q": "What is wrong with the frame?",
+    "options": [
+     "It skips the Network-layer packet as the Data Link payload",
+     "It contains a destination MAC address",
+     "It has application data somewhere inside",
+     "It uses a destination port"
+    ],
+    "answer": 0,
+    "feedback": "Data Link should carry the complete Network-layer PDU."
+   },
+   {
+    "type": "Choose the correct payload",
+    "q": "What should the frame carry?",
+    "options": [
+     "The complete IP Packet",
+     "The raw HTTP request directly",
+     "Only the destination port",
+     "Only the destination IP address"
+    ],
+    "answer": 0,
+    "feedback": "The packet contains the Transport PDU and application data."
+   },
+   {
+    "type": "Evaluate the reasoning",
+    "q": "“Correct IP and port values make the frame structure irrelevant.”",
+    "options": [
+     "Incorrect — encapsulation relationships still matter",
+     "Correct — values are all that matter",
+     "Correct only on wireless",
+     "Incorrect because ports belong to Physical"
+    ],
+    "answer": 0,
+    "feedback": "Correct values do not remove the need for correct layered encapsulation."
+   }
+  ],
+  "hint": "The issue is not the values; it is which PDU is carried by which layer.",
+  "analysis": "The model is still incorrect because Data Link should carry the complete Network-layer packet, not the Transport PDU directly. Correct IP and port values do not compensate for a broken encapsulation relationship."
+ },
+ {
+  "id": "s26",
+  "bucket": "process",
+  "category": "Cross-layer",
+  "heading": "The physical medium is fine, but the logical destination is wrong",
+  "goal": "Separate successful physical transmission from correct higher-layer addressing.",
+  "title": "A signal crosses the cable successfully, but the packet contains the wrong destination IP address.",
+  "text": "The sending NIC successfully transmits the frame as electrical signals and the receiver detects those signals. A student concludes that communication must therefore be correct.",
+  "left": "Sender",
+  "leftNote": "Signal transmitted correctly",
+  "right": "Receiver",
+  "rightNote": "Signal received correctly",
+  "facts": [
+   [
+    "Physical",
+    "Successful"
+   ],
+   [
+    "Frame transmission",
+    "Occurred"
+   ],
+   [
+    "Destination IP",
+    "Wrong"
+   ]
+  ],
+  "prompt": "Why does successful physical transmission not prove that the intended network communication is correct?",
+  "questions": [
+   {
+    "type": "Evaluate the conclusion",
+    "q": "Is successful signal reception enough to prove the intended host was addressed correctly?",
+    "options": [
+     "No — Physical success does not guarantee correct Network-layer addressing",
+     "Yes — if the signal arrives, all layers are correct",
+     "Yes — IP is created by the cable",
+     "No — because Physical always fails first"
+    ],
+    "answer": 0,
+    "feedback": "Different layers can be correct or incorrect independently."
+   },
+   {
+    "type": "Identify the higher-layer problem",
+    "q": "Which information is wrong according to the scenario?",
+    "options": [
+     "Destination IP address",
+     "Signal type",
+     "The fact that bits were transmitted",
+     "The existence of a frame"
+    ],
+    "answer": 0,
+    "feedback": "The Network-layer destination is incorrect."
+   },
+   {
+    "type": "Choose the principle",
+    "q": "What principle is illustrated?",
+    "options": [
+     "A communication can work at a lower layer while still being wrong at a higher layer",
+     "Higher layers automatically repair lower layers",
+     "Physical signalling determines the destination application",
+     "IP addresses replace signals"
+    ],
+    "answer": 0,
+    "feedback": "Layered analysis allows us to isolate which responsibility is succeeding or failing."
+   }
+  ],
+  "hint": "Do not treat 'the cable worked' as proof that all upper-layer information is correct.",
+  "analysis": "Successful physical transmission shows only that the bits/signals crossed the medium successfully at that stage. It does not prove that the packet contains the correct Network-layer destination or that the intended application/service is identified correctly."
+ },
+ {
+  "id": "s27",
+  "bucket": "process",
+  "category": "Cross-layer",
+  "heading": "Correct packet, wrong local-link information",
+  "goal": "Distinguish Network-layer logical addressing from Data Link local-link delivery.",
+  "title": "The IP packet identifies the intended host, but the frame's destination MAC information is incorrect for the local link.",
+  "text": "The packet itself contains the correct destination IP address. The Data Link frame, however, has incorrect local-link destination information.",
+  "left": "Sender",
+  "leftNote": "Correct IP packet",
+  "right": "Local Link",
+  "rightNote": "Incorrect frame destination",
+  "facts": [
+   [
+    "Network Layer",
+    "Correct destination IP"
+   ],
+   [
+    "Data Link",
+    "Incorrect destination MAC"
+   ],
+   [
+    "Scope",
+    "Local-link delivery"
+   ]
+  ],
+  "prompt": "Explain why correct Network-layer addressing does not make incorrect Data Link information irrelevant.",
+  "questions": [
+   {
+    "type": "Identify the layers",
+    "q": "Which layer contains the correct logical destination in this scenario?",
+    "options": [
+     "Network Layer",
+     "Physical Layer",
+     "Application Layer",
+     "Transport Layer"
+    ],
+    "answer": 0,
+    "feedback": "The destination IP address belongs to the Network layer."
+   },
+   {
+    "type": "Identify the local-link problem",
+    "q": "Which layer contains the incorrect local-link destination information?",
+    "options": [
+     "Data Link Layer",
+     "Transport Layer",
+     "Application Layer",
+     "Physical Layer"
+    ],
+    "answer": 0,
+    "feedback": "MAC addressing is Data Link information."
+   },
+   {
+    "type": "Choose the principle",
+    "q": "What does this show?",
+    "options": [
+     "Network and Data Link addressing have different responsibilities and both must be coherent for the communication stage",
+     "Correct IP makes Data Link unnecessary",
+     "MAC addresses identify web services",
+     "Ports repair incorrect MAC information"
+    ],
+    "answer": 0,
+    "feedback": "Layered delivery uses different information for different scopes and responsibilities."
+   }
+  ],
+  "hint": "Separate logical host addressing from local-link framing information.",
+  "analysis": "The correct destination IP address means the Network-layer PDU identifies the intended host logically. But the frame still requires appropriate Data Link information for the local-link delivery stage. One layer's correct information does not make another layer's information irrelevant."
+ },
+ {
+  "id": "s28",
+  "bucket": "process",
+  "category": "End-to-end",
+  "heading": "Complete sender-to-receiver trace",
+  "goal": "Integrate encapsulation, physical transmission and decapsulation.",
+  "title": "Office-PC requests a web page from Server1 and the complete communication must be traced.",
+  "text": "The browser creates an HTTP request. The sender encapsulates it, the frame is transmitted across the medium, and the receiver processes the communication upward until the server application receives the request.",
+  "left": "Office-PC",
+  "leftNote": "Sender",
+  "right": "Server1",
+  "rightNote": "Receiver",
+  "facts": [
+   [
+    "Sender",
+    "Encapsulation downward"
+   ],
+   [
+    "Medium",
+    "Signals"
+   ],
+   [
+    "Receiver",
+    "Decapsulation upward"
+   ]
+  ],
+  "prompt": "Describe the major stages from the browser creating the request until the receiving application gets the data.",
+  "questions": [
+   {
+    "type": "Order the sender",
+    "q": "Which sender order is correct?",
+    "options": [
+     "Application → Transport → Network → Data Link → Physical",
+     "Physical → Application → Data Link → Network → Transport",
+     "Application → Network → Physical → Transport → Data Link",
+     "Transport → Application → Network → Physical → Data Link"
+    ],
+    "answer": 0,
+    "feedback": "The sender moves downward through the layered stack."
+   },
+   {
+    "type": "Identify the medium representation",
+    "q": "What crosses the medium at the Physical stage?",
+    "options": [
+     "Signals representing the transmitted bits",
+     "An abstract IP packet with no physical representation",
+     "Only the destination port",
+     "Only the HTTP text"
+    ],
+    "answer": 0,
+    "feedback": "The medium carries a physical signal representation of the transmitted bits."
+   },
+   {
+    "type": "Order the receiver",
+    "q": "Which receiver order is correct?",
+    "options": [
+     "Physical → Data Link → Network → Transport → Application",
+     "Application → Transport → Network → Data Link → Physical",
+     "Network → Application → Physical → Transport → Data Link",
+     "Data Link → Application → Network → Physical → Transport"
+    ],
+    "answer": 0,
+    "feedback": "The receiver processes the communication upward."
+   }
+  ],
+  "hint": "Treat the medium as the turning point: downward on the sender, upward on the receiver.",
+  "analysis": "The browser creates the application data. The sender processes it downward through Transport, Network and Data Link, then the Physical layer represents the completed frame as bits/signals for transmission. The receiver starts at Physical and processes upward through Data Link, Network and Transport until the original application data is delivered to the receiving application."
+ },
+ {
+  "id": "s29",
+  "bucket": "process",
+  "category": "End-to-end",
+  "heading": "What changes and what remains nested",
+  "goal": "Reason about the same application data as control information is added around it.",
+  "title": "A student thinks each layer replaces the previous PDU with completely new data.",
+  "text": "They believe the HTTP request disappears when the Transport PDU is created, and the Transport PDU disappears when the IP packet is created.",
+  "left": "Application Data",
+  "leftNote": "Original message",
+  "right": "Lower-layer PDUs",
+  "rightNote": "Nested encapsulation",
+  "facts": [
+   [
+    "Student claim",
+    "Previous data disappears"
+   ],
+   [
+    "Actual concept",
+    "Upper PDU becomes payload"
+   ],
+   [
+    "Result",
+    "Nested information"
+   ]
+  ],
+  "prompt": "Explain why the student's 'replacement' model is misleading.",
+  "questions": [
+   {
+    "type": "Choose the correct model",
+    "q": "What happens to the Application data at the Transport layer?",
+    "options": [
+     "It becomes payload inside the Transport PDU",
+     "It is destroyed and replaced by ports",
+     "It becomes a MAC address",
+     "It becomes a signal immediately"
+    ],
+    "answer": 0,
+    "feedback": "The upper-layer data is carried as payload."
+   },
+   {
+    "type": "Choose the next nesting",
+    "q": "What happens to the Transport PDU at the Network layer?",
+    "options": [
+     "It becomes payload inside the IP packet",
+     "It is discarded after ports are copied",
+     "It becomes the frame trailer",
+     "It is transmitted separately from the packet"
+    ],
+    "answer": 0,
+    "feedback": "The complete Transport PDU is nested inside the packet."
+   },
+   {
+    "type": "Summarise the concept",
+    "q": "Which word best describes the relationship?",
+    "options": [
+     "Encapsulation",
+     "Deletion",
+     "Duplication of applications",
+     "Physical replacement"
+    ],
+    "answer": 0,
+    "feedback": "Encapsulation adds layer-specific information around existing data/PDU structures."
+   }
+  ],
+  "hint": "Think 'carried inside' rather than 'replaced by'.",
+  "analysis": "The student's replacement model is misleading because each lower layer carries the complete upper-layer PDU as its payload while adding information for its own function. The HTTP request remains inside the Transport PDU, which remains inside the IP packet, which is carried inside the frame."
+ },
+ {
+  "id": "s30",
+  "bucket": "challenge",
+  "category": "Misconception Challenge",
+  "heading": "An AI mixes up IP, MAC and ports",
+  "goal": "Critique a plausible but incorrect AI explanation.",
+  "title": "An AI assistant gives a confident explanation of addressing, but several responsibilities are reversed.",
+  "text": "AI response: “The destination MAC address identifies the remote application, the destination port identifies the destination computer, and the destination IP address tells the local switch which cable to use.”",
+  "left": "AI Explanation",
+  "leftNote": "Confident but flawed",
+  "right": "Your Analysis",
+  "rightNote": "Verify by layer responsibility",
+  "facts": [
+   [
+    "MAC",
+    "Data Link"
+   ],
+   [
+    "IP",
+    "Network"
+   ],
+   [
+    "Port",
+    "Transport"
+   ]
+  ],
+  "prompt": "Identify the errors in the AI response and construct a correct layer-by-layer explanation.",
+  "questions": [
+   {
+    "type": "Find the first error",
+    "q": "What is wrong with saying the destination MAC identifies the remote application?",
+    "options": [
+     "MAC information belongs to Data Link/local-link delivery, not application identification",
+     "MAC is a Transport port",
+     "MAC is the HTTP request",
+     "Nothing is wrong"
+    ],
+    "answer": 0,
+    "feedback": "Application/service context is distinguished at the Transport layer using port information."
+   },
+   {
+    "type": "Find the second error",
+    "q": "What is wrong with saying the destination port identifies the destination computer?",
+    "options": [
+     "The destination port identifies service/application context; the destination IP identifies the host logically",
+     "Ports identify cables",
+     "Ports are Physical-layer values",
+     "Nothing is wrong"
+    ],
+    "answer": 0,
+    "feedback": "Transport and Network identifiers have different roles."
+   },
+   {
+    "type": "Evaluate AI output",
+    "q": "What is the best response to a confident AI explanation that conflicts with the course model?",
+    "options": [
+     "Analyse and verify it against the layer responsibilities rather than accepting it because it sounds confident",
+     "Accept it automatically",
+     "Reject all AI responses without reading them",
+     "Use whichever sentence is longest"
+    ],
+    "answer": 0,
+    "feedback": "AI output should be evaluated against known concepts and authoritative course material."
+   }
+  ],
+  "hint": "Map each value to its layer first: port, IP and MAC.",
+  "analysis": "The AI explanation is incorrect. Port information belongs to the Transport layer and distinguishes service/application context. IP addresses belong to the Network layer and identify hosts logically. MAC addresses belong to the Data Link layer and support local-link delivery. A confident tone does not make an explanation technically correct."
+ },
+ {
+  "id": "s31",
+  "bucket": "challenge",
+  "category": "Misconception Challenge",
+  "heading": "Frame and packet are treated as the same thing",
+  "goal": "Distinguish PDUs by layer without turning the task into pure terminology recall.",
+  "title": "A student uses the words frame and packet interchangeably in a diagram.",
+  "text": "Their diagram labels the Network-layer structure 'Ethernet Frame' and the Data Link structure 'IP Packet'.",
+  "left": "Network Layer",
+  "leftNote": "Student writes Ethernet Frame",
+  "right": "Data Link Layer",
+  "rightNote": "Student writes IP Packet",
+  "facts": [
+   [
+    "Network PDU",
+    "IP Packet"
+   ],
+   [
+    "Data Link PDU",
+    "Ethernet Frame"
+   ],
+   [
+    "Issue",
+    "Labels reversed"
+   ]
+  ],
+  "prompt": "Explain why the labels matter and how the two structures relate.",
+  "questions": [
+   {
+    "type": "Correct the Network label",
+    "q": "What is the Network-layer PDU in this lesson?",
+    "options": [
+     "IP Packet",
+     "Ethernet Frame",
+     "Signal",
+     "HTTP request only"
+    ],
+    "answer": 0,
+    "feedback": "The Network layer creates the IP packet."
+   },
+   {
+    "type": "Correct the Data Link label",
+    "q": "What is the Data Link PDU in this lesson?",
+    "options": [
+     "Ethernet Frame",
+     "IP Packet",
+     "TCP port",
+     "Signal only"
+    ],
+    "answer": 0,
+    "feedback": "The Data Link layer creates the Ethernet frame."
+   },
+   {
+    "type": "Explain the relationship",
+    "q": "How do they relate during encapsulation?",
+    "options": [
+     "The IP packet becomes the payload of the Ethernet frame",
+     "The frame becomes the payload of the IP packet at the sender",
+     "They are identical names for the same object",
+     "The packet replaces the application"
+    ],
+    "answer": 0,
+    "feedback": "The lower-layer frame carries the Network-layer packet."
+   }
+  ],
+  "hint": "Do not only memorise the names; identify which layer carries which PDU.",
+  "analysis": "The labels matter because packet and frame refer to different layer-specific structures in this lesson. The Network layer creates the IP packet. The Data Link layer then carries that complete packet as the payload of the Ethernet frame."
+ },
+ {
+  "id": "s32",
+  "bucket": "challenge",
+  "category": "Misconception Challenge",
+  "heading": "The Physical layer reads HTTP",
+  "goal": "Correct an explanation that assigns application meaning to the Physical layer.",
+  "title": "A student says the Physical layer examines the HTTP request before deciding how to send it.",
+  "text": "They claim the cable or wireless interface reads whether the message is HTTP and then chooses how to transmit it.",
+  "left": "Application",
+  "leftNote": "HTTP semantics",
+  "right": "Physical",
+  "rightNote": "Bits and signals",
+  "facts": [
+   [
+    "HTTP meaning",
+    "Application-level"
+   ],
+   [
+    "Physical role",
+    "Representation / signalling"
+   ],
+   [
+    "Claim",
+    "Physical interprets HTTP"
+   ]
+  ],
+  "prompt": "Why is the explanation inconsistent with layered communication?",
+  "questions": [
+   {
+    "type": "Identify the responsibility",
+    "q": "What does the Physical layer handle at this level?",
+    "options": [
+     "Bits and signals on the medium",
+     "HTTP request meaning",
+     "Destination service selection by port",
+     "Logical destination IP selection"
+    ],
+    "answer": 0,
+    "feedback": "Physical focuses on representation and transmission, not application semantics."
+   },
+   {
+    "type": "Identify who owns HTTP meaning",
+    "q": "Which area is associated with the HTTP request itself?",
+    "options": [
+     "Application-layer functions",
+     "Physical signalling",
+     "Frame trailer",
+     "MAC addressing"
+    ],
+    "answer": 0,
+    "feedback": "HTTP is an application-level protocol/message concept."
+   },
+   {
+    "type": "Apply abstraction",
+    "q": "Why is the separation useful?",
+    "options": [
+     "Lower layers can transmit data without needing to understand the application's specific meaning",
+     "Every cable must know every application protocol",
+     "Ports become unnecessary",
+     "IP addresses become physical voltages"
+    ],
+    "answer": 0,
+    "feedback": "Layering allows lower layers to provide services without interpreting upper-layer semantics."
+   }
+  ],
+  "hint": "Ask whether a physical signal needs to know the meaning of the application message it represents.",
+  "analysis": "The Physical layer does not need to interpret HTTP. It handles the representation and transmission of bits as signals on the chosen medium. The meaning of the HTTP request belongs to the application-level functions. This separation is a key benefit of layering and abstraction."
+ },
+ {
+  "id": "s33",
+  "bucket": "challenge",
+  "category": "Misconception Challenge",
+  "heading": "Every application needs its own IP address",
+  "goal": "Challenge the assumption that application separation requires separate host addresses.",
+  "title": "A student proposes giving the browser, email client and chat application separate IP addresses because they run at the same time.",
+  "text": "The student believes one IP address can support only one application communication at a time.",
+  "left": "Office-PC",
+  "leftNote": "One active interface",
+  "right": "Applications",
+  "rightNote": "Browser · Email · Chat",
+  "facts": [
+   [
+    "Host",
+    "Office-PC"
+   ],
+   [
+    "Applications",
+    "Several active"
+   ],
+   [
+    "Transport distinction",
+    "Ports"
+   ]
+  ],
+  "prompt": "Evaluate the proposal and explain how layered addressing avoids the need for one IP address per application communication.",
+  "questions": [
+   {
+    "type": "Evaluate the proposal",
+    "q": "Is a separate IP address required for each of these application communications?",
+    "options": [
+     "No — Transport-layer ports can distinguish application communications on the same host",
+     "Yes — one IP can support only one application",
+     "Yes — every browser tab needs an IP",
+     "No — because applications use only MAC addresses"
+    ],
+    "answer": 0,
+    "feedback": "Multiple application communications can share the same host address."
+   },
+   {
+    "type": "Identify the host value",
+    "q": "Which value identifies Office-PC logically at the Network layer?",
+    "options": [
+     "Its IP address",
+     "Each application's source port",
+     "The frame trailer",
+     "The signal type"
+    ],
+    "answer": 0,
+    "feedback": "The Network-layer IP address identifies the host/interface."
+   },
+   {
+    "type": "Identify the application distinction",
+    "q": "Which information distinguishes concurrent application communications?",
+    "options": [
+     "Transport-layer port information",
+     "A different physical cable for each app",
+     "A different Ethernet standard for each app",
+     "A different frame trailer for each app"
+    ],
+    "answer": 0,
+    "feedback": "Ports allow multiple application communications to coexist on the same host."
+   }
+  ],
+  "hint": "Separate host identification from application-communication identification.",
+  "analysis": "The proposal is unnecessary. One host can run many application communications while using the same Network-layer host address. Transport-layer port information distinguishes the different application/service contexts. This is one reason layered communication can scale to many simultaneous applications."
+ },
+ {
+  "id": "s34",
+  "bucket": "challenge",
+  "category": "AI Review Challenge",
+  "heading": "An AI gives a partially correct explanation",
+  "goal": "Distinguish a correct statement from an incorrect extension.",
+  "title": "An AI says: “The destination IP address gets the packet to the correct host, so the destination port is optional.”",
+  "text": "The first clause reflects the Network-layer role of the destination IP address. The conclusion about the destination port, however, is questionable when multiple services exist.",
+  "left": "AI Response",
+  "leftNote": "Partly correct",
+  "right": "Course Model",
+  "rightNote": "Separate host and service responsibilities",
+  "facts": [
+   [
+    "Destination IP",
+    "Host identification"
+   ],
+   [
+    "Destination Port",
+    "Service/application context"
+   ],
+   [
+    "Task",
+    "Separate correct from incorrect"
+   ]
+  ],
+  "prompt": "Identify which part of the AI explanation is correct and which part is wrong or incomplete.",
+  "questions": [
+   {
+    "type": "Classify the first clause",
+    "q": "“The destination IP address identifies the destination host.”",
+    "options": [
+     "Correct at the conceptual Network-layer level",
+     "Incorrect because IP identifies applications",
+     "Incorrect because IP is a MAC address",
+     "Incorrect because hosts have only ports"
+    ],
+    "answer": 0,
+    "feedback": "The destination IP provides logical destination-host addressing."
+   },
+   {
+    "type": "Classify the conclusion",
+    "q": "“Therefore the destination port is optional when several services run on that host.”",
+    "options": [
+     "Incorrect — port information distinguishes the intended service/application context",
+     "Correct — IP always identifies the service",
+     "Correct only when MAC is missing",
+     "Incorrect because ports belong to Physical"
+    ],
+    "answer": 0,
+    "feedback": "The correct host does not by itself identify the intended service/application context."
+   },
+   {
+    "type": "Evaluate partial correctness",
+    "q": "What is the best way to handle a partially correct AI response?",
+    "options": [
+     "Keep the correct concept, reject or revise the incorrect extension, and verify against course material",
+     "Treat the whole response as correct",
+     "Treat the whole response as useless",
+     "Choose the conclusion because it appears last"
+    ],
+    "answer": 0,
+    "feedback": "Technical evaluation should separate valid reasoning from invalid conclusions."
+   }
+  ],
+  "hint": "A response can contain one correct idea and still reach an incorrect conclusion.",
+  "analysis": "The first part is correct: the destination IP address identifies the destination host at the Network layer. The conclusion is incorrect or incomplete because the destination port still identifies the intended service/application context on that host. AI output should be checked concept by concept rather than accepted or rejected as a single block."
+ }
 ];
 
 let scenarios=[],scenarioIndex=0,answers={},committed="",reflection=null,results=[];
 
 function startAttempt(){
-  scenarios=drawCycle(scenarioBank,3,"m1l3_a2_cycle");scenarioIndex=0;results=[];$("completeCard").classList.add("hidden");$("activityCard").classList.remove("hidden");renderScenario();
+  const layerPool=scenarioBank.filter(s=>s.bucket==="layer");
+  const processPool=scenarioBank.filter(s=>s.bucket==="process");
+  const challengePool=scenarioBank.filter(s=>s.bucket==="challenge");
+  scenarios=[
+    ...drawCycle(layerPool,1,"m1l3_a2_layer_cycle"),
+    ...drawCycle(processPool,1,"m1l3_a2_process_cycle"),
+    ...drawCycle(challengePool,1,"m1l3_a2_challenge_cycle")
+  ];
+  scenarios=shuffle(scenarios);
+  scenarioIndex=0;results=[];$("completeCard").classList.add("hidden");$("activityCard").classList.remove("hidden");renderScenario();
 }
 function setPills(step){for(let i=1;i<=4;i++){$("pill"+i).classList.toggle("active",i===step);$("pill"+i).classList.toggle("done",i<step)}}
 function factHTML(pair){return '<div class="fact"><strong>'+pair[0]+'</strong><span>'+pair[1]+'</span></div>'}
 function renderScenario(){
   const s=scenarios[scenarioIndex];answers={};committed="";reflection=null;
-  $("scenarioCount").textContent="Scenario "+(scenarioIndex+1)+" of "+scenarios.length;
+  $("scenarioCount").textContent="Scenario "+(scenarioIndex+1)+" of "+scenarios.length+" · "+s.category;
   $("scenarioHeading").textContent=s.heading;$("scenarioGoal").textContent=s.goal;$("scenarioTitle").textContent=s.title;$("scenarioText").textContent=s.text;
   $("leftDevice").textContent=s.left;$("leftNote").textContent=s.leftNote;$("rightDevice").textContent=s.right;$("rightNote").textContent=s.rightNote;
   $("factGrid").innerHTML=s.facts.map(factHTML).join("");$("analysisPrompt").textContent=s.prompt;
@@ -324,9 +2555,11 @@ function renderQuestions(){
   const qwrap=$("questions");qwrap.innerHTML="";const s=scenarios[scenarioIndex];
   s.questions.forEach((q,qi)=>{
     const card=document.createElement("div");card.className="qcard";
+    const type=document.createElement("div");type.className="qtype";type.textContent=q.type||"Reasoning check";card.appendChild(type);
     const t=document.createElement("div");t.className="qtext";t.textContent=(qi+1)+". "+q.q;card.appendChild(t);
     const options=document.createElement("div");options.className="options";
-    q.options.forEach((op,oi)=>{const d=document.createElement("div");d.className="option";d.textContent=op;d.onclick=()=>{options.querySelectorAll(".option").forEach(x=>x.classList.remove("selected"));d.classList.add("selected");answers[qi]=oi};options.appendChild(d)});
+    const shuffled=shuffle(q.options.map((op,oi)=>({op,oi})));
+    shuffled.forEach(item=>{const d=document.createElement("div");d.className="option";d.textContent=item.op;d.dataset.original=item.oi;d.onclick=()=>{options.querySelectorAll(".option").forEach(x=>x.classList.remove("selected"));d.classList.add("selected");answers[qi]=item.oi};options.appendChild(d)});
     const fb=document.createElement("div");fb.className="qfeedback";fb.id="qfb"+qi;card.appendChild(options);card.appendChild(fb);qwrap.appendChild(card);
   });
 }
@@ -336,7 +2569,8 @@ $("checkBtn").onclick=()=>{
   let score=0;
   [...document.querySelectorAll(".qcard")].forEach((card,qi)=>{
     const q=s.questions[qi],chosen=answers[qi];const opts=[...card.querySelectorAll(".option")];
-    opts[chosen].classList.add(chosen===q.answer?"correct":"wrong");if(chosen===q.answer)score++;
+    const chosenEl=opts.find(x=>Number(x.dataset.original)===chosen);
+    if(chosenEl)chosenEl.classList.add(chosen===q.answer?"correct":"wrong");if(chosen===q.answer)score++;
     $("qfb"+qi).textContent=chosen===q.answer?q.feedback:"Reconsider this point. "+s.hint;
   });
   $("scoreBox").classList.remove("hidden");$("scoreBox").textContent="Initial reasoning check: "+score+" / "+s.questions.length+" structured questions correct.";
@@ -353,7 +2587,7 @@ document.querySelectorAll(".compare-choice").forEach(btn=>btn.onclick=()=>{
 });
 function aiPrompt(){
   const s=scenarios[scenarioIndex];const answer=reflection==="revise"&&$("revisedAnswer").value.trim()?$("revisedAnswer").value.trim():committed;
-  return `You are reviewing a beginner networking student's reasoning. Do not simply give the answer first. Evaluate the student's explanation against the scenario and identify which concepts are correct, incomplete, or incorrect. Focus only on Transport-layer application delivery, source/destination ports, multiplexing/demultiplexing, and the distinction between host identification and application/service identification. Do not introduce advanced TCP mechanisms.
+  return `You are reviewing a beginner networking student's reasoning from a lesson on layered network communication. Do not simply give the answer first. Evaluate the student's explanation against the scenario and identify which concepts are correct, incomplete, or incorrect. Keep the review within the concepts taught in this activity: Application data, Transport-layer ports and application delivery, Network-layer IP addressing, Data Link frames/MAC addressing/local-link delivery, Physical-layer bits/signals, encapsulation, decapsulation, and layer responsibilities. Do not introduce advanced TCP mechanisms, routing-table logic, subnetting, ARP, VLANs or other later-course topics.
 
 SCENARIO:
 ${s.title}
