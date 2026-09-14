@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Complete Sender-to-Receiver Communication Simulation</title>
+
+<style>
+:root{
+  --navy:#0b2f6b;
+  --line:#163a76;
+  --ink:#152238;
+  --muted:#5c6b7a;
+  --panel:#f8fbff;
+
+  --app:#dff4df;
+  --app2:#f2fbf2;
+
+  --tcp:#dcecff;
+  --tcp2:#eef6ff;
+
+  --ip:#ffe5a8;
+  --ip2:#fff3d3;
+
+  --eth:#ebe5ff;
+  --eth2:#f6f3ff;
+
+  --fcs:#ffd9df;
+  --fcs2:#fff1f4;
+
+  --ok:#e7f6ec;
+  --ok-ink:#245d35;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:#fff;
+  color:var(--ink);
+  font-family:Inter,"Segoe UI",Arial,sans-serif;
+}
+
+.page{
+  width:min(1480px,98vw);
+  margin:0 auto;
+  padding:22px 12px 34px;
+}
+
+h1{
+  margin:0 0 8px;
+  text-align:center;
+  color:var(--navy);
+  font-size:clamp(28px,4vw,48px);
+  line-height:1.1;
+}
+
+.subtitle{
+  max-width:1080px;
+  margin:0 auto 20px;
+  text-align:center;
+  color:var(--muted);
+  font-size:clamp(14px,1.7vw,18px);
+  line-height:1.5;
+}
+
+.scene{
+  border:1px solid #d7deea;
+  border-radius:20px;
+  padding:20px;
+  background:
+    radial-gradient(circle at 8% 8%, rgba(188,217,255,.16), transparent 24%),
+    radial-gradient(circle at 92% 92%, rgba(235,229,255,.18), transparent 25%),
+    #fff;
+  box-shadow:0 10px 28px rgba(13,47,107,.08);
+  overflow:hidden;
+}
+
+.top-headings{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 190px minmax(0,1fr);
+  gap:18px;
+  align-items:end;
+  margin-bottom:14px;
+}
+
+.flow-heading{
+  text-align:center;
+}
+
+.flow-heading h2{
+  margin:0;
+  color:var(--navy);
+  font-size:25px;
+}
+
+.flow-heading p{
+  margin:5px 0 0;
+  color:var(--muted);
+  font-size:14px;
+  font-weight:600;
+}
+
+.center-heading{
+  text-align:center;
+  color:var(--muted);
+  font-size:13px;
+  font-weight:800;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+}
+
+.main-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 190px minmax(0,1fr);
+  gap:18px;
+  align-items:stretch;
+}
+
+.side{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  min-width:0;
+}
+
+.device{
+  min-height:88px;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:14px 16px;
+  border:2px solid #c7d7ea;
+  border-radius:16px;
+  background:#f4f9ff;
+  opacity:0;
+  transform:translateY(10px);
+}
+
+.device-icon{
+  width:58px;
+  height:44px;
+  border:4px solid var(--navy);
+  border-radius:7px;
+  background:#fff;
+  position:relative;
+  flex:0 0 auto;
+}
+
+.device-icon::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  bottom:-13px;
+  width:28px;
+  height:4px;
+  background:var(--navy);
+  transform:translateX(-50%);
+  box-shadow:0 7px 0 5px #f4f9ff, 0 7px 0 7px var(--navy);
+}
+
+.device strong{
+  color:var(--navy);
+  font-size:18px;
+  display:block;
+}
+
+.device span{
+  display:block;
+  margin-top:3px;
+  color:var(--muted);
+  font-size:14px;
+}
+
+.step{
+  position:relative;
+  border:2px solid #cdd8e6;
+  border-radius:15px;
+  background:#fff;
+  padding:12px;
+  min-height:125px;
+  opacity:0;
+  transform:translateY(10px);
+  box-shadow:0 4px 12px rgba(13,47,107,.04);
+}
+
+.step.active{
+  border-color:var(--line);
+}
+
+.layer-name{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:9px;
+}
+
+.layer-name strong{
+  color:var(--navy);
+  font-size:19px;
+}
+
+.pdu-name{
+  padding:5px 9px;
+  border-radius:999px;
+  background:#eef4fb;
+  color:var(--navy);
+  font-size:12px;
+  font-weight:800;
+  white-space:nowrap;
+}
+
+.transition{
+  position:relative;
+  height:36px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--navy);
+  font-size:13px;
+  font-weight:800;
+  text-align:center;
+  opacity:0;
+}
+
+.transition.down::before{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:1px;
+  width:4px;
+  height:14px;
+  background:var(--navy);
+  transform:translateX(-50%);
+}
+
+.transition.down::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:13px;
+  transform:translateX(-50%);
+  border-left:8px solid transparent;
+  border-right:8px solid transparent;
+  border-top:10px solid var(--navy);
+}
+
+.transition.down span{
+  background:#fff;
+  padding:0 8px;
+  position:relative;
+  top:10px;
+}
+
+.transition.up::before{
+  content:"";
+  position:absolute;
+  left:50%;
+  bottom:1px;
+  width:4px;
+  height:14px;
+  background:var(--navy);
+  transform:translateX(-50%);
+}
+
+.transition.up::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  bottom:13px;
+  transform:translateX(-50%);
+  border-left:8px solid transparent;
+  border-right:8px solid transparent;
+  border-bottom:10px solid var(--navy);
+}
+
+.transition.up span{
+  background:#fff;
+  padding:0 8px;
+  position:relative;
+  bottom:10px;
+}
+
+/* PDU blocks */
+.pdu{
+  display:flex;
+  width:100%;
+  min-height:65px;
+  border:2px solid var(--line);
+  border-radius:10px;
+  overflow:hidden;
+}
+
+.block{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:8px 7px;
+  text-align:center;
+  border-right:2px solid var(--line);
+}
+
+.block:last-child{border-right:0}
+
+.block .title{
+  font-size:14px;
+  font-weight:800;
+  color:#111;
+  line-height:1.15;
+}
+
+.block .detail{
+  margin-top:4px;
+  font-size:11px;
+  color:#36485c;
+  line-height:1.25;
+}
+
+.app-block{
+  background:linear-gradient(180deg,var(--app),var(--app2));
+  flex:1;
+}
+
+.tcp-block{
+  background:linear-gradient(180deg,var(--tcp),var(--tcp2));
+  flex:.72;
+}
+
+.ip-block{
+  background:linear-gradient(180deg,var(--ip),var(--ip2));
+  flex:.72;
+}
+
+.eth-block{
+  background:linear-gradient(180deg,var(--eth),var(--eth2));
+  flex:.82;
+}
+
+.fcs-block{
+  background:linear-gradient(180deg,var(--fcs),var(--fcs2));
+  flex:.3;
+}
+
+.bits{
+  border:2px solid var(--line);
+  border-radius:10px;
+  padding:14px 12px;
+  text-align:center;
+  font-weight:800;
+  letter-spacing:.05em;
+  font-size:17px;
+  background:#fff;
+  overflow-wrap:anywhere;
+}
+
+.bits small{
+  display:block;
+  margin-top:6px;
+  color:var(--muted);
+  letter-spacing:0;
+  font-weight:500;
+  font-size:11px;
+}
+
+/* Center column */
+.center-flow{
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  justify-content:space-between;
+  min-width:0;
+}
+
+.center-spacer{
+  flex:1;
+}
+
+.middle-note{
+  border:1px dashed #bdd0e6;
+  border-radius:13px;
+  padding:12px 10px;
+  background:#fbfdff;
+  text-align:center;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.45;
+}
+
+.middle-note strong{
+  color:var(--navy);
+}
+
+/* Transmission area */
+.transmission-wrap{
+  margin-top:18px;
+  padding:16px;
+  border:2px solid #ccd9ea;
+  border-radius:16px;
+  background:#f8fbff;
+  opacity:0;
+  transform:translateY(8px);
+}
+
+.transmission-title{
+  text-align:center;
+  color:var(--navy);
+  font-size:20px;
+  font-weight:800;
+  margin-bottom:9px;
+}
+
+.transmission-sub{
+  text-align:center;
+  color:var(--muted);
+  font-size:13px;
+  margin-bottom:14px;
+}
+
+.medium{
+  position:relative;
+  height:92px;
+  display:grid;
+  grid-template-columns:160px 1fr 160px;
+  gap:12px;
+  align-items:center;
+}
+
+.interface-box{
+  text-align:center;
+  color:var(--navy);
+  font-weight:800;
+  font-size:14px;
+}
+
+.interface-box span{
+  display:block;
+  margin-top:3px;
+  color:var(--muted);
+  font-weight:600;
+  font-size:12px;
+}
+
+.link-area{
+  position:relative;
+  height:72px;
+}
+
+.copper-line{
+  position:absolute;
+  left:0;
+  right:0;
+  top:36px;
+  height:6px;
+  border-radius:999px;
+  background:#1970d6;
+}
+
+.wave{
+  position:absolute;
+  left:3%;
+  right:3%;
+  top:3px;
+  height:45px;
+}
+
+.wave svg{
+  width:100%;
+  height:100%;
+  display:block;
+}
+
+.signal-pulse{
+  position:absolute;
+  top:26px;
+  left:0;
+  width:24px;
+  height:24px;
+  border-radius:50%;
+  background:#fff;
+  border:5px solid #1970d6;
+  box-shadow:0 0 0 6px rgba(25,112,214,.12);
+  opacity:0;
+}
+
+.medium-label{
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  bottom:0;
+  color:var(--navy);
+  font-size:12px;
+  font-weight:800;
+  white-space:nowrap;
+}
+
+.accepted{
+  display:inline-block;
+  margin-top:8px;
+  padding:5px 9px;
+  border-radius:999px;
+  background:var(--ok);
+  border:1px solid #b9ddc4;
+  color:var(--ok-ink);
+  font-size:12px;
+  font-weight:800;
+}
+
+/* Summary row */
+.summary{
+  margin-top:18px;
+  padding:13px 14px;
+  border-radius:14px;
+  background:#f7fafc;
+  border:1px solid #d8e2ee;
+  text-align:center;
+  color:#3b4a5e;
+  font-size:14px;
+  line-height:1.5;
+  opacity:0;
+}
+
+.summary strong{
+  color:var(--navy);
+}
+
+/* Controls */
+.controls{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:16px;
+}
+
+button{
+  border:0;
+  border-radius:10px;
+  padding:10px 18px;
+  font-size:15px;
+  font-weight:800;
+  cursor:pointer;
+}
+
+.replay{
+  background:var(--navy);
+  color:#fff;
+}
+
+.pause{
+  background:#edf3fb;
+  color:var(--navy);
+  border:1px solid #c8d5e8;
+}
+
+.speed-control{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:8px 12px;
+  border:1px solid #c8d5e8;
+  border-radius:10px;
+  background:#f8fbff;
+  color:var(--navy);
+  font-size:14px;
+  font-weight:700;
+}
+
+.speed-control input[type="range"]{
+  width:170px;
+  accent-color:var(--navy);
+  cursor:pointer;
+}
+
+.speed-value{
+  min-width:44px;
+  text-align:right;
+  font-variant-numeric:tabular-nums;
+}
+
+.note{
+  max-width:1080px;
+  margin:14px auto 0;
+  text-align:center;
+  color:#526173;
+  font-size:13px;
+  line-height:1.5;
+}
+
+.credit{
+  margin-top:18px;
+  text-align:center;
+  color:#6b7480;
+  font-size:13px;
+  font-weight:600;
+}
+
+/* ---------------- Animation timeline ---------------- */
+
+.sender-device{
+  animation:showUp .7s .3s forwards;
+}
+
+.sender-app{
+  animation:showUp .8s 1.4s forwards, highlight 1.0s 1.8s 1;
+}
+.s-t1{animation:fadeIn .5s 3.5s forwards}
+.sender-transport{
+  animation:showUp .8s 4.2s forwards, highlight 1.0s 4.6s 1;
+}
+.s-t2{animation:fadeIn .5s 6.2s forwards}
+.sender-network{
+  animation:showUp .8s 6.9s forwards, highlight 1.0s 7.3s 1;
+}
+.s-t3{animation:fadeIn .5s 8.9s forwards}
+.sender-datalink{
+  animation:showUp .8s 9.6s forwards, highlight 1.0s 10.0s 1;
+}
+.s-t4{animation:fadeIn .5s 11.8s forwards}
+.sender-physical{
+  animation:showUp .8s 12.5s forwards, highlight 1.0s 12.9s 1;
+}
+
+.transmission-wrap{
+  animation:showUp .8s 14.8s forwards;
+}
+
+.signal-pulse{
+  animation:pulseTravel 3.2s 16.2s forwards;
+}
+
+.receiver-device{
+  animation:showUp .7s 18.8s forwards;
+}
+
+.receiver-physical{
+  animation:showUp .8s 19.6s forwards, highlight 1.0s 20.0s 1;
+}
+.r-t1{animation:fadeIn .5s 21.7s forwards}
+.receiver-datalink{
+  animation:showUp .8s 22.4s forwards, highlight 1.0s 22.8s 1;
+}
+.r-t2{animation:fadeIn .5s 24.5s forwards}
+.receiver-network{
+  animation:showUp .8s 25.2s forwards, highlight 1.0s 25.6s 1;
+}
+.r-t3{animation:fadeIn .5s 27.3s forwards}
+.receiver-transport{
+  animation:showUp .8s 28.0s forwards, highlight 1.0s 28.4s 1;
+}
+.r-t4{animation:fadeIn .5s 30.1s forwards}
+.receiver-app{
+  animation:showUp .8s 30.8s forwards, highlight 1.0s 31.2s 1;
+}
+
+.summary{
+  animation:fadeIn .8s 33.0s forwards;
+}
+
+@keyframes showUp{
+  to{opacity:1;transform:translateY(0)}
+}
+
+@keyframes fadeIn{
+  to{opacity:1}
+}
+
+@keyframes highlight{
+  0%,100%{box-shadow:0 4px 12px rgba(13,47,107,.04)}
+  50%{box-shadow:0 0 0 5px rgba(11,47,107,.13),0 8px 18px rgba(13,47,107,.10)}
+}
+
+@keyframes pulseTravel{
+  0%{left:0;opacity:0}
+  5%{opacity:1}
+  95%{opacity:1}
+  100%{left:calc(100% - 24px);opacity:0}
+}
+
+.paused *{
+  animation-play-state:paused !important;
+}
+
+/* Responsive */
+@media (max-width:1050px){
+  .top-headings,
+  .main-grid{
+    grid-template-columns:minmax(0,1fr) 120px minmax(0,1fr);
+    gap:10px;
+  }
+
+  .block .title{font-size:12px}
+  .block .detail{font-size:10px}
+  .layer-name strong{font-size:17px}
+  .pdu-name{font-size:10px}
+  .bits{font-size:14px}
+  .medium{grid-template-columns:120px 1fr 120px}
+}
+
+@media (max-width:760px){
+  .top-headings{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .center-heading{
+    display:none;
+  }
+
+  .main-grid{
+    grid-template-columns:1fr;
+  }
+
+  .center-flow{
+    display:none;
+  }
+
+  .flow-heading h2{
+    font-size:20px;
+  }
+
+  .receiver-side{
+    margin-top:18px;
+    padding-top:18px;
+    border-top:2px dashed #d0dcea;
+  }
+
+  .medium{
+    grid-template-columns:84px 1fr 84px;
+    gap:6px;
+  }
+
+  .interface-box{
+    font-size:12px;
+  }
+
+  .interface-box span{
+    font-size:10px;
+  }
+
+  .medium-label{
+    font-size:10px;
+  }
+
+  .block .detail{
+    display:none;
+  }
+
+  .step{
+    min-height:105px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{
+    animation-duration:.001ms !important;
+    animation-delay:0ms !important;
+  }
+}
+</style>
+</head>
+
+<body>
+<div class="page">
+  <h1>Complete Sender-to-Receiver Communication</h1>
+  <p class="subtitle">
+    Follow the same HTTP web request from <strong>Office-PC</strong> through sender-side encapsulation,
+    physical transmission, and receiver-side decapsulation until the application data is available again.
+  </p>
+
+  <div class="scene" id="scene">
+
+    <div class="top-headings">
+      <div class="flow-heading">
+        <h2>Sender — Encapsulation</h2>
+        <p>Information moves downward through the layers.</p>
+      </div>
+
+      <div class="center-heading">Complete Communication</div>
+
+      <div class="flow-heading">
+        <h2>Receiver — Decapsulation</h2>
+        <p>Information moves upward through the layers.</p>
+      </div>
+    </div>
+
+    <div class="main-grid">
+
+      <!-- SENDER -->
+      <div class="side sender-side">
+
+        <div class="device sender-device">
+          <div class="device-icon"></div>
+          <div>
+            <strong>Office-PC</strong>
+            <span>Web browser generates an HTTP Web Request</span>
+          </div>
+        </div>
+
+        <div class="step sender-app">
+          <div class="layer-name">
+            <strong>Application Layer</strong>
+            <span class="pdu-name">PDU — Data</span>
+          </div>
+          <div class="pdu">
+            <div class="block app-block">
+              <div class="title">Application Data</div>
+              <div class="detail">HTTP Web Request</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="transition down s-t1"><span>TCP adds a header</span></div>
+
+        <div class="step sender-transport">
+          <div class="layer-name">
+            <strong>Transport Layer</strong>
+            <span class="pdu-name">PDU — TCP Segment</span>
+          </div>
+          <div class="pdu">
+            <div class="block tcp-block">
+              <div class="title">TCP Header</div>
+              <div class="detail">Source Port 49152<br>Destination Port 80</div>
+            </div>
+            <div class="block app-block">
+              <div class="title">Application Data</div>
+              <div class="detail">HTTP Web Request</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="transition down s-t2"><span>IP adds a header</span></div>
+
+        <div class="step sender-network">
+          <div class="layer-name">
+            <strong>Network Layer</strong>
+            <span class="pdu-name">PDU — IP Packet</span>
+          </div>
+          <div class="pdu">
+            <div class="block ip-block">
+              <div class="title">IP Header</div>
+              <div class="detail">Source IP Address<br>Destination IP Address</div>
+            </div>
+            <div class="block tcp-block">
+              <div class="title">TCP Header</div>
+            </div>
+            <div class="block app-block">
+              <div class="title">Application Data</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="transition down s-t3"><span>Ethernet adds a header and FCS trailer</span></div>
+
+        <div class="step sender-datalink">
+          <div class="layer-name">
+            <strong>Data Link Layer</strong>
+            <span class="pdu-name">PDU — Ethernet Frame</span>
+          </div>
+          <div class="pdu">
+            <div class="block eth-block">
+              <div class="title">Ethernet Header</div>
+              <div class="detail">Destination MAC<br>Source MAC<br>EtherType</div>
+            </div>
+            <div class="block ip-block">
+              <div class="title">IP Header</div>
+            </div>
+            <div class="block tcp-block">
+              <div class="title">TCP Header</div>
+            </div>
+            <div class="block app-block">
+              <div class="title">Application Data</div>
+            </div>
+            <div class="block fcs-block">
+              <div class="title">FCS</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="transition down s-t4"><span>Frame is represented as bits</span></div>
+
+        <div class="step sender-physical">
+          <div class="layer-name">
+            <strong>Physical Layer</strong>
+            <span class="pdu-name">Bits</span>
+          </div>
+          <div class="bits">
+            10110100 01101001 11000100 01011010 ...
+            <small>Illustrative bit sequence — not the actual complete binary contents of the frame</small>
+          </div>
+          <div style="margin-top:8px;text-align:center;color:var(--navy);font-size:13px;font-weight:800;">
+            Bits are encoded into an electrical signal
+          </div>
+        </div>
+
+      </div>
+
+      <!-- CENTER -->
+      <div class="center-flow">
+        <div class="middle-note">
+          <strong>Encapsulation</strong><br>
+          The original application data remains enclosed as each lower layer adds the information required for its function.
+        </div>
+
+        <div class="center-spacer"></div>
+
+        <div class="middle-note">
+          <strong>Physical transmission</strong><br>
+          The signal connects sender-side encapsulation with receiver-side decapsulation.
+        </div>
+
+        <div class="center-spacer"></div>
+
+        <div class="middle-note">
+          <strong>Decapsulation</strong><br>
+          The receiver processes the surrounding protocol information as the data moves upward.
+        </div>
+      </div>
+
+      <!-- RECEIVER -->
+      <div class="side receiver-side">
+
+        <div class="device receiver-device">
+          <div class="device-icon"></div>
+          <div>
+            <strong>Receiving Host</strong>
+            <span>Application receives the HTTP Web Request</span>
+          </div>
+        </div>
+
+        <div class="step receiver-app">
+          <div class="layer-name">
+            <strong>Application Layer</strong>
+            <span class="pdu-name">PDU — Data</span>
+          </div>
+          <div class="pdu">
+            <div class="block app-block">
+              <div class="title">Application Data</div>
+              <div class="detail">HTTP Web Request available to the receiving application</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="transition up r-t4"><span>TCP information processed</span></div>
+
+        <div class="step receiver-transport">
+          <div class="layer-name">
+            <strong>Transport Layer</strong>
+            <span class="pdu-name">PDU — TCP Segment</span>
+          </div>
+          <div class="pdu">
+            <div class="block tcp-block">
+              <div class="title">TCP Header</div>
+              <div class="detail">Source Port 49152<br>Destination Port 80</div>
+            </div>
+            <div class="block app-block">
+              <div class="title">Application Data</div>
+              <div class="detail">HTTP Web Request</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="transition up r-t3"><span>IP information processed</span></div>
+
+        <div class="step receiver-network">
+          <div class="layer-name">
+            <strong>Network Layer</strong>
+            <span class="pdu-name">PDU — IP Packet</span>
+          </div>
+          <div class="pdu">
+            <div class="block ip-block">
+              <div class="title">IP Header</div>
+              <div class="detail">Source IP Address<br>Destination IP Address</div>
+            </div>
+            <div class="block tcp-block">
+              <div class="title">TCP Header</div>
+            </div>
+            <div class="block app-block">
+              <div class="title">Application Data</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="transition up r-t2"><span>Ethernet information processed</span></div>
+
+        <div class="step receiver-datalink">
+          <div class="layer-name">
+            <strong>Data Link Layer</strong>
+            <span class="pdu-name">PDU — Ethernet Frame</span>
+          </div>
+          <div class="pdu">
+            <div class="block eth-block">
+              <div class="title">Ethernet Header</div>
+              <div class="detail">Destination MAC<br>Source MAC<br>EtherType</div>
+            </div>
+            <div class="block ip-block">
+              <div class="title">IP Header</div>
+            </div>
+            <div class="block tcp-block">
+              <div class="title">TCP Header</div>
+            </div>
+            <div class="block app-block">
+              <div class="title">Application Data</div>
+            </div>
+            <div class="block fcs-block">
+              <div class="title">FCS</div>
+            </div>
+          </div>
+          <span class="accepted">Frame accepted</span>
+        </div>
+
+        <div class="transition up r-t1"><span>Signal interpreted and bits recovered</span></div>
+
+        <div class="step receiver-physical">
+          <div class="layer-name">
+            <strong>Physical Layer</strong>
+            <span class="pdu-name">Recovered Bits</span>
+          </div>
+          <div class="bits">
+            10110100 01101001 11000100 01011010 ...
+            <small>The receiving interface recovers the bit sequence from the incoming signal</small>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TRANSMISSION -->
+    <div class="transmission-wrap">
+      <div class="transmission-title">Physical Transmission</div>
+      <div class="transmission-sub">
+        Conceptual electrical signal crossing the copper Ethernet medium. No specific line-encoding method is shown.
+      </div>
+
+      <div class="medium">
+        <div class="interface-box">
+          Sending Interface
+          <span>bits → signal</span>
+        </div>
+
+        <div class="link-area">
+          <div class="wave">
+            <svg viewBox="0 0 1000 100" preserveAspectRatio="none" aria-hidden="true">
+              <path
+                d="M0,55
+                   C45,10 90,100 135,55
+                   S225,10 270,55
+                   S360,100 405,55
+                   S495,10 540,55
+                   S630,100 675,55
+                   S765,10 810,55
+                   S900,100 1000,55"
+                fill="none"
+                stroke="#1970d6"
+                stroke-width="7"
+                stroke-linecap="round"
+              />
+            </svg>
+          </div>
+          <div class="copper-line"></div>
+          <div class="signal-pulse"></div>
+          <div class="medium-label">Copper Ethernet Medium</div>
+        </div>
+
+        <div class="interface-box">
+          Receiving Interface
+          <span>signal → bits</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary">
+      <strong>Complete progression:</strong>
+      Application Data → TCP Segment → IP Packet → Ethernet Frame → Bits → Physical Signal
+      → Recovered Bits → Ethernet Frame → IP Packet → TCP Segment → Application Data
+    </div>
+
+  </div>
+
+  <div class="controls">
+    <button class="replay" onclick="replayAnimation()">Replay animation</button>
+    <button class="pause" id="pauseBtn" onclick="togglePause()">Pause</button>
+
+    <div class="speed-control">
+      <label for="speedSlider">Speed</label>
+      <input
+        id="speedSlider"
+        type="range"
+        min="0.50"
+        max="1.50"
+        step="0.05"
+        value="0.75"
+        oninput="updateSpeed(this.value)"
+      />
+      <span class="speed-value" id="speedValue">0.75×</span>
+    </div>
+  </div>
+
+  <div class="note">
+    This simulation consolidates only the concepts introduced in Lesson 1.3. It does not introduce ARP, switching-table behaviour,
+    routing decisions, advanced TCP operation, or a specific Physical-layer encoding scheme.
+  </div>
+
+  <div class="credit">Created by Zeeshan Basit</div>
+</div>
+
+<script>
+let paused = false;
+let playbackRate = 0.75;
+
+function applyPlaybackRate(){
+  const currentScene = document.getElementById("scene");
+  if(!currentScene) return;
+
+  currentScene.getAnimations({subtree:true}).forEach(animation=>{
+    animation.playbackRate = playbackRate;
+  });
+}
+
+function updateSpeed(value){
+  playbackRate = parseFloat(value);
+  document.getElementById("speedValue").textContent = playbackRate.toFixed(2) + "×";
+  applyPlaybackRate();
+}
+
+function replayAnimation(){
+  const currentScene = document.getElementById("scene");
+  currentScene.classList.remove("paused");
+  paused = false;
+
+  const clone = currentScene.cloneNode(true);
+  currentScene.parentNode.replaceChild(clone, currentScene);
+
+  document.getElementById("pauseBtn").textContent = "Pause";
+
+  requestAnimationFrame(()=>{
+    applyPlaybackRate();
+  });
+}
+
+function togglePause(){
+  const currentScene = document.getElementById("scene");
+  paused = !paused;
+  currentScene.classList.toggle("paused", paused);
+  document.getElementById("pauseBtn").textContent = paused ? "Resume" : "Pause";
+}
+
+window.addEventListener("load",()=>{
+  updateSpeed(document.getElementById("speedSlider").value);
+});
+</script>
+</body>
+</html>
