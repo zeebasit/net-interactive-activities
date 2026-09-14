@@ -760,6 +760,142 @@ button{
   }
 }
 </style>
+
+<style>
+/* Revised consolidated layout: sender and receiver are the two primary processes. */
+.top-headings{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:28px;
+  align-items:end;
+  margin-bottom:14px;
+}
+
+.main-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:28px;
+  align-items:stretch;
+}
+
+.center-heading,
+.center-flow,
+.middle-note,
+.center-spacer{
+  display:none !important;
+}
+
+.process-tag{
+  margin-top:10px;
+  padding:6px 10px;
+  border-radius:999px;
+  text-align:center;
+  font-size:12px;
+  font-weight:800;
+  background:#eef6ff;
+  border:1px solid #c7dcf6;
+  color:var(--navy);
+}
+
+/* Transmission is now explicitly the bridge between the two Physical layers. */
+.transmission-wrap{
+  margin-top:24px;
+  position:relative;
+}
+
+.transmission-wrap::before{
+  content:"Sender Physical Layer";
+  position:absolute;
+  left:18px;
+  top:-29px;
+  color:var(--navy);
+  font-size:12px;
+  font-weight:800;
+}
+
+.transmission-wrap::after{
+  content:"Receiver Physical Layer";
+  position:absolute;
+  right:18px;
+  top:-29px;
+  color:var(--navy);
+  font-size:12px;
+  font-weight:800;
+}
+
+.transmission-title{
+  font-size:23px;
+}
+
+.transmission-sub{
+  max-width:760px;
+  margin:0 auto 14px;
+  line-height:1.45;
+}
+
+.medium{
+  grid-template-columns:180px 1fr 180px;
+}
+
+.interface-box:first-child::before{
+  content:"ENCAPSULATION ↓";
+  display:block;
+  margin-bottom:6px;
+  color:var(--navy);
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.04em;
+}
+
+.interface-box:last-child::before{
+  content:"↑ DECAPSULATION";
+  display:block;
+  margin-bottom:6px;
+  color:var(--navy);
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.04em;
+}
+
+.summary{
+  margin-top:20px;
+}
+
+@media (max-width:1050px){
+  .top-headings,
+  .main-grid{
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    gap:14px;
+  }
+
+  .medium{
+    grid-template-columns:130px 1fr 130px;
+  }
+}
+
+@media (max-width:760px){
+  .top-headings,
+  .main-grid{
+    grid-template-columns:1fr;
+  }
+
+  .receiver-side{
+    margin-top:24px;
+    padding-top:24px;
+    border-top:2px dashed #d0dcea;
+  }
+
+  .transmission-wrap::before,
+  .transmission-wrap::after{
+    display:none;
+  }
+
+  .medium{
+    grid-template-columns:86px 1fr 86px;
+  }
+}
+</style>
+
 </head>
 
 <body>
@@ -777,8 +913,6 @@ button{
         <h2>Sender — Encapsulation</h2>
         <p>Information moves downward through the layers.</p>
       </div>
-
-      <div class="center-heading">Complete Communication</div>
 
       <div class="flow-heading">
         <h2>Receiver — Decapsulation</h2>
@@ -893,30 +1027,9 @@ button{
           <div style="margin-top:8px;text-align:center;color:var(--navy);font-size:13px;font-weight:800;">
             Bits are encoded into an electrical signal
           </div>
+          <div class="process-tag sender-tag">End of sender-side encapsulation</div>
         </div>
 
-      </div>
-
-      <!-- CENTER -->
-      <div class="center-flow">
-        <div class="middle-note">
-          <strong>Encapsulation</strong><br>
-          The original application data remains enclosed as each lower layer adds the information required for its function.
-        </div>
-
-        <div class="center-spacer"></div>
-
-        <div class="middle-note">
-          <strong>Physical transmission</strong><br>
-          The signal connects sender-side encapsulation with receiver-side decapsulation.
-        </div>
-
-        <div class="center-spacer"></div>
-
-        <div class="middle-note">
-          <strong>Decapsulation</strong><br>
-          The receiver processes the surrounding protocol information as the data moves upward.
-        </div>
       </div>
 
       <!-- RECEIVER -->
@@ -1022,6 +1135,7 @@ button{
             10110100 01101001 11000100 01011010 ...
             <small>The receiving interface recovers the bit sequence from the incoming signal</small>
           </div>
+          <div class="process-tag receiver-tag">Start of receiver-side decapsulation</div>
         </div>
 
       </div>
