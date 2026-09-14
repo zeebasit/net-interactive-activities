@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 4 Activity 2 — IPv4 AND Machine</title>
+<style>
+:root{
+  --bg:#f5f7fb;--panel:#fff;--text:#172033;--muted:#667085;--line:#d9e0ea;
+  --accent:#1769e0;--accent-dark:#0f4faa;--soft:#eef4ff;--good:#137a4b;
+  --good-bg:#edf9f2;--bad:#b42318;--bad-bg:#fff1f0;--hint:#805600;
+  --hint-bg:#fff7df;--shadow:0 12px 32px rgba(20,35,60,.08);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  background:linear-gradient(180deg,#f7f9fc 0,#f3f6fa 100%);color:var(--text)
+}
+button,input{font:inherit}
+button{touch-action:manipulation}
+.shell{max-width:1200px;margin:0 auto;padding:32px 20px 64px}
+.hero{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap;margin-bottom:20px}
+.eyebrow{color:var(--accent);font-weight:800;font-size:.82rem;letter-spacing:.06em;text-transform:uppercase}
+h1{margin:.28rem 0 .45rem;font-size:clamp(1.8rem,3.4vw,2.65rem)}
+.lead{margin:0;color:var(--muted);line-height:1.62;max-width:790px}
+.phase-nav{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 8px}
+.phase-pill{
+  border:1px solid var(--line);background:#fff;color:#42526a;cursor:pointer;
+  padding:9px 13px;border-radius:999px;font-weight:750;font-size:.9rem
+}
+.phase-pill:hover{border-color:#9fb6da}
+.phase-pill.active{background:var(--soft);border-color:#9fc0f7;color:var(--accent-dark)}
+.phase-help{color:var(--muted);font-size:.86rem;line-height:1.45;max-width:790px}
+.progress-card{
+  min-width:245px;background:var(--panel);border:1px solid var(--line);
+  border-radius:14px;padding:14px 16px;box-shadow:var(--shadow)
+}
+.progress-row{display:flex;justify-content:space-between;gap:18px;font-size:.9rem;margin-bottom:8px}
+.progress-row + .progress-row{margin-top:10px}
+.progress-track{height:10px;background:#e7edf5;border-radius:999px;overflow:hidden}
+.progress-fill{height:100%;width:0;background:var(--accent);transition:width .25s ease}
+.card{
+  background:var(--panel);border:1px solid var(--line);border-radius:18px;
+  box-shadow:var(--shadow);padding:clamp(20px,3vw,30px)
+}
+.hidden{display:none!important}
+.intro-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:24px 0}
+.intro-step{border:1px solid var(--line);border-radius:14px;padding:17px;background:#fbfcfe}
+.step-number{
+  display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;
+  border-radius:999px;background:var(--soft);color:var(--accent-dark);font-weight:850;margin-bottom:9px
+}
+.intro-step h2{font-size:1rem;margin:0 0 6px}
+.intro-step p{font-size:.91rem;color:var(--muted);line-height:1.5;margin:0}
+.rule-box{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:20px 0;
+  border:1px solid #c9daf7;background:#f6f9ff;border-radius:14px;padding:14px
+}
+.rule{background:#fff;border:1px solid var(--line);border-radius:10px;padding:11px;text-align:center;font:800 .95rem ui-monospace,SFMono-Regular,Consolas,monospace}
+.note{
+  border:1px solid #c9daf7;background:#f6f9ff;border-radius:13px;padding:14px 16px;
+  color:#34445b;line-height:1.55;margin:18px 0
+}
+.primary,.secondary,.ghost{
+  border:none;border-radius:10px;padding:11px 16px;font-weight:800;cursor:pointer
+}
+.primary{background:var(--accent);color:#fff}
+.primary:hover:not(:disabled){background:var(--accent-dark)}
+.secondary{background:#eef2f7;color:#263245}
+.ghost{background:#fff;color:#263245;border:1px solid var(--line)}
+button:focus-visible,input:focus-visible{outline:3px solid rgba(23,105,224,.28);outline-offset:2px}
+button:disabled,input:disabled{opacity:.67;cursor:not-allowed}
+.question-top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap}
+.question-kicker{font-size:.8rem;color:var(--muted);font-weight:850;text-transform:uppercase;letter-spacing:.05em}
+.stage-chip{
+  display:inline-flex;padding:7px 11px;border-radius:999px;background:var(--soft);
+  color:var(--accent-dark);font-weight:800;font-size:.82rem
+}
+#questionTitle{font-size:clamp(1.35rem,2.5vw,1.75rem);margin:.28rem 0 .4rem}
+.instruction{color:var(--muted);line-height:1.58;margin:0}
+.address-panel{
+  margin:22px 0 18px;border:1px solid var(--line);border-radius:16px;background:#fbfcfe;
+  padding:18px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px
+}
+.address-item{text-align:center;border-right:1px solid var(--line)}
+.address-item:last-child{border-right:0}
+.address-label{display:block;color:var(--muted);font-weight:800;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em}
+.address-value{display:block;margin-top:5px;font:850 clamp(1.08rem,2.5vw,1.5rem) ui-monospace,SFMono-Regular,Consolas,monospace;word-break:break-word}
+.machine-heading{display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap;margin:20px 0 10px}
+.machine-heading h3{margin:0;font-size:1.05rem}
+.machine-heading span{color:var(--muted);font-size:.86rem}
+.octet-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.octet-card{border:1px solid var(--line);border-radius:15px;background:#fbfcfe;padding:15px}
+.octet-card.problem{border-color:#df8a82;background:#fff8f7}
+.octet-title{font-weight:850;margin-bottom:11px;display:flex;justify-content:space-between;gap:10px}
+.octet-title span{color:var(--muted);font-size:.8rem;font-weight:700}
+.binary-row{display:grid;grid-template-columns:62px repeat(8,minmax(28px,1fr));gap:4px;align-items:center;margin:6px 0}
+.row-label{font-size:.76rem;color:#536174;font-weight:850}
+.bit{
+  min-height:34px;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);
+  border-radius:7px;background:#fff;font:850 .88rem ui-monospace,SFMono-Regular,Consolas,monospace
+}
+.bit.one{background:#e8f1ff;border-color:#b6cef3;color:#0f4faa}
+button.bit{width:100%;cursor:pointer}
+button.bit:hover{border-color:#7fa7df}
+button.bit.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.and-line{height:1px;background:#aebbd0;margin:9px 0 8px 66px}
+.decimal-answer{display:flex;align-items:center;justify-content:flex-end;gap:9px;margin-top:12px}
+.decimal-answer label{font-size:.8rem;color:#536174;font-weight:800}
+.decimal-answer input{
+  width:86px;border:1px solid #aebbd0;border-radius:9px;padding:9px 8px;text-align:center;
+  background:#fff;color:var(--text);font:800 1rem ui-monospace,SFMono-Regular,Consolas,monospace
+}
+.network-preview{
+  margin-top:17px;border:1px solid var(--line);border-radius:13px;padding:14px 16px;background:#fff;
+  display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap
+}
+.network-preview span{color:var(--muted);font-weight:750}
+.network-preview strong{font:850 1.2rem ui-monospace,SFMono-Regular,Consolas,monospace}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+.message{display:none;margin-top:18px;border-radius:12px;padding:14px 16px;line-height:1.55}
+.message.good{display:block;background:var(--good-bg);color:var(--good);border:1px solid #b8e2cc}
+.message.bad{display:block;background:var(--bad-bg);color:var(--bad);border:1px solid #f0c5c2}
+.message.hint{display:block;background:var(--hint-bg);color:var(--hint);border:1px solid #efd792}
+.explanation{display:none;margin-top:15px;border:1px solid var(--line);border-radius:14px;padding:16px;background:#fbfcfe;line-height:1.58}
+.explanation.show{display:block}
+.explanation h3{font-size:1rem;margin:0 0 8px}
+.explanation p{margin:0;color:#42526a}
+.explanation code{font:800 .93rem ui-monospace,SFMono-Regular,Consolas,monospace}
+.credit{margin-top:20px;text-align:center;color:#6b7480;font-size:13px;font-weight:600}
+.results{text-align:center}
+.result-score{font-size:clamp(2.2rem,7vw,4rem);font-weight:900;color:var(--accent);margin:8px 0}
+.result-sub{color:var(--muted);line-height:1.55}
+.result-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:22px 0;text-align:left}
+.result-item{border:1px solid var(--line);border-radius:13px;padding:15px;background:#fbfcfe}
+.result-item strong{display:block;font-size:1.25rem;margin-bottom:3px}
+.result-item span{color:var(--muted);font-size:.88rem}
+.review{margin:18px 0;text-align:left;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.review-row{display:flex;justify-content:space-between;gap:12px;padding:11px 14px;border-bottom:1px solid var(--line)}
+.review-row:last-child{border-bottom:0}
+.status-good{color:var(--good);font-weight:800}
+.status-review{color:var(--bad);font-weight:800}
+@media(max-width:900px){.octet-grid{grid-template-columns:1fr}}
+@media(max-width:760px){
+  .intro-grid,.result-grid,.address-panel{grid-template-columns:1fr}
+  .address-item{border-right:0;border-bottom:1px solid var(--line);padding-bottom:11px}
+  .address-item:last-child{border-bottom:0;padding-bottom:0}
+  .rule-box{grid-template-columns:repeat(2,1fr)}
+  .progress-card{width:100%}
+  .shell{padding:22px 12px 44px}
+  .card{border-radius:15px}
+  .binary-row{grid-template-columns:54px repeat(8,minmax(24px,1fr));gap:3px}
+  .bit{font-size:.78rem;min-height:32px}
+  .and-line{margin-left:58px}
+}
+@media(max-width:430px){
+  .octet-card{padding:11px}
+  .binary-row{grid-template-columns:48px repeat(8,minmax(20px,1fr));gap:2px}
+  .row-label{font-size:.68rem}
+  .bit{font-size:.72rem;min-height:30px}
+}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main class="shell">
+<header class="hero">
+  <div>
+    <div class="eyebrow">Old Content · Module 4 · Practice Activity</div>
+    <h1>IPv4 AND Machine</h1>
+    <p class="lead">
+      Perform Boolean AND on an IPv4 address and subnet mask to discover the network address.
+      Work through each octet in binary, then verify the decimal result.
+    </p>
+    <nav class="phase-nav" aria-label="Activity phases">
+      <button type="button" class="phase-pill" id="phase1Btn">Phase 1 · Whole-Octet Masks</button>
+      <button type="button" class="phase-pill" id="phase2Btn">Phase 2 · Subnet Octet</button>
+      <button type="button" class="phase-pill" id="phase3Btn">Phase 3 · Challenge</button>
+    </nav>
+    <div class="phase-help">
+      Open any phase directly for review. Selecting a phase starts at its first question and resets the current score.
+    </div>
+  </div>
+  <aside class="progress-card hidden" id="progressCard" aria-label="Activity progress">
+    <div class="progress-row"><span id="progressLabel">Question 1 of 8</span><strong id="percentText">0%</strong></div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-row"><span>Score</span><strong id="scoreText">0 / 8</strong></div>
+  </aside>
+</header>
+
+<section class="card" id="introCard">
+  <div class="question-kicker">Module 4 Activity 2</div>
+  <h2>Use AND to identify an IPv4 network</h2>
+  <p class="instruction">
+    For every bit position, compare the address bit with the mask bit. The result is 1 only
+    when both bits are 1. Complete the binary result and its decimal value for all four octets.
+  </p>
+  <div class="rule-box" aria-label="Boolean AND rules">
+    <div class="rule">0 AND 0 = 0</div>
+    <div class="rule">0 AND 1 = 0</div>
+    <div class="rule">1 AND 0 = 0</div>
+    <div class="rule">1 AND 1 = 1</div>
+  </div>
+  <div class="intro-grid">
+    <article class="intro-step">
+      <div class="step-number">1</div><h2>Compare each bit</h2>
+      <p>Read the IP-address row and mask row vertically within each octet.</p>
+    </article>
+    <article class="intro-step">
+      <div class="step-number">2</div><h2>Build the AND result</h2>
+      <p>Switch on a result bit only when both bits directly above it are 1.</p>
+    </article>
+    <article class="intro-step">
+      <div class="step-number">3</div><h2>Convert to decimal</h2>
+      <p>Convert the four result octets to dotted decimal to reveal the network address.</p>
+    </article>
+  </div>
+  <div class="note">
+    <strong>Practice mode:</strong> You have two attempts per question. An incorrect first
+    attempt identifies which octets need attention without revealing the answer.
+  </div>
+  <button class="primary" id="startBtn">Start Activity</button>
+  <div class="credit">Created by Zeeshan Basit</div>
+</section>
+
+<section class="card hidden" id="questionCard">
+  <div class="question-top">
+    <div>
+      <div class="question-kicker" id="questionNumber">Question 1 of 8</div>
+      <h2 id="questionTitle">Find the network address</h2>
+      <p class="instruction" id="questionInstruction"></p>
+    </div>
+    <div class="stage-chip" id="stageChip">Whole-octet masks</div>
+  </div>
+
+  <div class="address-panel">
+    <div class="address-item"><span class="address-label">IPv4 address</span><strong class="address-value" id="ipValue"></strong></div>
+    <div class="address-item"><span class="address-label">Prefix length</span><strong class="address-value" id="prefixValue"></strong></div>
+    <div class="address-item"><span class="address-label">Subnet mask</span><strong class="address-value" id="maskValue"></strong></div>
+  </div>
+
+  <div class="machine-heading">
+    <h3>AND workspace</h3>
+    <span>Complete the result bits and decimal value in every octet.</span>
+  </div>
+  <div class="octet-grid" id="octetGrid"></div>
+  <div class="network-preview">
+    <span>Your network address</span>
+    <strong id="networkPreview">0.0.0.0</strong>
+  </div>
+
+  <div class="controls">
+    <button class="primary" id="checkBtn">Check Answer</button>
+    <button class="ghost" id="clearBtn">Clear Answer</button>
+    <button class="primary hidden" id="nextBtn">Next Question</button>
+  </div>
+  <div class="message" id="message" role="status" aria-live="polite"></div>
+  <div class="explanation" id="explanation">
+    <h3>Worked solution</h3>
+    <p id="explanationText"></p>
+  </div>
+  <div class="credit">Created by Zeeshan Basit</div>
+</section>
+
+<section class="card results hidden" id="resultsCard">
+  <div class="question-kicker">Activity complete</div>
+  <h2>Your result</h2>
+  <div class="result-score" id="finalScore">0 / 8</div>
+  <p class="result-sub" id="resultMessage"></p>
+  <div class="result-grid">
+    <div class="result-item"><strong id="correctTotal">0</strong><span>Solved within two attempts</span></div>
+    <div class="result-item"><strong id="firstTryTotal">0</strong><span>Correct on the first attempt</span></div>
+    <div class="result-item"><strong id="reviewTotal">0</strong><span>Questions to review</span></div>
+  </div>
+  <div class="review" id="reviewList"></div>
+  <button class="primary" id="restartBtn">Try Another Set</button>
+  <div class="credit">Created by Zeeshan Basit</div>
+</section>
+</main>
+
+<script>
+(function(){
+"use strict";
+var TOTAL=8;
+var STORAGE_KEY="net-old-m4-ipv4-and-previous-set-v1";
+var questions=[];
+var index=0;
+var correctTotal=0;
+var firstTryTotal=0;
+var attempts=0;
+var resolved=false;
+var resultBits=[];
+var outcomes=[];
+
+function byId(id){return document.getElementById(id)}
+function randomInt(min,max){return Math.floor(Math.random()*(max-min+1))+min}
+function octetBits(value){return value.toString(2).padStart(8,"0")}
+function ipString(octets){return octets.join(".")}
+function maskOctets(prefix){
+  var mask=[];
+  for(var octet=0;octet<4;octet++){
+    var remaining=Math.max(0,Math.min(8,prefix-octet*8));
+    mask.push(remaining===0?0:(256-Math.pow(2,8-remaining)));
+  }
+  return mask;
+}
+function networkOctets(ip,prefix){
+  var mask=maskOctets(prefix);
+  return ip.map(function(value,i){return value & mask[i]});
+}
+function readPrevious(){
+  try{var p=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");return Array.isArray(p)?p:[]}
+  catch(error){return[]}
+}
+function saveSet(){
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(questions.map(function(q){return q.key})))}
+  catch(error){}
+}
+function randomPrivateIp(){
+  var family=randomInt(0,2);
+  if(family===0)return[10,randomInt(1,254),randomInt(1,254),randomInt(1,254)];
+  if(family===1)return[172,randomInt(16,31),randomInt(1,254),randomInt(1,254)];
+  return[192,168,randomInt(1,254),randomInt(1,254)];
+}
+function makeQuestion(prefix,stage,previous,used){
+  var ip,key,network,hostBits=32-prefix,hostValue,maxHost;
+  for(var attempt=0;attempt<500;attempt++){
+    ip=randomPrivateIp();
+    network=networkOctets(ip,prefix);
+    key=ipString(ip)+"/"+prefix;
+    if(used.has(key)||(attempt<300&&previous.indexOf(key)!==-1))continue;
+    if(hostBits<=8){
+      hostValue=ip[3]-network[3];
+      maxHost=Math.pow(2,hostBits)-1;
+      if(hostValue===0||hostValue===maxHost)continue;
+    }
+    used.add(key);
+    return{ip:ip,prefix:prefix,mask:maskOctets(prefix),network:network,stage:stage,key:key};
+  }
+  used.add(key);
+  return{ip:ip,prefix:prefix,mask:maskOctets(prefix),network:network,stage:stage,key:key};
+}
+function generateQuestions(){
+  var previous=readPrevious(),used=new Set();
+  var challengePrefix=randomInt(19,23);
+  var lastPrefix=Math.random()<.5?29:30;
+  var specs=[
+    [16,"Whole-octet masks"],[24,"Whole-octet masks"],
+    [25,"Subnet octet"],[26,"Subnet octet"],[27,"Subnet octet"],[28,"Subnet octet"],
+    [challengePrefix,"Challenge"],[lastPrefix,"Challenge"]
+  ];
+  questions=specs.map(function(s){return makeQuestion(s[0],s[1],previous,used)});
+  saveSet();
+}
+function bitCell(bit,extra){
+  return'<span class="bit '+(bit==="1"?"one ":"")+(extra||"")+'">'+bit+'</span>';
+}
+function rowHtml(label,bits){
+  return'<div class="binary-row"><span class="row-label">'+label+'</span>'+
+    bits.split("").map(function(bit){return bitCell(bit,"")}).join("")+'</div>';
+}
+function resultRowHtml(octetIndex){
+  return'<div class="binary-row"><span class="row-label">AND</span>'+
+    resultBits[octetIndex].map(function(bit,bitIndex){
+      return'<button type="button" class="bit result-bit'+(bit?" on":"")+
+        '" data-octet="'+octetIndex+'" data-bit="'+bitIndex+
+        '" aria-pressed="'+(bit?"true":"false")+
+        '" aria-label="Octet '+(octetIndex+1)+' result bit '+(bitIndex+1)+', currently '+bit+'">'+bit+'</button>';
+    }).join("")+'</div>';
+}
+function octetCardHtml(q,i){
+  return'<article class="octet-card" id="octetCard'+i+'">'+
+    '<div class="octet-title">Octet '+(i+1)+'<span>IP '+q.ip[i]+' · Mask '+q.mask[i]+'</span></div>'+
+    rowHtml("IP",octetBits(q.ip[i]))+rowHtml("Mask",octetBits(q.mask[i]))+
+    '<div class="and-line"></div>'+resultRowHtml(i)+
+    '<div class="decimal-answer"><label for="decimal'+i+'">Decimal result</label>'+
+    '<input id="decimal'+i+'" type="number" min="0" max="255" inputmode="numeric" autocomplete="off" placeholder="0–255"></div></article>';
+}
+function updatePreview(){
+  var values=[0,1,2,3].map(function(i){
+    var input=byId("decimal"+i);
+    if(!input||input.value==="")return"0";
+    var n=Number(input.value);
+    return Number.isInteger(n)&&n>=0&&n<=255?String(n):"?";
+  });
+  byId("networkPreview").textContent=values.join(".");
+}
+function bindWorkspace(){
+  Array.prototype.forEach.call(document.querySelectorAll(".result-bit"),function(button){
+    button.addEventListener("click",function(){
+      if(resolved)return;
+      var o=Number(button.getAttribute("data-octet"));
+      var b=Number(button.getAttribute("data-bit"));
+      resultBits[o][b]=resultBits[o][b]?0:1;
+      button.textContent=resultBits[o][b];
+      button.classList.toggle("on",resultBits[o][b]===1);
+      button.setAttribute("aria-pressed",resultBits[o][b]?"true":"false");
+    });
+  });
+  [0,1,2,3].forEach(function(i){
+    byId("decimal"+i).addEventListener("input",updatePreview);
+    byId("decimal"+i).addEventListener("keydown",function(event){
+      if(event.key==="Enter"&&!resolved)checkAnswer();
+    });
+  });
+}
+function updatePhaseNav(){
+  var phase=index<2?1:(index<6?2:3);
+  [1,2,3].forEach(function(n){
+    byId("phase"+n+"Btn").classList.toggle("active",n===phase);
+    byId("phase"+n+"Btn").setAttribute("aria-current",n===phase?"step":"false");
+  });
+}
+function updateProgress(){
+  var completed=index+(resolved?1:0);
+  var percent=Math.round(completed/TOTAL*100);
+  byId("progressLabel").textContent="Question "+(index+1)+" of "+TOTAL;
+  byId("percentText").textContent=percent+"%";
+  byId("progressFill").style.width=percent+"%";
+  byId("scoreText").textContent=correctTotal+" / "+TOTAL;
+}
+function instructionFor(q){
+  if(q.stage==="Whole-octet masks")return"Observe how 255 preserves an octet and 0 clears an octet. Complete all four AND results.";
+  if(q.stage==="Subnet octet")return"The prefix ends inside the fourth octet. Pay particular attention to the address and mask bits in Octet 4.";
+  return q.prefix<24?
+    "The prefix ends inside the third octet. Find the boundary there, then clear all host bits that follow.":
+    "This small subnet leaves very few host bits. Compare every bit in the fourth octet carefully.";
+}
+function renderQuestion(){
+  var q=questions[index];
+  attempts=0;resolved=false;
+  resultBits=[0,1,2,3].map(function(){return[0,0,0,0,0,0,0,0]});
+  byId("questionNumber").textContent="Question "+(index+1)+" of "+TOTAL;
+  byId("questionTitle").textContent="Find the network address";
+  byId("questionInstruction").textContent=instructionFor(q);
+  byId("stageChip").textContent=q.stage;
+  byId("ipValue").textContent=ipString(q.ip);
+  byId("prefixValue").textContent="/"+q.prefix;
+  byId("maskValue").textContent=ipString(q.mask);
+  byId("octetGrid").innerHTML=[0,1,2,3].map(function(i){return octetCardHtml(q,i)}).join("");
+  byId("networkPreview").textContent="0.0.0.0";
+  byId("message").className="message";byId("message").innerHTML="";
+  byId("explanation").className="explanation";byId("explanationText").innerHTML="";
+  byId("checkBtn").classList.remove("hidden");byId("clearBtn").classList.remove("hidden");
+  byId("nextBtn").classList.add("hidden");
+  bindWorkspace();updatePhaseNav();updateProgress();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function expectedBits(q,i){return octetBits(q.network[i]).split("").map(Number)}
+function octetStatus(q,i){
+  var bitsCorrect=resultBits[i].join("")===expectedBits(q,i).join("");
+  var decimal=byId("decimal"+i).value;
+  var decimalCorrect=decimal!==""&&Number(decimal)===q.network[i];
+  return{bits:bitsCorrect,decimal:decimalCorrect,correct:bitsCorrect&&decimalCorrect};
+}
+function solutionText(q){
+  return q.ip.map(function(value,i){
+    return'<code>'+octetBits(value)+' AND '+octetBits(q.mask[i])+' = '+octetBits(q.network[i])+
+      ' ('+q.network[i]+')</code>';
+  }).join("<br>")+"<br><br>Network address: <strong>"+ipString(q.network)+"/"+q.prefix+"</strong>.";
+}
+function hintText(q,statuses){
+  var problems=statuses.map(function(s,i){return s.correct?null:i+1}).filter(Boolean);
+  var details=statuses.map(function(s,i){
+    if(s.correct)return null;
+    if(!s.bits&&!s.decimal)return"Octet "+(i+1)+" has an incorrect binary AND result and decimal value.";
+    if(!s.bits)return"Octet "+(i+1)+" has an incorrect binary AND result.";
+    return"Octet "+(i+1)+" has the correct bits but its decimal value is incorrect.";
+  }).filter(Boolean);
+  return"Review "+(problems.length===1?"Octet ":"Octets ")+problems.join(", ")+". "+details.join(" ");
+}
+function markProblems(statuses){
+  statuses.forEach(function(s,i){byId("octetCard"+i).classList.toggle("problem",!s.correct)});
+}
+function clearProblemMarks(){[0,1,2,3].forEach(function(i){byId("octetCard"+i).classList.remove("problem")})}
+function fillSolution(q){
+  resultBits=[0,1,2,3].map(function(i){return expectedBits(q,i)});
+  [0,1,2,3].forEach(function(i){byId("decimal"+i).value=q.network[i]});
+  Array.prototype.forEach.call(document.querySelectorAll(".result-bit"),function(button){
+    var o=Number(button.getAttribute("data-octet")),b=Number(button.getAttribute("data-bit"));
+    button.textContent=resultBits[o][b];button.classList.toggle("on",resultBits[o][b]===1);button.disabled=true;
+  });
+  updatePreview();
+}
+function lockWorkspace(){
+  Array.prototype.forEach.call(document.querySelectorAll("#octetGrid button,#octetGrid input"),function(el){el.disabled=true});
+}
+function finishQuestion(solved){
+  resolved=true;
+  if(solved){correctTotal++;if(attempts===1)firstTryTotal++}
+  outcomes.push({stage:questions[index].stage,solved:solved,firstTry:solved&&attempts===1});
+  byId("explanationText").innerHTML=solutionText(questions[index]);
+  byId("explanation").classList.add("show");
+  byId("checkBtn").classList.add("hidden");byId("clearBtn").classList.add("hidden");
+  byId("nextBtn").classList.remove("hidden");
+  byId("nextBtn").textContent=index===TOTAL-1?"View Results":"Next Question";
+  lockWorkspace();updateProgress();
+}
+function checkAnswer(){
+  if(resolved)return;
+  var q=questions[index];
+  attempts++;
+  var statuses=[0,1,2,3].map(function(i){return octetStatus(q,i)});
+  var correct=statuses.every(function(s){return s.correct});
+  if(correct){
+    clearProblemMarks();
+    byId("message").className="message good";
+    byId("message").innerHTML="<strong>Correct.</strong> The AND result identifies network "+ipString(q.network)+"/"+q.prefix+".";
+    finishQuestion(true);
+  }else if(attempts===1){
+    markProblems(statuses);
+    byId("message").className="message hint";
+    byId("message").innerHTML="<strong>Not quite.</strong> "+hintText(q,statuses)+" Try once more.";
+  }else{
+    markProblems(statuses);fillSolution(q);
+    byId("message").className="message bad";
+    byId("message").innerHTML="<strong>Review the worked solution.</strong> A result bit is 1 only where the IP bit and mask bit are both 1.";
+    finishQuestion(false);
+  }
+}
+function clearAnswer(){
+  if(resolved)return;
+  resultBits=[0,1,2,3].map(function(){return[0,0,0,0,0,0,0,0]});
+  Array.prototype.forEach.call(document.querySelectorAll(".result-bit"),function(button){
+    button.textContent="0";button.classList.remove("on");button.setAttribute("aria-pressed","false")
+  });
+  [0,1,2,3].forEach(function(i){byId("decimal"+i).value=""});
+  clearProblemMarks();updatePreview();
+}
+function showResults(){
+  byId("questionCard").classList.add("hidden");byId("progressCard").classList.add("hidden");
+  byId("resultsCard").classList.remove("hidden");
+  byId("finalScore").textContent=correctTotal+" / "+TOTAL;
+  byId("correctTotal").textContent=correctTotal;byId("firstTryTotal").textContent=firstTryTotal;
+  byId("reviewTotal").textContent=TOTAL-correctTotal;
+  var message=correctTotal===TOTAL&&firstTryTotal>=7?
+    "Excellent. You are applying Boolean AND accurately across whole and partial mask octets.":
+    correctTotal>=7?"Strong result. Review any worked solution, then repeat with a different address set.":
+    correctTotal>=5?"The process is developing. Focus on the octet where the prefix ends and repeat the activity.":
+    "Repeat the activity slowly and compare each pair of bits vertically before converting the result to decimal.";
+  byId("resultMessage").textContent=message;
+  var stages=["Whole-octet masks","Subnet octet","Challenge"];
+  byId("reviewList").innerHTML=stages.map(function(stage){
+    var group=outcomes.filter(function(o){return o.stage===stage});
+    var solved=group.filter(function(o){return o.solved}).length;
+    var complete=group.length>0&&solved===group.length;
+    return'<div class="review-row"><span>'+stage+': '+solved+' / '+group.length+
+      '</span><span class="'+(complete?"status-good":"status-review")+'">'+(complete?"Secure":"Review")+'</span></div>';
+  }).join("");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function openActivityAt(startIndex,newSet){
+  if(newSet||questions.length===0)generateQuestions();
+  index=startIndex;correctTotal=0;firstTryTotal=0;outcomes=[];
+  byId("introCard").classList.add("hidden");byId("resultsCard").classList.add("hidden");
+  byId("questionCard").classList.remove("hidden");byId("progressCard").classList.remove("hidden");
+  renderQuestion();
+}
+byId("startBtn").addEventListener("click",function(){openActivityAt(0,true)});
+byId("restartBtn").addEventListener("click",function(){openActivityAt(0,true)});
+byId("phase1Btn").addEventListener("click",function(){openActivityAt(0,false)});
+byId("phase2Btn").addEventListener("click",function(){openActivityAt(2,false)});
+byId("phase3Btn").addEventListener("click",function(){openActivityAt(6,false)});
+byId("checkBtn").addEventListener("click",checkAnswer);
+byId("clearBtn").addEventListener("click",clearAnswer);
+byId("nextBtn").addEventListener("click",function(){if(index===TOTAL-1)showResults();else{index++;renderQuestion()}});
+})();
+</script>
+</body>
+</html>
