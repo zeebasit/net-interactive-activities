@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 4 Activity 1 — Binary &amp; Hex Builder</title>
+<style>
+  :root{
+    --bg:#f5f7fb;--panel:#fff;--text:#172033;--muted:#667085;--line:#d9e0ea;
+    --accent:#1769e0;--accent-dark:#0f4faa;--soft:#eef4ff;--good:#137a4b;
+    --good-bg:#edf9f2;--bad:#b42318;--bad-bg:#fff1f0;--hint:#805600;
+    --hint-bg:#fff7df;--shadow:0 12px 32px rgba(20,35,60,.08);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    background:linear-gradient(180deg,#f7f9fc 0,#f3f6fa 100%);color:var(--text);
+  }
+  button,input{font:inherit}
+  button{touch-action:manipulation}
+  .shell{max-width:1120px;margin:0 auto;padding:32px 20px 64px}
+  .hero{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap;margin-bottom:20px}
+  .eyebrow{color:var(--accent);font-weight:800;font-size:.82rem;letter-spacing:.06em;text-transform:uppercase}
+  h1{margin:.28rem 0 .45rem;font-size:clamp(1.8rem,3.4vw,2.65rem)}
+  .lead{margin:0;color:var(--muted);line-height:1.62;max-width:780px}
+  .progress-card{
+    min-width:245px;background:var(--panel);border:1px solid var(--line);
+    border-radius:14px;padding:14px 16px;box-shadow:var(--shadow)
+  }
+  .progress-row{display:flex;justify-content:space-between;gap:18px;font-size:.9rem;margin-bottom:8px}
+  .progress-row + .progress-row{margin-top:10px}
+  .progress-track{height:10px;background:#e7edf5;border-radius:999px;overflow:hidden}
+  .progress-fill{height:100%;width:0;background:var(--accent);transition:width .25s ease}
+  .card{
+    background:var(--panel);border:1px solid var(--line);border-radius:18px;
+    box-shadow:var(--shadow);padding:clamp(20px,3vw,30px)
+  }
+  .hidden{display:none!important}
+  .intro-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:24px 0}
+  .intro-step{border:1px solid var(--line);border-radius:14px;padding:17px;background:#fbfcfe}
+  .step-number{
+    display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;
+    border-radius:999px;background:var(--soft);color:var(--accent-dark);font-weight:850;margin-bottom:9px
+  }
+  .intro-step h2{font-size:1rem;margin:0 0 6px}
+  .intro-step p{font-size:.91rem;color:var(--muted);line-height:1.5;margin:0}
+  .note{
+    border:1px solid #c9daf7;background:#f6f9ff;border-radius:13px;padding:14px 16px;
+    color:#34445b;line-height:1.55;margin:18px 0
+  }
+  .primary,.secondary,.ghost{
+    border:none;border-radius:10px;padding:11px 16px;font-weight:800;cursor:pointer
+  }
+  .primary{background:var(--accent);color:#fff}
+  .primary:hover:not(:disabled){background:var(--accent-dark)}
+  .secondary{background:#eef2f7;color:#263245}
+  .secondary:hover:not(:disabled){background:#e3e9f1}
+  .ghost{background:#fff;color:#263245;border:1px solid var(--line)}
+  button:focus-visible,input:focus-visible{outline:3px solid rgba(23,105,224,.28);outline-offset:2px}
+  button:disabled{opacity:.58;cursor:not-allowed}
+  .question-top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap}
+  .question-kicker{font-size:.8rem;color:var(--muted);font-weight:850;text-transform:uppercase;letter-spacing:.05em}
+  .stage-chip{
+    display:inline-flex;padding:7px 11px;border-radius:999px;background:var(--soft);
+    color:var(--accent-dark);font-weight:800;font-size:.82rem
+  }
+  #questionTitle{font-size:clamp(1.35rem,2.5vw,1.75rem);margin:.28rem 0 .4rem}
+  .instruction{color:var(--muted);line-height:1.58;margin:0}
+  .target{
+    margin:22px 0 18px;border:1px solid var(--line);border-radius:16px;background:#fbfcfe;
+    padding:20px;text-align:center
+  }
+  .target-label{font-size:.78rem;color:var(--muted);font-weight:850;text-transform:uppercase;letter-spacing:.06em}
+  .target-value{font:850 clamp(1.75rem,5vw,3rem)/1.25 ui-monospace,SFMono-Regular,Consolas,monospace;margin-top:6px;word-break:break-word}
+  .workspace-title{font-size:.95rem;margin:0 0 10px;color:#344054}
+  .bit-scroll{overflow-x:auto;padding:3px 2px 8px}
+  .bit-board{
+    min-width:624px;display:grid;grid-template-columns:repeat(8,minmax(62px,1fr));
+    gap:8px;border:1px solid var(--line);border-radius:16px;padding:14px;background:#fbfcfe
+  }
+  .bit-cell{text-align:center;position:relative}
+  .bit-cell.nibble-start{margin-left:10px}
+  .bit-cell.nibble-start:before{
+    content:"";position:absolute;left:-10px;top:0;bottom:0;border-left:2px dashed #9fb1c8
+  }
+  .weight{display:block;color:#536174;font-weight:800;font-size:.82rem;margin-bottom:7px}
+  .bit{
+    width:100%;min-height:54px;border:1px solid #aebbd0;border-radius:11px;background:#fff;
+    color:#263245;font:850 1.35rem ui-monospace,SFMono-Regular,Consolas,monospace
+  }
+  button.bit{cursor:pointer}
+  button.bit:hover{border-color:#7fa7df}
+  button.bit.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  .bit.static.on{background:#e4eefc;border-color:#9fc0f7;color:#0f4faa}
+  .nibble-labels{
+    min-width:624px;display:grid;grid-template-columns:1fr 1fr;gap:18px;
+    margin-top:8px;text-align:center;color:var(--muted);font-size:.78rem;font-weight:750
+  }
+  .working{
+    margin-top:13px;border:1px solid var(--line);border-radius:12px;padding:12px 14px;
+    background:#fff;color:#42526a;line-height:1.5;min-height:49px
+  }
+  .answer-row{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-top:18px}
+  .field{display:flex;flex-direction:column;gap:7px}
+  .field label{font-weight:800;font-size:.9rem}
+  .field input{
+    width:min(330px,80vw);border:1px solid #aebbd0;border-radius:10px;padding:12px 13px;
+    background:#fff;color:var(--text);font:750 1rem ui-monospace,SFMono-Regular,Consolas,monospace
+  }
+  .prefix-box{
+    border:1px solid var(--line);border-radius:10px;padding:12px 13px;background:#f5f7fa;
+    color:#526174;font:750 1rem ui-monospace,SFMono-Regular,Consolas,monospace
+  }
+  .controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+  .message{display:none;margin-top:18px;border-radius:12px;padding:14px 16px;line-height:1.55}
+  .message.good{display:block;background:var(--good-bg);color:var(--good);border:1px solid #b8e2cc}
+  .message.bad{display:block;background:var(--bad-bg);color:var(--bad);border:1px solid #f0c5c2}
+  .message.hint{display:block;background:var(--hint-bg);color:var(--hint);border:1px solid #efd792}
+  .explanation{display:none;margin-top:15px;border:1px solid var(--line);border-radius:14px;padding:16px;background:#fbfcfe;line-height:1.58}
+  .explanation.show{display:block}
+  .explanation h3{font-size:1rem;margin:0 0 6px}
+  .explanation p{margin:0;color:#42526a}
+  .credit{margin-top:20px;text-align:center;color:#6b7480;font-size:13px;font-weight:600}
+  .results{text-align:center}
+  .result-score{font-size:clamp(2.2rem,7vw,4rem);font-weight:900;color:var(--accent);margin:8px 0}
+  .result-sub{color:var(--muted);line-height:1.55}
+  .result-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:22px 0;text-align:left}
+  .result-item{border:1px solid var(--line);border-radius:13px;padding:15px;background:#fbfcfe}
+  .result-item strong{display:block;font-size:1.25rem;margin-bottom:3px}
+  .result-item span{color:var(--muted);font-size:.88rem}
+  .review{margin:18px 0;text-align:left;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .review-row{display:flex;justify-content:space-between;gap:12px;padding:11px 14px;border-bottom:1px solid var(--line)}
+  .review-row:last-child{border-bottom:0}
+  .status-good{color:var(--good);font-weight:800}
+  .status-review{color:var(--bad);font-weight:800}
+  @media(max-width:780px){
+    .intro-grid,.result-grid{grid-template-columns:1fr}
+    .progress-card{width:100%}
+    .shell{padding:22px 13px 44px}
+    .card{border-radius:15px}
+  }
+  @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main class="shell">
+  <header class="hero">
+    <div>
+      <div class="eyebrow">Old Content · Module 4 · Practice Activity</div>
+      <h1>Binary &amp; Hex Builder</h1>
+      <p class="lead">
+        Build 8-bit binary values, calculate decimal values and practise the hexadecimal
+        conversions needed for IPv4 and IPv6 addressing.
+      </p>
+    </div>
+    <aside class="progress-card hidden" id="progressCard" aria-label="Activity progress">
+      <div class="progress-row"><span id="progressLabel">Question 1 of 12</span><strong id="percentText">0%</strong></div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-row"><span>Score</span><strong id="scoreText">0 / 12</strong></div>
+    </aside>
+  </header>
+
+  <section class="card" id="introCard">
+    <div class="question-kicker">Module 4 Activity 1</div>
+    <h2>Practise the number systems used in networking</h2>
+    <p class="instruction">
+      You will complete 12 questions in a controlled sequence. The values change every time
+      you start a new set, but the activity always progresses from binary foundations to
+      hexadecimal conversion.
+    </p>
+    <div class="intro-grid">
+      <article class="intro-step">
+        <div class="step-number">1</div>
+        <h2>Build and read binary</h2>
+        <p>Use the place values 128, 64, 32, 16, 8, 4, 2 and 1 to move between decimal and 8-bit binary.</p>
+      </article>
+      <article class="intro-step">
+        <div class="step-number">2</div>
+        <h2>Work with hexadecimal</h2>
+        <p>Split a byte into two 4-bit nibbles and convert each nibble to one hexadecimal digit.</p>
+      </article>
+      <article class="intro-step">
+        <div class="step-number">3</div>
+        <h2>Connect the systems</h2>
+        <p>Complete mixed conversions using binary as the bridge between decimal and hexadecimal.</p>
+      </article>
+    </div>
+    <div class="note">
+      <strong>Practice mode:</strong> You have two attempts for each question. After the first
+      incorrect attempt, you receive a targeted hint. After the second, the worked solution is shown.
+    </div>
+    <button class="primary" id="startBtn">Start Activity</button>
+    <div class="credit">Created by Zeeshan Basit</div>
+  </section>
+
+  <section class="card hidden" id="questionCard">
+    <div class="question-top">
+      <div>
+        <div class="question-kicker" id="questionNumber">Question 1</div>
+        <h2 id="questionTitle">Build the binary value</h2>
+        <p class="instruction" id="questionInstruction"></p>
+      </div>
+      <div class="stage-chip" id="stageChip">Binary foundations</div>
+    </div>
+
+    <div class="target">
+      <div class="target-label" id="targetLabel">Decimal value</div>
+      <div class="target-value" id="targetValue">0</div>
+    </div>
+
+    <div id="workspace"></div>
+    <div class="controls">
+      <button class="primary" id="checkBtn">Check Answer</button>
+      <button class="ghost" id="clearBtn">Clear Answer</button>
+      <button class="primary hidden" id="nextBtn">Next Question</button>
+    </div>
+    <div class="message" id="message" role="status" aria-live="polite"></div>
+    <div class="explanation" id="explanation">
+      <h3>Worked solution</h3>
+      <p id="explanationText"></p>
+    </div>
+    <div class="credit">Created by Zeeshan Basit</div>
+  </section>
+
+  <section class="card results hidden" id="resultsCard">
+    <div class="question-kicker">Activity complete</div>
+    <h2>Your result</h2>
+    <div class="result-score" id="finalScore">0 / 12</div>
+    <p class="result-sub" id="resultMessage"></p>
+    <div class="result-grid">
+      <div class="result-item"><strong id="correctTotal">0</strong><span>Solved within two attempts</span></div>
+      <div class="result-item"><strong id="firstTryTotal">0</strong><span>Correct on the first attempt</span></div>
+      <div class="result-item"><strong id="reviewTotal">0</strong><span>Questions to review</span></div>
+    </div>
+    <div class="review" id="reviewList"></div>
+    <button class="primary" id="restartBtn">Try Another Set</button>
+    <div class="credit">Created by Zeeshan Basit</div>
+  </section>
+</main>
+
+<script>
+(function(){
+  "use strict";
+
+  var TOTAL = 12;
+  var WEIGHTS = [128,64,32,16,8,4,2,1];
+  var STORAGE_KEY = "net-old-m4-binary-hex-previous-set-v1";
+  var questions = [];
+  var index = 0;
+  var correctTotal = 0;
+  var firstTryTotal = 0;
+  var attempts = 0;
+  var resolved = false;
+  var selectedBits = [0,0,0,0,0,0,0,0];
+  var outcomes = [];
+
+  function byId(id){ return document.getElementById(id); }
+
+  function countOnes(value){
+    return value.toString(2).split("").filter(function(bit){ return bit === "1"; }).length;
+  }
+
+  function toBits(value){
+    return value.toString(2).padStart(8,"0");
+  }
+
+  function toHex(value){
+    return value.toString(16).toUpperCase().padStart(2,"0");
+  }
+
+  function readPrevious(){
+    try{
+      var parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      return Array.isArray(parsed) ? parsed : [];
+    }catch(error){ return []; }
+  }
+
+  function saveCurrentSet(){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(questions.map(function(q){ return q.key; })));
+    }catch(error){}
+  }
+
+  function randomValue(min,max,minOnes,maxOnes,used,previous,type){
+    var fallback = min;
+    for(var pass=0;pass<3;pass++){
+      for(var attempt=0;attempt<600;attempt++){
+        var value = Math.floor(Math.random()*(max-min+1))+min;
+        var ones = countOnes(value);
+        var key = type + ":" + value;
+        fallback = value;
+        if(ones < minOnes || ones > maxOnes || used.has(key)) continue;
+        if(pass === 0 && previous.indexOf(key) !== -1) continue;
+        used.add(key);
+        return value;
+      }
+    }
+    used.add(type + ":" + fallback);
+    return fallback;
+  }
+
+  function makeQuestion(type,value,stage,title,instruction,targetLabel){
+    return {
+      type:type,value:value,stage:stage,title:title,instruction:instruction,
+      targetLabel:targetLabel,key:type + ":" + value
+    };
+  }
+
+  function generateQuestions(){
+    var previous = readPrevious();
+    var used = new Set();
+    var specs = [
+      ["dec-bin",5,31,2,4,"Binary foundations","Build an 8-bit binary value","Switch the bits on or off to represent the decimal value.","Decimal value"],
+      ["dec-bin",32,127,2,6,"Binary foundations","Build an 8-bit binary value","Switch the bits on or off to represent the decimal value.","Decimal value"],
+      ["dec-bin",128,254,3,7,"Binary foundations","Build an 8-bit binary value","Switch the bits on or off to represent the decimal value.","Decimal value"],
+      ["bin-dec",5,31,2,4,"Binary foundations","Calculate the decimal value","Add the place values represented by the 1 bits, then enter the decimal value.","8-bit binary value"],
+      ["bin-dec",32,127,2,6,"Binary foundations","Calculate the decimal value","Add the place values represented by the 1 bits, then enter the decimal value.","8-bit binary value"],
+      ["bin-dec",128,254,3,7,"Binary foundations","Calculate the decimal value","Add the place values represented by the 1 bits, then enter the decimal value.","8-bit binary value"],
+      ["bin-hex",16,127,2,6,"Binary and hexadecimal","Convert binary to hexadecimal","Split the byte into two nibbles. Convert each 4-bit nibble to one hexadecimal digit.","8-bit binary value"],
+      ["bin-hex",128,254,3,7,"Binary and hexadecimal","Convert binary to hexadecimal","Split the byte into two nibbles. Convert each 4-bit nibble to one hexadecimal digit.","8-bit binary value"],
+      ["hex-bin",16,127,2,6,"Binary and hexadecimal","Convert hexadecimal to binary","Convert each hexadecimal digit into four binary bits. Keep all eight bits, including leading zeros.","Hexadecimal byte"],
+      ["hex-bin",128,254,3,7,"Binary and hexadecimal","Convert hexadecimal to binary","Convert each hexadecimal digit into four binary bits. Keep all eight bits, including leading zeros.","Hexadecimal byte"],
+      ["dec-bin-hex",32,254,3,7,"Mixed challenge","Connect decimal, binary and hexadecimal","Build the 8-bit binary value first, then use its two nibbles to write the hexadecimal byte.","Decimal value"],
+      ["hex-bin-dec",16,254,2,7,"Mixed challenge","Connect hexadecimal, binary and decimal","Build the binary byte from the hexadecimal digits, then calculate its decimal value.","Hexadecimal byte"]
+    ];
+
+    questions = specs.map(function(s){
+      var value = randomValue(s[1],s[2],s[3],s[4],used,previous,s[0]);
+      return makeQuestion(s[0],value,s[5],s[6],s[7],s[8]);
+    });
+    saveCurrentSet();
+  }
+
+  function targetFor(q){
+    if(q.type.indexOf("hex") === 0) return "0x" + toHex(q.value);
+    if(q.type.indexOf("bin") === 0) return toBits(q.value);
+    return String(q.value);
+  }
+
+  function bitBoard(bits,interactive){
+    var cells = bits.split("").map(function(bit,i){
+      var start = i === 4 ? " nibble-start" : "";
+      var on = bit === "1" ? " on" : "";
+      var element;
+      if(interactive){
+        element = '<button type="button" class="bit' + on + '" data-bit="' + i +
+          '" aria-pressed="' + (bit === "1") + '" aria-label="Bit for place value ' +
+          WEIGHTS[i] + ', currently ' + bit + '">' + bit + '</button>';
+      }else{
+        element = '<div class="bit static' + on + '" aria-label="Bit ' + bit + '">' + bit + '</div>';
+      }
+      return '<div class="bit-cell' + start + '"><span class="weight">' + WEIGHTS[i] +
+        '</span>' + element + '</div>';
+    }).join("");
+
+    return '<h3 class="workspace-title">' + (interactive ? "Build the 8-bit value" : "Read the 8-bit value") +
+      '</h3><div class="bit-scroll"><div class="bit-board">' + cells +
+      '</div><div class="nibble-labels"><span>High nibble</span><span>Low nibble</span></div></div>';
+  }
+
+  function inputField(id,label,type,placeholder,prefix){
+    var prefixHtml = prefix ? '<div class="prefix-box" aria-hidden="true">' + prefix + '</div>' : "";
+    return '<div class="answer-row">' + prefixHtml + '<div class="field"><label for="' + id + '">' +
+      label + '</label><input id="' + id + '" type="' + type + '" placeholder="' + placeholder +
+      '" autocomplete="off" spellcheck="false"></div></div>';
+  }
+
+  function updateWorking(){
+    var active = selectedBits.map(function(bit,i){ return bit ? WEIGHTS[i] : null; })
+      .filter(function(value){ return value !== null; });
+    var total = active.reduce(function(sum,value){ return sum+value; },0);
+    var text = active.length ? active.join(" + ") + " = " + total : "No place values selected yet.";
+    var area = byId("working");
+    if(area) area.textContent = text;
+  }
+
+  function bindBitButtons(){
+    Array.prototype.forEach.call(document.querySelectorAll("button.bit"),function(button){
+      button.addEventListener("click",function(){
+        if(resolved) return;
+        var i = Number(button.getAttribute("data-bit"));
+        selectedBits[i] = selectedBits[i] ? 0 : 1;
+        button.textContent = selectedBits[i];
+        button.classList.toggle("on",selectedBits[i] === 1);
+        button.setAttribute("aria-pressed",selectedBits[i] === 1 ? "true" : "false");
+        button.setAttribute("aria-label","Bit for place value " + WEIGHTS[i] + ", currently " + selectedBits[i]);
+        updateWorking();
+      });
+    });
+  }
+
+  function renderWorkspace(q){
+    var html = "";
+    selectedBits = [0,0,0,0,0,0,0,0];
+
+    if(q.type === "dec-bin" || q.type === "hex-bin"){
+      html = bitBoard("00000000",true) + '<div class="working" id="working">No place values selected yet.</div>';
+    }else if(q.type === "bin-dec"){
+      html = bitBoard(toBits(q.value),false) +
+        inputField("decimalAnswer","Decimal value","number","Enter a value from 0 to 255","");
+    }else if(q.type === "bin-hex"){
+      html = bitBoard(toBits(q.value),false) +
+        inputField("hexAnswer","Hexadecimal byte","text","Example: A7","0x");
+    }else if(q.type === "dec-bin-hex"){
+      html = bitBoard("00000000",true) +
+        '<div class="working" id="working">No place values selected yet.</div>' +
+        inputField("hexAnswer","Hexadecimal byte","text","Example: A7","0x");
+    }else if(q.type === "hex-bin-dec"){
+      html = bitBoard("00000000",true) +
+        '<div class="working" id="working">No place values selected yet.</div>' +
+        inputField("decimalAnswer","Decimal value","number","Enter a value from 0 to 255","");
+    }
+
+    byId("workspace").innerHTML = html;
+    bindBitButtons();
+    var input = byId("decimalAnswer") || byId("hexAnswer");
+    if(input){
+      input.addEventListener("keydown",function(event){
+        if(event.key === "Enter" && !resolved) checkAnswer();
+      });
+    }
+  }
+
+  function updateProgress(){
+    var completed = index + (resolved ? 1 : 0);
+    var percent = Math.round((completed/TOTAL)*100);
+    byId("progressLabel").textContent = "Question " + (index+1) + " of " + TOTAL;
+    byId("percentText").textContent = percent + "%";
+    byId("progressFill").style.width = percent + "%";
+    byId("scoreText").textContent = correctTotal + " / " + TOTAL;
+  }
+
+  function renderQuestion(){
+    var q = questions[index];
+    attempts = 0;
+    resolved = false;
+    byId("questionNumber").textContent = "Question " + (index+1) + " of " + TOTAL;
+    byId("questionTitle").textContent = q.title;
+    byId("questionInstruction").textContent = q.instruction;
+    byId("stageChip").textContent = q.stage;
+    byId("targetLabel").textContent = q.targetLabel;
+    byId("targetValue").textContent = targetFor(q);
+    byId("message").className = "message";
+    byId("message").innerHTML = "";
+    byId("explanation").className = "explanation";
+    byId("explanationText").textContent = "";
+    byId("checkBtn").classList.remove("hidden");
+    byId("clearBtn").classList.remove("hidden");
+    byId("nextBtn").classList.add("hidden");
+    renderWorkspace(q);
+    updateProgress();
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+
+  function normalHex(value){
+    return String(value || "").trim().toUpperCase().replace(/^0X/,"").padStart(2,"0");
+  }
+
+  function bitsValue(){
+    return parseInt(selectedBits.join(""),2);
+  }
+
+  function answerIsCorrect(q){
+    if(q.type === "dec-bin" || q.type === "hex-bin") return bitsValue() === q.value;
+    if(q.type === "bin-dec") return Number(byId("decimalAnswer").value) === q.value;
+    if(q.type === "bin-hex") return normalHex(byId("hexAnswer").value) === toHex(q.value);
+    if(q.type === "dec-bin-hex"){
+      return bitsValue() === q.value && normalHex(byId("hexAnswer").value) === toHex(q.value);
+    }
+    if(q.type === "hex-bin-dec"){
+      return bitsValue() === q.value && Number(byId("decimalAnswer").value) === q.value;
+    }
+    return false;
+  }
+
+  function hintFor(q){
+    var bits = toBits(q.value);
+    if(q.type === "dec-bin"){
+      var firstWeight = WEIGHTS[bits.indexOf("1")];
+      return "Start with the largest place value that does not exceed " + q.value +
+        ". In this question, begin with " + firstWeight + ", then subtract it and continue.";
+    }
+    if(q.type === "bin-dec"){
+      return "Only add place values that have a 1 beneath them. Ignore every place value with a 0.";
+    }
+    if(q.type === "bin-hex"){
+      return "Treat " + bits.slice(0,4) + " and " + bits.slice(4) +
+        " as separate 4-bit values. Each becomes one hexadecimal digit.";
+    }
+    if(q.type === "hex-bin"){
+      return "Convert the two digits separately: " + toHex(q.value).charAt(0) +
+        " becomes the first four bits and " + toHex(q.value).charAt(1) + " becomes the last four bits.";
+    }
+    if(q.type === "dec-bin-hex"){
+      return "Check the binary byte first. When it is correct, split it after four bits and convert each nibble separately.";
+    }
+    return "Convert each hexadecimal digit to four bits first. Then add the place values that contain a 1.";
+  }
+
+  function solutionFor(q){
+    var bits = toBits(q.value);
+    var active = bits.split("").map(function(bit,i){ return bit === "1" ? WEIGHTS[i] : null; })
+      .filter(function(value){ return value !== null; });
+    var decimalWorking = active.length ? active.join(" + ") + " = " + q.value : "0";
+    var high = parseInt(bits.slice(0,4),2);
+    var low = parseInt(bits.slice(4),2);
+    var hex = toHex(q.value);
+    return "Binary: " + bits.slice(0,4) + " " + bits.slice(4) +
+      ". Decimal working: " + decimalWorking +
+      ". Nibbles: " + bits.slice(0,4) + " = " + high.toString(16).toUpperCase() +
+      " and " + bits.slice(4) + " = " + low.toString(16).toUpperCase() +
+      ". Hexadecimal: 0x" + hex + ".";
+  }
+
+  function fillSolution(q){
+    selectedBits = toBits(q.value).split("").map(Number);
+    Array.prototype.forEach.call(document.querySelectorAll("button.bit"),function(button){
+      var i = Number(button.getAttribute("data-bit"));
+      button.textContent = selectedBits[i];
+      button.classList.toggle("on",selectedBits[i] === 1);
+      button.setAttribute("aria-pressed",selectedBits[i] === 1 ? "true" : "false");
+      button.disabled = true;
+    });
+    if(byId("decimalAnswer")) byId("decimalAnswer").value = q.value;
+    if(byId("hexAnswer")) byId("hexAnswer").value = toHex(q.value);
+    updateWorking();
+  }
+
+  function lockInputs(){
+    Array.prototype.forEach.call(document.querySelectorAll("#workspace button,#workspace input"),function(el){
+      el.disabled = true;
+    });
+  }
+
+  function finishQuestion(solved){
+    resolved = true;
+    if(solved){
+      correctTotal++;
+      if(attempts === 1) firstTryTotal++;
+    }
+    outcomes.push({stage:questions[index].stage,solved:solved,firstTry:solved && attempts === 1});
+    byId("explanationText").textContent = solutionFor(questions[index]);
+    byId("explanation").classList.add("show");
+    byId("checkBtn").classList.add("hidden");
+    byId("clearBtn").classList.add("hidden");
+    byId("nextBtn").classList.remove("hidden");
+    byId("nextBtn").textContent = index === TOTAL-1 ? "View Results" : "Next Question";
+    lockInputs();
+    updateProgress();
+  }
+
+  function checkAnswer(){
+    if(resolved) return;
+    var q = questions[index];
+    attempts++;
+    if(answerIsCorrect(q)){
+      byId("message").className = "message good";
+      byId("message").innerHTML = "<strong>Correct.</strong> The representations describe the same value.";
+      finishQuestion(true);
+    }else if(attempts === 1){
+      byId("message").className = "message hint";
+      byId("message").innerHTML = "<strong>Not quite.</strong> " + hintFor(q) + " Try once more.";
+    }else{
+      byId("message").className = "message bad";
+      byId("message").innerHTML = "<strong>Review the worked solution.</strong> Compare each place value and nibble with your answer.";
+      fillSolution(q);
+      finishQuestion(false);
+    }
+  }
+
+  function clearAnswer(){
+    if(resolved) return;
+    selectedBits = [0,0,0,0,0,0,0,0];
+    Array.prototype.forEach.call(document.querySelectorAll("button.bit"),function(button){
+      button.textContent = "0";
+      button.classList.remove("on");
+      button.setAttribute("aria-pressed","false");
+    });
+    if(byId("decimalAnswer")) byId("decimalAnswer").value = "";
+    if(byId("hexAnswer")) byId("hexAnswer").value = "";
+    updateWorking();
+  }
+
+  function showResults(){
+    byId("questionCard").classList.add("hidden");
+    byId("progressCard").classList.add("hidden");
+    byId("resultsCard").classList.remove("hidden");
+    byId("finalScore").textContent = correctTotal + " / " + TOTAL;
+    byId("correctTotal").textContent = correctTotal;
+    byId("firstTryTotal").textContent = firstTryTotal;
+    byId("reviewTotal").textContent = TOTAL-correctTotal;
+
+    var message;
+    if(correctTotal === TOTAL && firstTryTotal >= 10){
+      message = "Excellent control of binary place values and hexadecimal nibble conversion.";
+    }else if(correctTotal >= 10){
+      message = "Strong result. Review any worked solutions, then try another set to improve first-attempt accuracy.";
+    }else if(correctTotal >= 7){
+      message = "The foundation is developing. Repeat the activity and focus on the place values or nibble conversions marked for review.";
+    }else{
+      message = "Repeat the activity slowly. Use the worked solutions to connect every 1 bit with its place value.";
+    }
+    byId("resultMessage").textContent = message;
+
+    var stages = ["Binary foundations","Binary and hexadecimal","Mixed challenge"];
+    byId("reviewList").innerHTML = stages.map(function(stage){
+      var group = outcomes.filter(function(item){ return item.stage === stage; });
+      var solved = group.filter(function(item){ return item.solved; }).length;
+      var cls = solved === group.length ? "status-good" : "status-review";
+      var label = solved === group.length ? "Secure" : "Review";
+      return '<div class="review-row"><span>' + stage + ': ' + solved + ' / ' + group.length +
+        '</span><span class="' + cls + '">' + label + '</span></div>';
+    }).join("");
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+
+  function startSet(){
+    generateQuestions();
+    index = 0;
+    correctTotal = 0;
+    firstTryTotal = 0;
+    outcomes = [];
+    byId("introCard").classList.add("hidden");
+    byId("resultsCard").classList.add("hidden");
+    byId("questionCard").classList.remove("hidden");
+    byId("progressCard").classList.remove("hidden");
+    renderQuestion();
+  }
+
+  byId("startBtn").addEventListener("click",startSet);
+  byId("restartBtn").addEventListener("click",startSet);
+  byId("checkBtn").addEventListener("click",checkAnswer);
+  byId("clearBtn").addEventListener("click",clearAnswer);
+  byId("nextBtn").addEventListener("click",function(){
+    if(index === TOTAL-1) showResults();
+    else{ index++; renderQuestion(); }
+  });
+})();
+</script>
+</body>
+</html>
