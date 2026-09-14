@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Activity 1.3.1 — Build the PDU</title>
+<title>Activity 1.3.1 — Encapsulation Challenge</title>
 <style>
 :root{
   --bg:#f5f7fb;--panel:#fff;--text:#172033;--muted:#667085;--line:#d9e0ea;
@@ -17,43 +17,21 @@ body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-ser
 .hero{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;flex-wrap:wrap;margin-bottom:18px}
 .eyebrow{color:var(--accent);font-weight:800;font-size:.82rem;letter-spacing:.06em;text-transform:uppercase}
 h1{margin:.28rem 0 .45rem;font-size:clamp(1.8rem,3vw,2.55rem)}
-.lead{margin:0;color:var(--muted);line-height:1.6;max-width:820px}
-.progress-card{min-width:245px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow)}
+.lead{margin:0;color:var(--muted);line-height:1.6;max-width:850px}
+.phase-nav{display:flex;gap:9px;flex-wrap:wrap;margin:18px 0 8px}
+.phase-pill{border:1px solid var(--line);background:#fff;color:#42526a;cursor:pointer;padding:9px 13px;border-radius:999px;font-weight:800;font-size:.86rem}
+.phase-pill.active{background:var(--soft);border-color:#9fc0f7;color:var(--accent2)}
+.phase-pill.done{background:var(--goodbg);border-color:#b7dfca;color:var(--good)}
+.phase-help{color:var(--muted);font-size:.85rem;line-height:1.45}
+.progress-card{min-width:250px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow)}
 .progress-row{display:flex;justify-content:space-between;font-size:.9rem;margin-bottom:8px}
 .progress-track{height:10px;background:#e7edf5;border-radius:999px;overflow:hidden}
 .progress-fill{height:100%;background:var(--accent);transition:width .25s ease}
-.stage-nav{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 10px}
-.stage-pill{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;color:#526174;font-size:.86rem;font-weight:800}
-.stage-pill.active{background:var(--soft);border-color:#9fc0f7;color:var(--accent2)}
-.stage-pill.done{background:var(--goodbg);border-color:#b7dfca;color:var(--good)}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:24px}
 .section-kicker{font-size:.82rem;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.05em}
-h2{margin:.2rem 0 .4rem;font-size:1.45rem}
+h2{margin:.2rem 0 .4rem;font-size:1.5rem}
 .instruction{color:var(--muted);line-height:1.6;margin:0}
-.workspace{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(270px,.75fr);gap:22px;margin-top:22px;align-items:start}
-.builder,.tray{border:1px solid var(--line);border-radius:16px;background:#fbfcfe;padding:18px}
-.builder h3,.tray h3{margin:0 0 10px;font-size:1rem}
-.context{padding:11px 13px;border-radius:11px;background:#f6f8fb;border:1px solid var(--line);color:#536174;font-size:.9rem;line-height:1.5;margin-bottom:14px}
-.pdu-stack{display:flex;flex-direction:column;gap:12px}
-.pdu{border:2px solid #9aabc0;border-radius:14px;background:#fff;overflow:hidden}
-.pdu-head{padding:9px 12px;font-weight:900;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px;align-items:center}
-.pdu-head small{font-weight:700;color:#657287}
-.pdu-body{padding:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:stretch}
-.app .pdu-head{background:var(--app)}
-.transport .pdu-head{background:var(--transport)}
-.network .pdu-head{background:var(--network)}
-.link .pdu-head{background:var(--link)}
-.physical .pdu-head{background:var(--physical)}
-.payload{flex:1 1 260px;min-height:70px;border:1px solid #b6c0cf;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;text-align:center;padding:12px;font-weight:800}
-.slot{min-width:150px;min-height:70px;border:2px dashed #aebbd0;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;text-align:center;padding:10px;color:#7a8798;font-weight:750;cursor:pointer}
-.slot.selected-target{border-color:var(--accent);background:#f5f9ff}
-.slot.correct{border-style:solid;border-color:#70c59b;background:#f2fbf6;color:#245f43}
-.slot.wrong{border-color:#df8a82;background:#fff6f5;color:#8f3028}
-.field-card{border:1px solid var(--line);background:#fff;border-radius:11px;padding:11px 12px;cursor:grab;margin:8px 0;font-weight:850;line-height:1.25}
-.field-card span{display:block;color:var(--muted);font-size:.76rem;font-weight:650;margin-top:4px}
-.field-card:hover{border-color:#9fb6da}
-.field-card.selected{outline:3px solid rgba(23,105,224,.13);border-color:var(--accent)}
-.field-card.used{opacity:.35;cursor:not-allowed}
+.context{padding:11px 13px;border-radius:11px;background:#f6f8fb;border:1px solid var(--line);color:#536174;font-size:.9rem;line-height:1.5;margin-top:14px}
 .controls{margin-top:20px;display:flex;gap:10px;flex-wrap:wrap}
 button{border:none;border-radius:10px;padding:11px 16px;font-weight:800;cursor:pointer;font-size:.94rem}
 .primary{background:var(--accent);color:#fff}.primary:hover{background:var(--accent2)}
@@ -63,15 +41,74 @@ button{border:none;border-radius:10px;padding:11px 16px;font-weight:800;cursor:p
 .message.good{display:block;background:var(--goodbg);color:var(--good);border:1px solid #b8e2cc}
 .message.bad{display:block;background:var(--badbg);color:var(--bad);border:1px solid #f0c5c2}
 .message.hint{display:block;background:var(--hintbg);color:var(--hint);border:1px solid #efd792}
-.explain{margin-top:14px;color:var(--muted);font-size:.86rem;line-height:1.55}
-.final-card{text-align:center;padding:34px 24px}
-.final-diagram{max-width:900px;margin:22px auto;display:flex;flex-direction:column;gap:8px;text-align:left}
-.final-row{border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;grid-template-columns:145px 1fr;gap:12px;align-items:center}
-.final-row strong{font-size:.92rem}
-.final-fields{display:flex;gap:7px;flex-wrap:wrap}
-.chip{padding:6px 9px;border-radius:999px;border:1px solid #cbd4e0;background:#fff;font-size:.82rem;font-weight:750}
 .credit{margin-top:18px;text-align:center;color:#6b7480;font-size:13px;font-weight:600}
-@media(max-width:820px){.workspace{grid-template-columns:1fr}.final-row{grid-template-columns:1fr}.slot{min-width:120px}}
+
+/* Phase 1 */
+.stage-nav{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 10px}
+.stage-pill{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;color:#526174;font-size:.84rem;font-weight:800}
+.stage-pill.active{background:var(--soft);border-color:#9fc0f7;color:var(--accent2)}
+.stage-pill.done{background:var(--goodbg);border-color:#b7dfca;color:var(--good)}
+.workspace{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(270px,.75fr);gap:22px;margin-top:22px;align-items:start}
+.builder,.tray{border:1px solid var(--line);border-radius:16px;background:#fbfcfe;padding:18px}
+.builder h3,.tray h3{margin:0 0 10px;font-size:1rem}
+.pdu{border:2px solid #9aabc0;border-radius:14px;background:#fff;overflow:hidden}
+.pdu-head{padding:9px 12px;font-weight:900;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px;align-items:center}
+.pdu-head small{font-weight:700;color:#657287}
+.pdu-body{padding:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:stretch}
+.app .pdu-head{background:var(--app)} .transport .pdu-head{background:var(--transport)}
+.network .pdu-head{background:var(--network)} .link .pdu-head{background:var(--link)} .physical .pdu-head{background:var(--physical)}
+.slot{min-width:150px;min-height:70px;border:2px dashed #aebbd0;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;text-align:center;padding:10px;color:#7a8798;font-weight:750;cursor:pointer}
+.slot.selected-target{border-color:var(--accent);background:#f5f9ff}.slot.correct{border-style:solid;border-color:#70c59b;background:#f2fbf6;color:#245f43}.slot.wrong{border-color:#df8a82;background:#fff6f5;color:#8f3028}
+.field-card{border:1px solid var(--line);background:#fff;border-radius:11px;padding:11px 12px;cursor:grab;margin:8px 0;font-weight:850;line-height:1.25}
+.field-card span{display:block;color:var(--muted);font-size:.76rem;font-weight:650;margin-top:4px}.field-card:hover{border-color:#9fb6da}.field-card.selected{outline:3px solid rgba(23,105,224,.13);border-color:var(--accent)}.field-card.used{opacity:.35;cursor:not-allowed}
+.explain{margin-top:14px;color:var(--muted);font-size:.86rem;line-height:1.55}
+
+/* Generic challenge UI */
+.challenge{margin-top:22px;border:1px solid var(--line);border-radius:16px;background:#fbfcfe;padding:20px}
+.question-count{font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:850;margin-bottom:5px}
+.question-title{font-size:1.16rem;font-weight:900;line-height:1.4;margin-bottom:6px}
+.question-sub{color:var(--muted);line-height:1.5}
+.options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px}
+.option{border:1px solid var(--line);border-radius:12px;padding:13px;background:#fff;cursor:pointer;font-weight:750;line-height:1.35;transition:.15s ease}
+.option:hover{border-color:#9fb6da;transform:translateY(-1px)}.option.selected{border-color:var(--accent);outline:3px solid rgba(23,105,224,.13)}.option.correct{border-color:#70c59b;background:#f2fbf6}.option.wrong{border-color:#df8a82;background:#fff6f5}
+
+/* Broken PDU */
+.broken-pdu{margin-top:18px;border:2px solid #9aabc0;border-radius:14px;background:#fff;overflow:hidden}
+.broken-head{padding:10px 13px;font-weight:900;background:#eef3f9;border-bottom:1px solid var(--line)}
+.broken-fields{display:flex;gap:9px;flex-wrap:wrap;padding:16px}
+.broken-field{border:1px solid #bac5d3;border-radius:10px;padding:11px 12px;background:#fff;cursor:pointer;font-weight:800}
+.broken-field.selected{outline:3px solid rgba(23,105,224,.13);border-color:var(--accent)}
+.broken-field.correct{border-color:#df8a82;background:#fff6f5;color:#8f3028}
+
+/* Added next */
+.transition-box{display:grid;grid-template-columns:1fr 70px 1fr;gap:12px;align-items:center;margin-top:18px}
+.layer-box{border:1px solid var(--line);border-radius:14px;padding:18px;background:#fff;text-align:center}
+.layer-box strong{display:block;font-size:1.05rem;margin-bottom:5px}.layer-box span{color:var(--muted);font-size:.88rem}
+.arrow{font-size:1.8rem;text-align:center;color:var(--accent);font-weight:900}
+
+/* Detective */
+.evidence{margin:18px auto 0;max-width:720px;border:1px solid var(--line);border-radius:16px;background:#fff;padding:24px;text-align:center}
+.evidence-label{font-size:.8rem;color:var(--muted);font-weight:850;text-transform:uppercase;letter-spacing:.05em}
+.evidence-main{font-size:1.45rem;font-weight:900;margin:8px 0 4px}.evidence-sub{color:var(--muted);line-height:1.5}
+
+/* Keep/Add/Transform */
+.classify-grid{margin-top:18px;display:flex;flex-direction:column;gap:12px}
+.classify-row{border:1px solid var(--line);border-radius:14px;background:#fff;padding:14px;display:grid;grid-template-columns:minmax(190px,1fr) minmax(330px,1.6fr);gap:14px;align-items:center}
+.classify-item strong{display:block}.classify-item span{color:var(--muted);font-size:.82rem}
+.choice-buttons{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.choice{border:1px solid var(--line);background:#fbfcfe;color:#334155;padding:9px;border-radius:9px;font-size:.82rem}
+.choice.selected{border-color:var(--accent);background:var(--soft);color:var(--accent2)}
+.choice.correct{border-color:#70c59b;background:#f2fbf6;color:#245f43}.choice.wrong{border-color:#df8a82;background:#fff6f5;color:#8f3028}
+
+/* transitions/final */
+.transition-card,.mastery{text-align:center;padding:34px 24px}.transition-card p,.mastery p{max-width:780px;margin:0 auto 18px;color:var(--muted);line-height:1.6}
+.phase-summary{max-width:850px;margin:20px auto;display:grid;grid-template-columns:repeat(2,1fr);gap:12px;text-align:left}
+.summary-item{border:1px solid var(--line);border-radius:12px;padding:14px;background:#fbfcfe}.summary-item strong{display:block;margin-bottom:3px}
+@media(max-width:820px){
+  .workspace,.transition-box{grid-template-columns:1fr}.arrow{transform:rotate(90deg)}
+  .options{grid-template-columns:1fr}.classify-row{grid-template-columns:1fr}.choice-buttons{grid-template-columns:1fr}
+  .phase-summary{grid-template-columns:1fr}.slot{min-width:120px}
+}
 </style>
 </head>
 <body>
@@ -79,251 +116,340 @@ button{border:none;border-radius:10px;padding:11px 16px;font-weight:800;cursor:p
   <div class="hero">
     <div>
       <div class="eyebrow">Module 1 · Lesson 3</div>
-      <h1>Activity 1.3.1 — Build the PDU</h1>
-      <p class="lead">Follow one HTTP web request down the protocol stack. At each stage, place the information added by that layer and observe how the previous PDU becomes the payload of the next.</p>
-      <div class="stage-nav">
-        <div class="stage-pill active" id="pill0">1 · Application</div>
-        <div class="stage-pill" id="pill1">2 · Transport</div>
-        <div class="stage-pill" id="pill2">3 · Network</div>
-        <div class="stage-pill" id="pill3">4 · Data Link</div>
-        <div class="stage-pill" id="pill4">5 · Physical</div>
+      <h1>Activity 1.3.1 — Encapsulation Challenge</h1>
+      <p class="lead">Build, diagnose and reason about the same HTTP web request as it moves down the protocol stack. Each phase tests the same encapsulation concept in a different way.</p>
+      <div class="phase-nav">
+        <button class="phase-pill active" id="phasePill1">Phase 1 · Build the PDU</button>
+        <button class="phase-pill" id="phasePill2">Phase 2 · Fix the Broken PDU</button>
+        <button class="phase-pill" id="phasePill3">Phase 3 · What Gets Added Next?</button>
+        <button class="phase-pill" id="phasePill4">Phase 4 · Encapsulation Detective</button>
+        <button class="phase-pill" id="phasePill5">Phase 5 · Keep, Add or Transform</button>
       </div>
+      <div class="phase-help">Work through the phases in order or open any phase directly. Later phases require more reasoning and provide fewer structural clues.</div>
     </div>
     <div class="progress-card">
-      <div class="progress-row"><span>Activity progress</span><strong id="progressText">Stage 1 of 5</strong></div>
+      <div class="progress-row"><span id="progressLabel">Phase 1 progress</span><strong id="progressText">Stage 1 of 5</strong></div>
       <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
     </div>
   </div>
 
-  <section class="card" id="activityCard">
+  <!-- PHASE 1 -->
+  <section class="card" id="phase1Card">
     <div class="section-kicker" id="stageKicker">Stage 1</div>
     <h2 id="stageTitle"></h2>
     <p class="instruction" id="stageInstruction"></p>
-
+    <div class="stage-nav">
+      <div class="stage-pill active" id="stagePill0">1 · Application</div>
+      <div class="stage-pill" id="stagePill1">2 · Transport</div>
+      <div class="stage-pill" id="stagePill2">3 · Network</div>
+      <div class="stage-pill" id="stagePill3">4 · Data Link</div>
+      <div class="stage-pill" id="stagePill4">5 · Physical</div>
+    </div>
     <div class="workspace">
       <div class="builder">
         <h3>Encapsulation workspace</h3>
         <div class="context" id="contextText"></div>
-        <div class="pdu-stack" id="pduStack"></div>
+        <div id="pduStack"></div>
       </div>
       <div class="tray">
         <h3>Information tray</h3>
-        <div class="context">Drag an item into the matching empty position. On touch devices, select an item and then select a slot.</div>
+        <div class="context">Drag an item into the matching position. On touch devices, select an item and then select a slot.</div>
         <div id="fieldTray"></div>
       </div>
     </div>
-
     <div class="controls">
-      <button class="primary" id="checkBtn">Check stage</button>
-      <button class="secondary" id="hintBtn">Hint</button>
-      <button class="ghost" id="resetBtn">Reset stage</button>
-      <button class="primary hidden" id="nextBtn">Next stage</button>
+      <button class="primary" id="checkP1Btn">Check stage</button>
+      <button class="secondary" id="hintP1Btn">Hint</button>
+      <button class="ghost" id="resetP1Btn">Reset stage</button>
+      <button class="primary hidden" id="nextP1Btn">Next stage</button>
     </div>
-    <div class="message" id="message"></div>
+    <div class="message" id="p1Message"></div>
     <div class="explain" id="scopeNote"></div>
     <div class="credit">Created by Zeeshan Basit</div>
   </section>
 
-  <section class="card final-card hidden" id="completeCard">
-    <div style="font-size:3rem">✓</div>
-    <h2>Complete PDU built</h2>
-    <p class="instruction" style="max-width:780px;margin:0 auto">The HTTP request has been encapsulated layer by layer. Each lower layer carried the information produced above it and added information needed for its own job.</p>
-    <div class="final-diagram">
-      <div class="final-row"><strong>Application</strong><div class="final-fields"><span class="chip">HTTP Web Request</span></div></div>
-      <div class="final-row"><strong>Transport</strong><div class="final-fields"><span class="chip">Source Port</span><span class="chip">Destination Port</span><span class="chip">Application Data</span></div></div>
-      <div class="final-row"><strong>Network</strong><div class="final-fields"><span class="chip">Source IP Address</span><span class="chip">Destination IP Address</span><span class="chip">Transport PDU</span></div></div>
-      <div class="final-row"><strong>Data Link</strong><div class="final-fields"><span class="chip">Source MAC Address</span><span class="chip">Destination MAC Address</span><span class="chip">Network PDU</span><span class="chip">Frame Trailer</span></div></div>
-      <div class="final-row"><strong>Physical</strong><div class="final-fields"><span class="chip">Bits</span><span class="chip">Signals on the medium</span></div></div>
+  <section class="card transition-card hidden" id="transition2">
+    <div style="font-size:3rem">✓</div><h2>Phase 1 complete</h2>
+    <p>You built the encapsulation process from Application data to physical transmission. Next, diagnose PDUs that have been assembled incorrectly.</p>
+    <button class="primary" id="startP2Btn">Start Phase 2 — Fix the Broken PDU</button>
+    <div class="credit">Created by Zeeshan Basit</div>
+  </section>
+
+  <!-- PHASE 2 -->
+  <section class="card hidden" id="phase2Card">
+    <div class="section-kicker">Phase 2 · Fix the Broken PDU</div>
+    <h2>Find the error, then repair it</h2>
+    <p class="instruction">Each PDU contains one incorrect field or payload. First identify the error. Then choose the correction that restores the encapsulation sequence.</p>
+    <div class="challenge">
+      <div class="question-count" id="p2Count"></div>
+      <div class="question-title" id="p2Title"></div>
+      <div class="question-sub" id="p2Sub"></div>
+      <div class="broken-pdu">
+        <div class="broken-head" id="brokenHead"></div>
+        <div class="broken-fields" id="brokenFields"></div>
+      </div>
+      <div id="repairArea" class="hidden">
+        <div class="context">Now choose the best correction.</div>
+        <div class="options" id="repairOptions"></div>
+      </div>
     </div>
-    <button class="primary" id="restartBtn">Start a new attempt</button>
+    <div class="controls">
+      <button class="primary" id="checkBrokenBtn">Check error</button>
+      <button class="secondary" id="hintP2Btn">Hint</button>
+      <button class="ghost" id="resetP2Btn">Reset question</button>
+      <button class="primary hidden" id="checkRepairBtn">Check repair</button>
+      <button class="primary hidden" id="nextP2Btn">Next question</button>
+    </div>
+    <div class="message" id="p2Message"></div>
+    <div class="credit">Created by Zeeshan Basit</div>
+  </section>
+
+  <section class="card transition-card hidden" id="transition3">
+    <div style="font-size:3rem">🔧</div><h2>Phase 2 complete</h2>
+    <p>You can now recognise when a PDU violates the encapsulation sequence. The next phase removes the finished structure and asks you to predict what the next layer will do.</p>
+    <button class="primary" id="startP3Btn">Start Phase 3 — What Gets Added Next?</button>
+    <div class="credit">Created by Zeeshan Basit</div>
+  </section>
+
+  <!-- PHASE 3 -->
+  <section class="card hidden" id="phase3Card">
+    <div class="section-kicker">Phase 3 · What Gets Added Next?</div>
+    <h2>Predict the next encapsulation step</h2>
+    <p class="instruction">Use the current PDU and the next layer to predict which information is added or what happens next.</p>
+    <div class="challenge">
+      <div class="question-count" id="p3Count"></div>
+      <div class="question-title" id="p3Title"></div>
+      <div class="transition-box">
+        <div class="layer-box"><strong id="fromLayer"></strong><span id="fromPdu"></span></div>
+        <div class="arrow">→</div>
+        <div class="layer-box"><strong id="toLayer"></strong><span>What happens here?</span></div>
+      </div>
+      <div class="options" id="p3Options"></div>
+    </div>
+    <div class="controls">
+      <button class="primary" id="checkP3Btn">Check prediction</button>
+      <button class="secondary" id="hintP3Btn">Hint</button>
+      <button class="ghost" id="resetP3Btn">Reset question</button>
+      <button class="primary hidden" id="nextP3Btn">Next question</button>
+    </div>
+    <div class="message" id="p3Message"></div>
+    <div class="credit">Created by Zeeshan Basit</div>
+  </section>
+
+  <section class="card transition-card hidden" id="transition4">
+    <div style="font-size:3rem">→</div><h2>Phase 3 complete</h2>
+    <p>You can predict how the PDU changes as it moves downward. The next phase gives you isolated evidence and asks you to infer which layer or encapsulation stage produced it.</p>
+    <button class="primary" id="startP4Btn">Start Phase 4 — Encapsulation Detective</button>
+    <div class="credit">Created by Zeeshan Basit</div>
+  </section>
+
+  <!-- PHASE 4 -->
+  <section class="card hidden" id="phase4Card">
+    <div class="section-kicker">Phase 4 · Encapsulation Detective</div>
+    <h2>Identify the layer from the evidence</h2>
+    <p class="instruction">Inspect the field, payload relationship or transmission clue and determine which layer is responsible.</p>
+    <div class="challenge">
+      <div class="question-count" id="p4Count"></div>
+      <div class="evidence">
+        <div class="evidence-label" id="evidenceLabel"></div>
+        <div class="evidence-main" id="evidenceMain"></div>
+        <div class="evidence-sub" id="evidenceSub"></div>
+      </div>
+      <div class="options" id="p4Options"></div>
+    </div>
+    <div class="controls">
+      <button class="primary" id="checkP4Btn">Check answer</button>
+      <button class="secondary" id="hintP4Btn">Hint</button>
+      <button class="ghost" id="resetP4Btn">Reset question</button>
+      <button class="primary hidden" id="nextP4Btn">Next clue</button>
+    </div>
+    <div class="message" id="p4Message"></div>
+    <div class="credit">Created by Zeeshan Basit</div>
+  </section>
+
+  <section class="card transition-card hidden" id="transition5">
+    <div style="font-size:3rem">🔎</div><h2>Phase 4 complete</h2>
+    <p>You can identify encapsulation stages from individual clues. The final phase checks whether you can distinguish what is carried forward, what is added, and what changes form for transmission.</p>
+    <button class="primary" id="startP5Btn">Start Phase 5 — Keep, Add or Transform</button>
+    <div class="credit">Created by Zeeshan Basit</div>
+  </section>
+
+  <!-- PHASE 5 -->
+  <section class="card hidden" id="phase5Card">
+    <div class="section-kicker">Phase 5 · Keep, Add or Transform</div>
+    <h2>Classify what happens at each layer</h2>
+    <p class="instruction"><strong>Keep</strong> means carry the complete PDU from the layer above as payload. <strong>Add</strong> means the current layer supplies new information. <strong>Transform</strong> means represent the completed frame as bits/signals for transmission.</p>
+    <div class="challenge">
+      <div class="question-count" id="p5Count"></div>
+      <div class="question-title" id="p5Title"></div>
+      <div class="question-sub" id="p5Sub"></div>
+      <div class="classify-grid" id="classifyGrid"></div>
+    </div>
+    <div class="controls">
+      <button class="primary" id="checkP5Btn">Check classification</button>
+      <button class="secondary" id="hintP5Btn">Hint</button>
+      <button class="ghost" id="resetP5Btn">Reset question</button>
+      <button class="primary hidden" id="nextP5Btn">Next stage</button>
+    </div>
+    <div class="message" id="p5Message"></div>
+    <div class="credit">Created by Zeeshan Basit</div>
+  </section>
+
+  <!-- COMPLETE -->
+  <section class="card mastery hidden" id="masteryCard">
+    <div style="font-size:3rem">✓</div>
+    <h2>Encapsulation challenge complete</h2>
+    <p>The same HTTP web request has now been examined from five different perspectives: construction, repair, prediction, identification and classification.</p>
+    <div class="phase-summary">
+      <div class="summary-item"><strong>Build</strong>Construct the PDU layer by layer.</div>
+      <div class="summary-item"><strong>Diagnose</strong>Recognise fields or payloads that appear at the wrong layer.</div>
+      <div class="summary-item"><strong>Predict</strong>Determine what the next layer adds or changes.</div>
+      <div class="summary-item"><strong>Identify</strong>Infer the responsible layer from encapsulation evidence.</div>
+      <div class="summary-item"><strong>Classify</strong>Distinguish information carried as payload, newly added information and physical transformation.</div>
+    </div>
+    <button class="primary" id="restartAllBtn">Start a new attempt</button>
     <div class="credit">Created by Zeeshan Basit</div>
   </section>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const stages=[
-  {
-    title:"Create the Application Data",
-    instruction:"Begin with the message generated by the web browser.",
-    context:"The browser is requesting a web page. At this point, the request is application data; lower-layer addressing has not yet been added.",
-    layer:"Application Layer",
-    pdu:"Data",
-    slots:[{id:"appdata",label:"Application data"}],
-    fields:[
-      {id:"appdata",name:"HTTP Web Request",note:"Created by the application"},
-      {id:"srcport",name:"Source Port",note:"Added later"},
-      {id:"dstip",name:"Destination IP Address",note:"Added later"}
-    ],
-    hint:"The first PDU contains the message created by the browser.",
-    success:"Correct. The HTTP web request is the Application-layer data. It will become the payload of the Transport-layer PDU.",
-    scope:"Focus: the application creates the data. No transport, IP, MAC or physical information is required yet."
-  },
-  {
-    title:"Add Transport-Layer Information",
-    instruction:"The Application-layer data moves down to the Transport layer. Place the transport information in the correct positions.",
-    context:"The browser's HTTP request must be associated with the sending and receiving applications. The Transport layer adds port information while carrying the application data as its payload.",
-    layer:"Transport Layer",
-    pdu:"TCP Segment",
-    slots:[{id:"srcport",label:"Header field 1"},{id:"dstport",label:"Header field 2"},{id:"payload",label:"Payload"}],
-    fields:[
-      {id:"srcport",name:"Source Port",note:"Identifies the sending application"},
-      {id:"dstport",name:"Destination Port",note:"Identifies the receiving service"},
-      {id:"payload",name:"HTTP Web Request",note:"Application data carried as payload"},
-      {id:"srcip",name:"Source IP Address",note:"Network layer"},
-      {id:"srcmac",name:"Source MAC Address",note:"Data Link layer"}
-    ],
-    hint:"Transport uses port numbers. The HTTP request itself is not discarded; it is carried inside the Transport PDU.",
-    success:"Correct. The Transport layer added source and destination ports. The Application-layer data is now the payload of the TCP segment.",
-    scope:"Focus: ports and payload. TCP control fields beyond source and destination ports are intentionally not assessed here."
-  },
-  {
-    title:"Add Network-Layer Information",
-    instruction:"Carry the Transport PDU into the Network layer and add the addressing used for end-to-end logical delivery.",
-    context:"The complete Transport-layer PDU becomes the payload of the Network-layer PDU. The Network layer adds logical source and destination addressing.",
-    layer:"Network Layer",
-    pdu:"IP Packet",
-    slots:[{id:"srcip",label:"Header field 1"},{id:"dstip",label:"Header field 2"},{id:"payload",label:"Payload"}],
-    fields:[
-      {id:"srcip",name:"Source IP Address",note:"Logical source address"},
-      {id:"dstip",name:"Destination IP Address",note:"Logical destination address"},
-      {id:"payload",name:"TCP Segment",note:"Transport PDU carried as payload"},
-      {id:"dstport",name:"Destination Port",note:"Already inside the Transport PDU"},
-      {id:"dstmac",name:"Destination MAC Address",note:"Data Link layer"}
-    ],
-    hint:"The Network layer uses IP addressing. The entire Transport PDU is carried inside the packet.",
-    success:"Correct. The Network layer added source and destination IP addresses. The TCP segment is carried as the packet payload.",
-    scope:"Focus: logical addressing and encapsulation. Routing decisions and subnetting are outside this activity."
-  },
-  {
-    title:"Build the Data-Link Frame",
-    instruction:"Carry the Network PDU into the Data Link layer. Add local-link addressing and the trailer.",
-    context:"The IP packet becomes the payload of a frame. The Data Link layer adds a header for local-link delivery and a trailer used as part of the frame structure.",
-    layer:"Data Link Layer",
-    pdu:"Ethernet Frame",
-    slots:[{id:"dstmac",label:"Header field 1"},{id:"srcmac",label:"Header field 2"},{id:"payload",label:"Payload"},{id:"trailer",label:"Trailer"}],
-    fields:[
-      {id:"dstmac",name:"Destination MAC Address",note:"Local-link destination"},
-      {id:"srcmac",name:"Source MAC Address",note:"Local-link source"},
-      {id:"payload",name:"IP Packet",note:"Network PDU carried as payload"},
-      {id:"trailer",name:"Frame Trailer",note:"Added after the payload"},
-      {id:"srcip",name:"Source IP Address",note:"Already inside the IP packet"},
-      {id:"dstport",name:"Destination Port",note:"Already inside the TCP segment"}
-    ],
-    hint:"Ethernet framing uses source and destination MAC addresses, carries the IP packet as payload, and includes a trailer.",
-    success:"Correct. The Data Link layer added MAC addressing and a trailer around the Network-layer PDU.",
-    scope:"Focus: frame structure, MAC addressing and payload. Detailed Ethernet header fields are intentionally omitted."
-  },
-  {
-    title:"Prepare the Frame for Physical Transmission",
-    instruction:"Complete the final stage by showing what the Physical layer transmits over the medium.",
-    context:"The complete frame is represented as bits. The network interface then transmits those bits as signals appropriate to the physical medium.",
-    layer:"Physical Layer",
-    pdu:"Bits / Signals",
-    slots:[{id:"bits",label:"Representation"},{id:"signals",label:"Transmission"}],
-    fields:[
-      {id:"bits",name:"Bits",note:"Binary representation of the frame"},
-      {id:"signals",name:"Signals on the Medium",note:"Electrical, light or radio signalling"},
-      {id:"packet",name:"IP Packet",note:"Already encapsulated inside the frame"},
-      {id:"ports",name:"Port Numbers",note:"Already encapsulated inside the frame"}
-    ],
-    hint:"At the Physical layer, the frame is represented in bits and transmitted using signals on the selected medium.",
-    success:"Correct. The encapsulated frame is represented as bits and transmitted as physical signals across the medium.",
-    scope:"Focus: bits and signals. Signal encoding details are outside the scope of this activity."
-  }
-];
-
-let stageIndex=0, selected=null, placements={};
-
 function shuffle(a){const x=[...a];for(let i=x.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[x[i],x[j]]=[x[j],x[i]]}return x}
-function makeCard(field){
-  const d=document.createElement("div");
-  d.className="field-card";d.draggable=true;d.dataset.id=field.id;
+function sample(a,n){return shuffle(a).slice(0,Math.min(n,a.length))}
+function clearMessage(id){$(id).className="message";$(id).textContent=""}
+function setMessage(id,type,text){$(id).className="message "+type;$(id).textContent=text}
+function updatePhasePills(active){for(let i=1;i<=5;i++)$("phasePill"+i).classList.toggle("active",i===active)}
+function hideAll(){
+  ["phase1Card","transition2","phase2Card","transition3","phase3Card","transition4","phase4Card","transition5","phase5Card","masteryCard"].forEach(id=>$(id).classList.add("hidden"));
+}
+function updateProgress(label,text,pct){$("progressLabel").textContent=label;$("progressText").textContent=text;$("progressFill").style.width=pct+"%"}
+
+/* ---------------- PHASE 1 ---------------- */
+const p1Stages=[
+ {title:"Create the Application Data",instruction:"Begin with the message generated by the web browser.",context:"The browser is requesting a web page. At this point, the request is application data; lower-layer addressing has not yet been added.",layer:"Application Layer",pdu:"Data",slots:[{id:"appdata",label:"Application data"}],fields:[{id:"appdata",name:"HTTP Web Request",note:"Created by the application"},{id:"srcport",name:"Source Port",note:"Added later"},{id:"dstip",name:"Destination IP Address",note:"Added later"}],hint:"The first PDU contains the message created by the browser.",success:"Correct. The HTTP web request is the Application-layer data. It will become the payload of the Transport-layer PDU.",scope:"Focus: the application creates the data. No transport, IP, MAC or physical information is required yet."},
+ {title:"Add Transport-Layer Information",instruction:"The Application-layer data moves down to the Transport layer. Place the transport information in the correct positions.",context:"The browser's HTTP request must be associated with the sending and receiving applications. The Transport layer adds port information while carrying the application data as its payload.",layer:"Transport Layer",pdu:"TCP Segment",slots:[{id:"srcport",label:"Header field 1"},{id:"dstport",label:"Header field 2"},{id:"payload",label:"Payload"}],fields:[{id:"srcport",name:"Source Port",note:"Identifies the sending application"},{id:"dstport",name:"Destination Port",note:"Identifies the receiving service"},{id:"payload",name:"HTTP Web Request",note:"Application data carried as payload"},{id:"srcip",name:"Source IP Address",note:"Network layer"},{id:"srcmac",name:"Source MAC Address",note:"Data Link layer"}],hint:"Transport uses port numbers. The HTTP request itself is not discarded; it is carried inside the Transport PDU.",success:"Correct. The Transport layer added source and destination ports. The Application-layer data is now the payload of the TCP segment.",scope:"Focus: ports and payload. TCP control fields beyond source and destination ports are intentionally not assessed here."},
+ {title:"Add Network-Layer Information",instruction:"Carry the Transport PDU into the Network layer and add the addressing used for end-to-end logical delivery.",context:"The complete Transport-layer PDU becomes the payload of the Network-layer PDU. The Network layer adds logical source and destination addressing.",layer:"Network Layer",pdu:"IP Packet",slots:[{id:"srcip",label:"Header field 1"},{id:"dstip",label:"Header field 2"},{id:"payload",label:"Payload"}],fields:[{id:"srcip",name:"Source IP Address",note:"Logical source address"},{id:"dstip",name:"Destination IP Address",note:"Logical destination address"},{id:"payload",name:"TCP Segment",note:"Transport PDU carried as payload"},{id:"dstport",name:"Destination Port",note:"Already inside the Transport PDU"},{id:"dstmac",name:"Destination MAC Address",note:"Data Link layer"}],hint:"The Network layer uses IP addressing. The entire Transport PDU is carried inside the packet.",success:"Correct. The Network layer added source and destination IP addresses. The TCP segment is carried as the packet payload.",scope:"Focus: logical addressing and encapsulation. Routing decisions and subnetting are outside this activity."},
+ {title:"Build the Data-Link Frame",instruction:"Carry the Network PDU into the Data Link layer. Add local-link addressing and the trailer.",context:"The IP packet becomes the payload of a frame. The Data Link layer adds a header for local-link delivery and a trailer used as part of the frame structure.",layer:"Data Link Layer",pdu:"Ethernet Frame",slots:[{id:"dstmac",label:"Header field 1"},{id:"srcmac",label:"Header field 2"},{id:"payload",label:"Payload"},{id:"trailer",label:"Trailer"}],fields:[{id:"dstmac",name:"Destination MAC Address",note:"Local-link destination"},{id:"srcmac",name:"Source MAC Address",note:"Local-link source"},{id:"payload",name:"IP Packet",note:"Network PDU carried as payload"},{id:"trailer",name:"Frame Trailer",note:"Added after the payload"},{id:"srcip",name:"Source IP Address",note:"Already inside the IP packet"},{id:"dstport",name:"Destination Port",note:"Already inside the TCP segment"}],hint:"Ethernet framing uses source and destination MAC addresses, carries the IP packet as payload, and includes a trailer.",success:"Correct. The Data Link layer added MAC addressing and a trailer around the Network-layer PDU.",scope:"Focus: frame structure, MAC addressing and payload. Detailed Ethernet header fields are intentionally omitted."},
+ {title:"Prepare the Frame for Physical Transmission",instruction:"Complete the final stage by showing what the Physical layer transmits over the medium.",context:"The complete frame is represented as bits. The network interface then transmits those bits as signals appropriate to the physical medium.",layer:"Physical Layer",pdu:"Bits / Signals",slots:[{id:"bits",label:"Representation"},{id:"signals",label:"Transmission"}],fields:[{id:"bits",name:"Bits",note:"Binary representation of the frame"},{id:"signals",name:"Signals on the Medium",note:"Electrical, light or radio signalling"},{id:"packet",name:"IP Packet",note:"Already encapsulated inside the frame"},{id:"ports",name:"Port Numbers",note:"Already encapsulated inside the frame"}],hint:"At the Physical layer, the frame is represented in bits and transmitted using signals on the selected medium.",success:"Correct. The encapsulated frame is represented as bits and transmitted as physical signals across the medium.",scope:"Focus: bits and signals. Signal encoding details are outside the scope of this activity."}
+];
+let p1Index=0,p1Selected=null,p1Placements={};
+function p1MakeCard(field){
+  const d=document.createElement("div");d.className="field-card";d.draggable=true;d.dataset.id=field.id;
   d.innerHTML=field.name+"<span>"+field.note+"</span>";
   d.addEventListener("dragstart",e=>e.dataTransfer.setData("text/plain",field.id));
-  d.addEventListener("click",()=>selectField(field.id,d));
+  d.addEventListener("click",()=>{if(d.classList.contains("used"))return;p1Selected=field.id;document.querySelectorAll("#fieldTray .field-card").forEach(x=>x.classList.remove("selected"));d.classList.add("selected");document.querySelectorAll("#pduStack .slot").forEach(x=>x.classList.add("selected-target"))});
   return d;
 }
-function selectField(id,el){
-  if(el.classList.contains("used"))return;
-  selected=id;
-  document.querySelectorAll(".field-card").forEach(x=>x.classList.remove("selected"));
-  el.classList.add("selected");
-  document.querySelectorAll(".slot").forEach(x=>x.classList.add("selected-target"));
+function p1Place(id,slotId){
+  const existing=Object.entries(p1Placements).find(([k,v])=>v===id);if(existing)delete p1Placements[existing[0]];
+  p1Placements[slotId]=id;p1Selected=null;p1RenderPlacements();
 }
-function place(id,slotId){
-  const existing=Object.entries(placements).find(([k,v])=>v===id);
-  if(existing)delete placements[existing[0]];
-  placements[slotId]=id;selected=null;renderPlacements();
+function p1RenderPlacements(){
+  const s=p1Stages[p1Index];
+  document.querySelectorAll("#pduStack .slot").forEach(slot=>{slot.classList.remove("correct","wrong","selected-target");const id=p1Placements[slot.dataset.slot];const f=s.fields.find(x=>x.id===id);slot.textContent=f?f.name:slot.dataset.label});
+  document.querySelectorAll("#fieldTray .field-card").forEach(c=>{c.classList.toggle("used",Object.values(p1Placements).includes(c.dataset.id));c.classList.remove("selected")});
 }
-function renderPlacements(){
-  const s=stages[stageIndex];
-  document.querySelectorAll(".slot").forEach(slot=>{
-    slot.classList.remove("correct","wrong","selected-target");
-    const id=placements[slot.dataset.slot];
-    const f=s.fields.find(x=>x.id===id);
-    slot.textContent=f?f.name:slot.dataset.label;
-  });
-  document.querySelectorAll(".field-card").forEach(c=>{
-    c.classList.toggle("used",Object.values(placements).includes(c.dataset.id));
-    c.classList.remove("selected");
-  });
-}
-function buildPdu(){
-  const s=stages[stageIndex], wrap=$("pduStack");wrap.innerHTML="";
-  const p=document.createElement("div");
-  const cls=["app","transport","network","link","physical"][stageIndex];
-  p.className="pdu "+cls;
+function p1BuildPdu(){
+  const s=p1Stages[p1Index],wrap=$("pduStack");wrap.innerHTML="";
+  const p=document.createElement("div");p.className="pdu "+["app","transport","network","link","physical"][p1Index];
   p.innerHTML='<div class="pdu-head"><span>'+s.layer+'</span><small>PDU — '+s.pdu+'</small></div>';
   const body=document.createElement("div");body.className="pdu-body";
-  s.slots.forEach(def=>{
-    const slot=document.createElement("div");slot.className="slot";slot.dataset.slot=def.id;slot.dataset.label=def.label;slot.textContent=def.label;
-    slot.addEventListener("dragover",e=>e.preventDefault());
-    slot.addEventListener("drop",e=>{e.preventDefault();place(e.dataTransfer.getData("text/plain"),def.id)});
-    slot.addEventListener("click",()=>{if(selected)place(selected,def.id);else if(placements[def.id]){delete placements[def.id];renderPlacements()}});
-    body.appendChild(slot);
-  });
+  s.slots.forEach(def=>{const slot=document.createElement("div");slot.className="slot";slot.dataset.slot=def.id;slot.dataset.label=def.label;slot.textContent=def.label;slot.addEventListener("dragover",e=>e.preventDefault());slot.addEventListener("drop",e=>{e.preventDefault();p1Place(e.dataTransfer.getData("text/plain"),def.id)});slot.addEventListener("click",()=>{if(p1Selected)p1Place(p1Selected,def.id);else if(p1Placements[def.id]){delete p1Placements[def.id];p1RenderPlacements()}});body.appendChild(slot)});
   p.appendChild(body);wrap.appendChild(p);
 }
-function renderStage(){
-  placements={};selected=null;const s=stages[stageIndex];
-  $("stageKicker").textContent="Stage "+(stageIndex+1);
-  $("stageTitle").textContent=s.title;$("stageInstruction").textContent=s.instruction;
-  $("contextText").textContent=s.context;$("scopeNote").textContent=s.scope;
-  $("message").className="message";$("message").textContent="";
-  $("checkBtn").classList.remove("hidden");$("nextBtn").classList.add("hidden");
-  buildPdu();
-  const tray=$("fieldTray");tray.innerHTML="";shuffle(s.fields).forEach(f=>tray.appendChild(makeCard(f)));
-  for(let i=0;i<5;i++){const p=$("pill"+i);p.classList.toggle("active",i===stageIndex);p.classList.toggle("done",i<stageIndex)}
-  $("progressText").textContent="Stage "+(stageIndex+1)+" of 5";
-  $("progressFill").style.width=(stageIndex/5*100)+"%";
+function renderP1(){
+  hideAll();$("phase1Card").classList.remove("hidden");updatePhasePills(1);
+  p1Placements={};p1Selected=null;const s=p1Stages[p1Index];
+  $("stageKicker").textContent="Phase 1 · Stage "+(p1Index+1);$("stageTitle").textContent=s.title;$("stageInstruction").textContent=s.instruction;$("contextText").textContent=s.context;$("scopeNote").textContent=s.scope;clearMessage("p1Message");
+  $("checkP1Btn").classList.remove("hidden");$("nextP1Btn").classList.add("hidden");p1BuildPdu();
+  const tray=$("fieldTray");tray.innerHTML="";shuffle(s.fields).forEach(f=>tray.appendChild(p1MakeCard(f)));
+  for(let i=0;i<5;i++){$("stagePill"+i).classList.toggle("active",i===p1Index);$("stagePill"+i).classList.toggle("done",i<p1Index)}
+  updateProgress("Phase 1 progress","Stage "+(p1Index+1)+" of 5",(p1Index/5)*100);
 }
-$("checkBtn").addEventListener("click",()=>{
-  const s=stages[stageIndex], msg=$("message");
-  let ok=true;
-  s.slots.forEach(def=>{
-    const slot=document.querySelector('.slot[data-slot="'+def.id+'"]');
-    if(placements[def.id]===def.id){slot.classList.add("correct")}else{slot.classList.add("wrong");ok=false}
-  });
-  if(ok){
-    msg.className="message good";msg.textContent=s.success;
-    $("checkBtn").classList.add("hidden");$("nextBtn").classList.remove("hidden");
-  }else{
-    msg.className="message bad";msg.textContent="Not quite. Review which layer adds each item and remember that the PDU from the layer above becomes payload for the next layer.";
-  }
-});
-$("hintBtn").addEventListener("click",()=>{$("message").className="message hint";$("message").textContent=stages[stageIndex].hint});
-$("resetBtn").addEventListener("click",renderStage);
-$("nextBtn").addEventListener("click",()=>{
-  if(stageIndex<4){stageIndex++;renderStage()}
-  else{
-    $("activityCard").classList.add("hidden");$("completeCard").classList.remove("hidden");
-    for(let i=0;i<5;i++)$("pill"+i).classList.add("done");
-    $("progressText").textContent="Complete";$("progressFill").style.width="100%";
-  }
-});
-$("restartBtn").addEventListener("click",()=>{stageIndex=0;$("completeCard").classList.add("hidden");$("activityCard").classList.remove("hidden");renderStage()});
-renderStage();
+$("checkP1Btn").onclick=()=>{const s=p1Stages[p1Index];let ok=true;s.slots.forEach(def=>{const slot=document.querySelector('#pduStack .slot[data-slot="'+def.id+'"]');if(p1Placements[def.id]===def.id)slot.classList.add("correct");else{slot.classList.add("wrong");ok=false}});if(ok){setMessage("p1Message","good",s.success);$("checkP1Btn").classList.add("hidden");$("nextP1Btn").classList.remove("hidden")}else setMessage("p1Message","bad","Not quite. Review which layer adds each item and remember that the PDU from the layer above becomes payload for the next layer.")};
+$("hintP1Btn").onclick=()=>setMessage("p1Message","hint",p1Stages[p1Index].hint);
+$("resetP1Btn").onclick=renderP1;
+$("nextP1Btn").onclick=()=>{if(p1Index<4){p1Index++;renderP1()}else{hideAll();$("transition2").classList.remove("hidden");$("phasePill1").classList.add("done");updateProgress("Phase 1","Complete",100)}};
+
+/* ---------------- PHASE 2 ---------------- */
+const brokenBank=[
+ {title:"Transport-layer PDU",sub:"One item does not belong at this layer.",head:"TCP Segment",fields:["Source Port","Destination Port","Destination IP Address","HTTP Web Request"],wrong:"Destination IP Address",repairs:["Replace it with the Application data as payload","Move the IP address to the Network layer and keep the HTTP request as payload","Replace it with a Source MAC Address","Remove all addressing"],correctRepair:1,hint:"Ports belong to Transport. IP addressing is introduced one layer lower.",success:"Correct. IP addressing belongs to the Network layer; the HTTP request remains the Transport payload."},
+ {title:"Network-layer PDU",sub:"The payload relationship is wrong.",head:"IP Packet",fields:["Source IP Address","Destination IP Address","HTTP Web Request"],wrong:"HTTP Web Request",repairs:["Use the complete TCP segment as the packet payload","Use the Ethernet frame as the payload","Remove the payload","Replace the payload with MAC addresses"],correctRepair:0,hint:"A layer carries the complete PDU from the layer directly above it.",success:"Correct. The Network layer carries the complete TCP segment, not the application data by itself."},
+ {title:"Data-Link PDU",sub:"One payload has skipped a layer.",head:"Ethernet Frame",fields:["Destination MAC Address","Source MAC Address","TCP Segment","Frame Trailer"],wrong:"TCP Segment",repairs:["Replace the TCP segment with the complete IP packet","Replace it with the HTTP request","Replace it with bits","Remove the trailer"],correctRepair:0,hint:"Data Link receives its payload from the Network layer.",success:"Correct. The Ethernet frame carries the complete IP packet as its payload."},
+ {title:"Data-Link PDU",sub:"One addressing field belongs to another layer.",head:"Ethernet Frame",fields:["Destination MAC Address","Source IP Address","IP Packet","Frame Trailer"],wrong:"Source IP Address",repairs:["Replace it with Source MAC Address","Replace it with Source Port","Replace it with Destination IP Address","Remove the payload"],correctRepair:0,hint:"Local-link addressing at this layer uses MAC addresses.",success:"Correct. The Data Link header uses MAC addressing; IP addresses are already inside the packet."},
+ {title:"Physical transmission",sub:"One item incorrectly suggests another protocol header is added.",head:"Physical Layer",fields:["Bits","Signals on the Medium","New Physical Header"],wrong:"New Physical Header",repairs:["Do not add another protocol header; represent the frame as bits and transmit signals","Replace it with a Destination IP Address","Replace it with a Source Port","Add a second frame trailer"],correctRepair:0,hint:"The Physical layer changes how the completed frame is represented and transmitted.",success:"Correct. The Physical layer does not add another protocol header in this activity; it transmits the frame as bits/signals."},
+ {title:"Transport-layer PDU",sub:"One local-link field has appeared too early.",head:"TCP Segment",fields:["Source Port","Destination Port","Source MAC Address","HTTP Web Request"],wrong:"Source MAC Address",repairs:["Move MAC addressing to the Data Link layer","Move MAC addressing to the Network layer","Use MAC instead of ports","Remove the application payload"],correctRepair:0,hint:"MAC addresses are used by the Data Link layer.",success:"Correct. MAC addressing is added later by the Data Link layer."}
+];
+let p2Questions=[],p2Index=0,p2SelectedError=null,p2Repair=null;
+function initP2(){p2Questions=sample(brokenBank,5);p2Index=0;renderP2()}
+function renderP2(){
+  hideAll();$("phase2Card").classList.remove("hidden");updatePhasePills(2);const q=p2Questions[p2Index];p2SelectedError=null;p2Repair=null;
+  $("p2Count").textContent="Question "+(p2Index+1)+" of "+p2Questions.length;$("p2Title").textContent=q.title;$("p2Sub").textContent=q.sub;$("brokenHead").textContent=q.head;
+  const bf=$("brokenFields");bf.innerHTML="";q.fields.forEach(f=>{const d=document.createElement("div");d.className="broken-field";d.textContent=f;d.onclick=()=>{bf.querySelectorAll(".broken-field").forEach(x=>x.classList.remove("selected"));d.classList.add("selected");p2SelectedError=f};bf.appendChild(d)});
+  $("repairArea").classList.add("hidden");$("repairOptions").innerHTML="";$("checkBrokenBtn").classList.remove("hidden");$("checkRepairBtn").classList.add("hidden");$("nextP2Btn").classList.add("hidden");clearMessage("p2Message");
+  updateProgress("Phase 2 progress","Question "+(p2Index+1)+" of "+p2Questions.length,(p2Index/p2Questions.length)*100);
+}
+$("checkBrokenBtn").onclick=()=>{const q=p2Questions[p2Index];if(!p2SelectedError)return setMessage("p2Message","bad","Select the field or payload that you believe is incorrect.");if(p2SelectedError!==q.wrong)return setMessage("p2Message","bad","That item can appear in this PDU. Look for the field or payload that breaks the layer sequence.");document.querySelectorAll("#brokenFields .broken-field").forEach(x=>{if(x.textContent===q.wrong)x.classList.add("correct")});setMessage("p2Message","good","Correct. Now repair the PDU.");$("checkBrokenBtn").classList.add("hidden");$("repairArea").classList.remove("hidden");$("checkRepairBtn").classList.remove("hidden");const ro=$("repairOptions");ro.innerHTML="";q.repairs.forEach((r,i)=>{const d=document.createElement("div");d.className="option";d.textContent=r;d.onclick=()=>{ro.querySelectorAll(".option").forEach(x=>x.classList.remove("selected"));d.classList.add("selected");p2Repair=i};ro.appendChild(d)})};
+$("checkRepairBtn").onclick=()=>{const q=p2Questions[p2Index];if(p2Repair===null)return setMessage("p2Message","bad","Choose a repair first.");const opts=[...document.querySelectorAll("#repairOptions .option")];if(p2Repair===q.correctRepair){opts[p2Repair].classList.add("correct");setMessage("p2Message","good",q.success);$("checkRepairBtn").classList.add("hidden");$("nextP2Btn").classList.remove("hidden")}else{opts[p2Repair].classList.add("wrong");setMessage("p2Message","bad","That repair does not restore the encapsulation sequence. Remember that each layer carries the complete PDU from the layer above.")}};
+$("hintP2Btn").onclick=()=>setMessage("p2Message","hint",p2Questions[p2Index].hint);$("resetP2Btn").onclick=renderP2;
+$("nextP2Btn").onclick=()=>{if(p2Index<p2Questions.length-1){p2Index++;renderP2()}else{hideAll();$("transition3").classList.remove("hidden");$("phasePill2").classList.add("done");updateProgress("Phase 2","Complete",100)}};
+
+/* ---------------- PHASE 3 ---------------- */
+const nextBank=[
+ {from:"Application Layer",pdu:"HTTP Web Request — Application Data",to:"Transport Layer",options:["Add source and destination port numbers while carrying the application data as payload","Add source and destination IP addresses","Add source and destination MAC addresses","Convert the data directly into signals"],correct:0,hint:"The next layer identifies the communicating applications.",success:"Correct. The Transport layer adds port information and carries the application data as its payload."},
+ {from:"Transport Layer",pdu:"TCP Segment",to:"Network Layer",options:["Add source and destination IP addresses while carrying the complete TCP segment as payload","Add MAC addresses and a frame trailer","Remove the ports and keep only the HTTP request","Transmit the segment as electrical signals"],correct:0,hint:"The Network layer introduces logical addressing.",success:"Correct. The Network layer adds source and destination IP addresses around the Transport PDU."},
+ {from:"Network Layer",pdu:"IP Packet",to:"Data Link Layer",options:["Add destination/source MAC addresses and a frame trailer while carrying the IP packet as payload","Add source and destination ports","Replace the IP packet with the HTTP request","Add another IP header"],correct:0,hint:"The Data Link layer prepares a frame for the local link.",success:"Correct. The Data Link layer adds MAC addressing and a trailer around the IP packet."},
+ {from:"Data Link Layer",pdu:"Ethernet Frame",to:"Physical Layer",options:["No new protocol header is added; represent the frame as bits and transmit it as signals","Add source and destination IP addresses","Add source and destination ports","Remove the frame trailer before transmission"],correct:0,hint:"The Physical layer is about representation and signalling on the medium.",success:"Correct. The completed frame is represented as bits and transmitted using physical signals."}
+];
+let p3Questions=[],p3Index=0,p3Selected=null;
+function initP3(){p3Questions=shuffle(nextBank);p3Index=0;renderP3()}
+function renderP3(){hideAll();$("phase3Card").classList.remove("hidden");updatePhasePills(3);const q=p3Questions[p3Index];p3Selected=null;$("p3Count").textContent="Transition "+(p3Index+1)+" of "+p3Questions.length;$("p3Title").textContent="What happens as the PDU moves to the next layer?";$("fromLayer").textContent=q.from;$("fromPdu").textContent=q.pdu;$("toLayer").textContent=q.to;const o=$("p3Options");o.innerHTML="";q.options.forEach((v,i)=>{const d=document.createElement("div");d.className="option";d.textContent=v;d.onclick=()=>{o.querySelectorAll(".option").forEach(x=>x.classList.remove("selected"));d.classList.add("selected");p3Selected=i};o.appendChild(d)});$("checkP3Btn").classList.remove("hidden");$("nextP3Btn").classList.add("hidden");clearMessage("p3Message");updateProgress("Phase 3 progress","Transition "+(p3Index+1)+" of "+p3Questions.length,(p3Index/p3Questions.length)*100)}
+$("checkP3Btn").onclick=()=>{const q=p3Questions[p3Index];if(p3Selected===null)return setMessage("p3Message","bad","Choose what happens next.");const opts=[...document.querySelectorAll("#p3Options .option")];if(p3Selected===q.correct){opts[p3Selected].classList.add("correct");setMessage("p3Message","good",q.success);$("checkP3Btn").classList.add("hidden");$("nextP3Btn").classList.remove("hidden")}else{opts[p3Selected].classList.add("wrong");setMessage("p3Message","bad","That action belongs to a different layer. Follow the encapsulation order and consider the job of the next layer.")}};
+$("hintP3Btn").onclick=()=>setMessage("p3Message","hint",p3Questions[p3Index].hint);$("resetP3Btn").onclick=renderP3;
+$("nextP3Btn").onclick=()=>{if(p3Index<p3Questions.length-1){p3Index++;renderP3()}else{hideAll();$("transition4").classList.remove("hidden");$("phasePill3").classList.add("done");updateProgress("Phase 3","Complete",100)}};
+
+/* ---------------- PHASE 4 ---------------- */
+const detectiveBank=[
+ {label:"Header evidence",main:"Source Port + Destination Port",sub:"These fields identify the communicating applications.",answer:"Transport Layer",hint:"Which layer uses port numbers?",success:"Correct. Port numbers are Transport-layer information."},
+ {label:"Header evidence",main:"Source IP + Destination IP",sub:"These are logical addresses used for network-layer delivery.",answer:"Network Layer",hint:"Which layer uses IP addressing?",success:"Correct. IP addresses are Network-layer information."},
+ {label:"Frame evidence",main:"Destination MAC + Source MAC + Frame Trailer",sub:"These fields surround a Network-layer payload for local-link delivery.",answer:"Data Link Layer",hint:"Which layer creates the Ethernet frame?",success:"Correct. MAC addressing and the frame trailer belong to the Data Link layer."},
+ {label:"Application evidence",main:"HTTP Web Request",sub:"This is the original message generated by the browser before lower-layer encapsulation.",answer:"Application Layer",hint:"Where is the original web request created?",success:"Correct. The HTTP request begins as Application-layer data."},
+ {label:"Transmission evidence",main:"Bits → Signals on the Medium",sub:"The completed frame is represented and transmitted over copper, fibre or wireless media.",answer:"Physical Layer",hint:"Which layer handles signalling on the medium?",success:"Correct. Bits and physical signalling belong to the Physical layer."},
+ {label:"Payload clue",main:"The payload is a complete TCP Segment",sub:"The current layer adds logical source and destination addressing around it.",answer:"Network Layer",hint:"Which layer receives the Transport PDU directly?",success:"Correct. The TCP segment becomes the payload of the Network-layer packet."},
+ {label:"Payload clue",main:"The payload is a complete IP Packet",sub:"The current layer adds local-link addressing and a trailer.",answer:"Data Link Layer",hint:"Which layer receives the Network PDU directly?",success:"Correct. The IP packet becomes the payload of the Data Link frame."},
+ {label:"Payload clue",main:"The payload is Application Data",sub:"The current layer adds source and destination port numbers.",answer:"Transport Layer",hint:"Which layer receives Application data directly?",success:"Correct. Application data becomes the payload of the Transport-layer PDU."}
+];
+const detectiveLayers=["Application Layer","Transport Layer","Network Layer","Data Link Layer","Physical Layer"];
+let p4Questions=[],p4Index=0,p4Selected=null;
+function initP4(){p4Questions=sample(detectiveBank,6);p4Index=0;renderP4()}
+function renderP4(){hideAll();$("phase4Card").classList.remove("hidden");updatePhasePills(4);const q=p4Questions[p4Index];p4Selected=null;$("p4Count").textContent="Clue "+(p4Index+1)+" of "+p4Questions.length;$("evidenceLabel").textContent=q.label;$("evidenceMain").textContent=q.main;$("evidenceSub").textContent=q.sub;const o=$("p4Options");o.innerHTML="";shuffle(detectiveLayers).forEach(v=>{const d=document.createElement("div");d.className="option";d.textContent=v;d.onclick=()=>{o.querySelectorAll(".option").forEach(x=>x.classList.remove("selected"));d.classList.add("selected");p4Selected=v};o.appendChild(d)});$("checkP4Btn").classList.remove("hidden");$("nextP4Btn").classList.add("hidden");clearMessage("p4Message");updateProgress("Phase 4 progress","Clue "+(p4Index+1)+" of "+p4Questions.length,(p4Index/p4Questions.length)*100)}
+$("checkP4Btn").onclick=()=>{const q=p4Questions[p4Index];if(!p4Selected)return setMessage("p4Message","bad","Choose a layer first.");const opts=[...document.querySelectorAll("#p4Options .option")];const el=opts.find(x=>x.textContent===p4Selected);if(p4Selected===q.answer){el.classList.add("correct");setMessage("p4Message","good",q.success);$("checkP4Btn").classList.add("hidden");$("nextP4Btn").classList.remove("hidden")}else{el.classList.add("wrong");setMessage("p4Message","bad","That layer does not match the evidence. Focus on the type of addressing, payload or transmission clue shown.")}};
+$("hintP4Btn").onclick=()=>setMessage("p4Message","hint",p4Questions[p4Index].hint);$("resetP4Btn").onclick=renderP4;
+$("nextP4Btn").onclick=()=>{if(p4Index<p4Questions.length-1){p4Index++;renderP4()}else{hideAll();$("transition5").classList.remove("hidden");$("phasePill4").classList.add("done");updateProgress("Phase 4","Complete",100)}};
+
+/* ---------------- PHASE 5 ---------------- */
+const classifyBank=[
+ {title:"Application → Transport",sub:"Classify what happens when the HTTP request reaches the Transport layer.",items:[{name:"HTTP Web Request",note:"Complete PDU from the layer above",answer:"Keep"},{name:"Source Port",note:"Transport information",answer:"Add"},{name:"Destination Port",note:"Transport information",answer:"Add"}],hint:"The HTTP request is carried as payload; port information is supplied by the Transport layer.",success:"Correct. The application data is kept as payload while the Transport layer adds port information."},
+ {title:"Transport → Network",sub:"Classify what happens when the TCP segment reaches the Network layer.",items:[{name:"TCP Segment",note:"Complete PDU from the layer above",answer:"Keep"},{name:"Source IP Address",note:"Network-layer information",answer:"Add"},{name:"Destination IP Address",note:"Network-layer information",answer:"Add"}],hint:"The segment is carried intact as payload; the Network layer adds logical addressing.",success:"Correct. The TCP segment is kept as payload while the Network layer adds IP addressing."},
+ {title:"Network → Data Link",sub:"Classify what happens when the IP packet reaches the Data Link layer.",items:[{name:"IP Packet",note:"Complete PDU from the layer above",answer:"Keep"},{name:"Destination MAC Address",note:"Data Link information",answer:"Add"},{name:"Source MAC Address",note:"Data Link information",answer:"Add"},{name:"Frame Trailer",note:"Data Link information",answer:"Add"}],hint:"The IP packet remains the payload; the Data Link layer supplies frame information around it.",success:"Correct. The IP packet is kept as payload while the Data Link layer adds MAC addressing and the trailer."},
+ {title:"Data Link → Physical",sub:"Classify what happens when the completed Ethernet frame reaches the Physical layer.",items:[{name:"Ethernet Frame",note:"Completed Data-Link PDU",answer:"Transform"},{name:"Bits",note:"Binary representation for transmission",answer:"Transform"},{name:"Signals on the Medium",note:"Physical transmission form",answer:"Transform"}],hint:"At this point the frame is not given another protocol header; it is represented and transmitted physically.",success:"Correct. The completed frame is transformed into a physical representation: bits carried as signals on the medium."}
+];
+let p5Questions=[],p5Index=0,p5Answers={};
+function initP5(){p5Questions=classifyBank;p5Index=0;renderP5()}
+function renderP5(){hideAll();$("phase5Card").classList.remove("hidden");updatePhasePills(5);const q=p5Questions[p5Index];p5Answers={};$("p5Count").textContent="Stage "+(p5Index+1)+" of "+p5Questions.length;$("p5Title").textContent=q.title;$("p5Sub").textContent=q.sub;const g=$("classifyGrid");g.innerHTML="";q.items.forEach((it,idx)=>{const row=document.createElement("div");row.className="classify-row";row.innerHTML='<div class="classify-item"><strong>'+it.name+'</strong><span>'+it.note+'</span></div>';const choices=document.createElement("div");choices.className="choice-buttons";["Keep","Add","Transform"].forEach(v=>{const b=document.createElement("button");b.className="choice";b.textContent=v;b.onclick=()=>{choices.querySelectorAll(".choice").forEach(x=>x.classList.remove("selected"));b.classList.add("selected");p5Answers[idx]=v};choices.appendChild(b)});row.appendChild(choices);g.appendChild(row)});$("checkP5Btn").classList.remove("hidden");$("nextP5Btn").classList.add("hidden");clearMessage("p5Message");updateProgress("Phase 5 progress","Stage "+(p5Index+1)+" of "+p5Questions.length,(p5Index/p5Questions.length)*100)}
+$("checkP5Btn").onclick=()=>{const q=p5Questions[p5Index];if(Object.keys(p5Answers).length<q.items.length)return setMessage("p5Message","bad","Classify every item before checking.");let ok=true;[...document.querySelectorAll("#classifyGrid .classify-row")].forEach((row,idx)=>{const chosen=p5Answers[idx],answer=q.items[idx].answer;row.querySelectorAll(".choice").forEach(b=>{if(b.textContent===chosen)b.classList.add(chosen===answer?"correct":"wrong")});if(chosen!==answer)ok=false});if(ok){setMessage("p5Message","good",q.success);$("checkP5Btn").classList.add("hidden");$("nextP5Btn").classList.remove("hidden")}else setMessage("p5Message","bad","At least one classification is incorrect. Keep means carry the complete upper-layer PDU as payload; Add means the current layer supplies new information; Transform is reserved for physical representation/transmission.")};
+$("hintP5Btn").onclick=()=>setMessage("p5Message","hint",p5Questions[p5Index].hint);$("resetP5Btn").onclick=renderP5;
+$("nextP5Btn").onclick=()=>{if(p5Index<p5Questions.length-1){p5Index++;renderP5()}else{hideAll();$("masteryCard").classList.remove("hidden");$("phasePill5").classList.add("done");updateProgress("Activity","Complete",100)}};
+
+/* phase navigation and transitions */
+$("phasePill1").onclick=()=>{p1Index=0;renderP1()};
+$("phasePill2").onclick=()=>initP2();
+$("phasePill3").onclick=()=>initP3();
+$("phasePill4").onclick=()=>initP4();
+$("phasePill5").onclick=()=>initP5();
+$("startP2Btn").onclick=()=>initP2();$("startP3Btn").onclick=()=>initP3();$("startP4Btn").onclick=()=>initP4();$("startP5Btn").onclick=()=>initP5();
+$("restartAllBtn").onclick=()=>{for(let i=1;i<=5;i++)$("phasePill"+i).classList.remove("done");p1Index=0;renderP1()};
+renderP1();
 </script>
 </body>
 </html>
