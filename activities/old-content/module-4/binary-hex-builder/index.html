@@ -23,6 +23,14 @@
   .eyebrow{color:var(--accent);font-weight:800;font-size:.82rem;letter-spacing:.06em;text-transform:uppercase}
   h1{margin:.28rem 0 .45rem;font-size:clamp(1.8rem,3.4vw,2.65rem)}
   .lead{margin:0;color:var(--muted);line-height:1.62;max-width:780px}
+  .phase-nav{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 8px}
+  .phase-pill{
+    border:1px solid var(--line);background:#fff;color:#42526a;cursor:pointer;
+    padding:9px 13px;border-radius:999px;font-weight:750;font-size:.9rem
+  }
+  .phase-pill:hover{border-color:#9fb6da}
+  .phase-pill.active{background:var(--soft);border-color:#9fc0f7;color:var(--accent-dark)}
+  .phase-help{color:var(--muted);font-size:.86rem;line-height:1.45;max-width:790px}
   .progress-card{
     min-width:245px;background:var(--panel);border:1px solid var(--line);
     border-radius:14px;padding:14px 16px;box-shadow:var(--shadow)
@@ -152,6 +160,14 @@
         Build 8-bit binary values, calculate decimal values and practise the hexadecimal
         conversions needed for IPv4 and IPv6 addressing.
       </p>
+      <nav class="phase-nav" aria-label="Activity phases">
+        <button type="button" class="phase-pill" id="phase1Btn">Phase 1 · Binary Foundations</button>
+        <button type="button" class="phase-pill" id="phase2Btn">Phase 2 · Binary &amp; Hexadecimal</button>
+        <button type="button" class="phase-pill" id="phase3Btn">Phase 3 · Mixed Challenge</button>
+      </nav>
+      <div class="phase-help">
+        Open any phase directly for review. Selecting a phase starts at its first question and resets the current score.
+      </div>
     </div>
     <aside class="progress-card hidden" id="progressCard" aria-label="Activity progress">
       <div class="progress-row"><span id="progressLabel">Question 1 of 12</span><strong id="percentText">0%</strong></div>
@@ -421,6 +437,14 @@
     }
   }
 
+  function updatePhaseNav(){
+    var activePhase = index < 6 ? 1 : (index < 10 ? 2 : 3);
+    [1,2,3].forEach(function(phase){
+      byId("phase" + phase + "Btn").classList.toggle("active", phase === activePhase);
+      byId("phase" + phase + "Btn").setAttribute("aria-current", phase === activePhase ? "step" : "false");
+    });
+  }
+
   function updateProgress(){
     var completed = index + (resolved ? 1 : 0);
     var percent = Math.round((completed/TOTAL)*100);
@@ -448,6 +472,7 @@
     byId("clearBtn").classList.remove("hidden");
     byId("nextBtn").classList.add("hidden");
     renderWorkspace(q);
+    updatePhaseNav();
     updateProgress();
     window.scrollTo({top:0,behavior:"smooth"});
   }
@@ -614,9 +639,9 @@
     window.scrollTo({top:0,behavior:"smooth"});
   }
 
-  function startSet(){
-    generateQuestions();
-    index = 0;
+  function openActivityAt(startIndex,generateNewSet){
+    if(generateNewSet || questions.length === 0) generateQuestions();
+    index = startIndex;
     correctTotal = 0;
     firstTryTotal = 0;
     outcomes = [];
@@ -627,8 +652,15 @@
     renderQuestion();
   }
 
+  function startSet(){
+    openActivityAt(0,true);
+  }
+
   byId("startBtn").addEventListener("click",startSet);
   byId("restartBtn").addEventListener("click",startSet);
+  byId("phase1Btn").addEventListener("click",function(){ openActivityAt(0,false); });
+  byId("phase2Btn").addEventListener("click",function(){ openActivityAt(6,false); });
+  byId("phase3Btn").addEventListener("click",function(){ openActivityAt(10,false); });
   byId("checkBtn").addEventListener("click",checkAnswer);
   byId("clearBtn").addEventListener("click",clearAnswer);
   byId("nextBtn").addEventListener("click",function(){
