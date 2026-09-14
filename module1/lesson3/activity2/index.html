@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Activity 1.3.2 — Application Delivery Investigation</title>
+<style>
+:root{
+  --bg:#f5f7fb;--panel:#fff;--text:#172033;--muted:#667085;--line:#d9e0ea;
+  --accent:#1769e0;--accent2:#0f4faa;--soft:#eef4ff;--good:#137a4b;--goodbg:#edf9f2;
+  --bad:#b42318;--badbg:#fff1f0;--hint:#805600;--hintbg:#fff7df;--shadow:0 12px 32px rgba(20,35,60,.08);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(180deg,#f7f9fc,#f3f6fa);color:var(--text)}
+.shell{max-width:1100px;margin:0 auto;padding:34px 20px 64px}
+.hero{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;flex-wrap:wrap;margin-bottom:20px}
+.eyebrow{color:var(--accent);font-weight:800;font-size:.82rem;letter-spacing:.06em;text-transform:uppercase}
+h1{margin:.3rem 0 .55rem;font-size:clamp(1.9rem,3vw,2.65rem)}
+.lead{max-width:820px;margin:0;color:var(--muted);line-height:1.65}
+.progress-card{min-width:245px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow)}
+.progress-row{display:flex;justify-content:space-between;font-size:.9rem;margin-bottom:8px}
+.progress-track{height:10px;background:#e7edf5;border-radius:999px;overflow:hidden}
+.progress-fill{height:100%;background:var(--accent);transition:width .25s ease}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:24px}
+.phase-nav{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 8px}
+.phase-pill{border:1px solid var(--line);border-radius:999px;background:#fff;padding:8px 12px;font-size:.84rem;font-weight:800;color:#526174}
+.phase-pill.active{background:var(--soft);border-color:#9fc0f7;color:var(--accent2)}
+.phase-pill.done{background:var(--goodbg);border-color:#b7dfca;color:var(--good)}
+.section-kicker{font-size:.8rem;color:var(--muted);font-weight:850;letter-spacing:.05em;text-transform:uppercase}
+h2{margin:.25rem 0 .5rem;font-size:1.48rem}
+.instruction{margin:0;color:var(--muted);line-height:1.6}
+.scenario{margin-top:20px;border:1px solid var(--line);border-radius:16px;background:#fbfcfe;padding:20px}
+.scenario-title{font-size:1.15rem;font-weight:900;margin-bottom:10px}
+.scenario-text{line-height:1.65;color:#334155}
+.network-strip{display:grid;grid-template-columns:1fr 80px 1fr;align-items:center;gap:12px;margin:18px 0}
+.device{border:1px solid var(--line);border-radius:14px;background:#fff;padding:15px;text-align:center}
+.device strong{display:block;margin-bottom:5px}.device span{font-size:.85rem;color:var(--muted)}
+.link{text-align:center;color:var(--accent);font-weight:900;font-size:1.35rem}
+.fact-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:12px}
+.fact{border:1px solid var(--line);border-radius:11px;background:#fff;padding:10px 12px}
+.fact strong{display:block;font-size:.8rem;color:var(--muted);margin-bottom:3px}.fact span{font-weight:850}
+.step{margin-top:20px;border-top:1px solid #e7ebf1;padding-top:20px}
+.step-head{display:flex;align-items:flex-start;gap:10px}
+.step-no{flex:0 0 auto;width:28px;height:28px;border-radius:50%;background:var(--soft);color:var(--accent2);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.85rem}
+.step h3{margin:2px 0 5px;font-size:1.05rem}.step p{margin:0;color:var(--muted);line-height:1.5}
+textarea{width:100%;min-height:150px;margin-top:12px;border:1px solid #b8c4d4;border-radius:12px;padding:13px 14px;font:inherit;line-height:1.55;color:var(--text);resize:vertical;background:#fff}
+textarea:focus{outline:3px solid rgba(23,105,224,.13);border-color:var(--accent)}
+.char-note{font-size:.82rem;color:var(--muted);margin-top:6px}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
+button{border:none;border-radius:10px;padding:10px 15px;font-weight:800;cursor:pointer;font-size:.92rem}
+.primary{background:var(--accent);color:#fff}.primary:hover{background:var(--accent2)}
+.secondary{background:#eef2f7;color:#263245}.ghost{background:#fff;color:#263245;border:1px solid var(--line)}
+button:disabled{opacity:.5;cursor:not-allowed}
+.hidden{display:none!important}
+.message{margin-top:14px;border-radius:12px;padding:13px 15px;display:none;line-height:1.5}
+.message.good{display:block;background:var(--goodbg);color:var(--good);border:1px solid #b8e2cc}
+.message.bad{display:block;background:var(--badbg);color:var(--bad);border:1px solid #f0c5c2}
+.message.hint{display:block;background:var(--hintbg);color:var(--hint);border:1px solid #efd792}
+.questions{display:flex;flex-direction:column;gap:16px;margin-top:14px}
+.qcard{border:1px solid var(--line);border-radius:14px;background:#fff;padding:16px}
+.qtext{font-weight:850;line-height:1.45;margin-bottom:11px}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.option{border:1px solid var(--line);border-radius:10px;padding:11px;background:#fbfcfe;cursor:pointer;font-weight:700;line-height:1.35}
+.option:hover{border-color:#9fb6da}.option.selected{border-color:var(--accent);background:var(--soft);outline:2px solid rgba(23,105,224,.08)}
+.option.correct{border-color:#70c59b;background:#f2fbf6;color:#245f43}.option.wrong{border-color:#df8a82;background:#fff6f5;color:#8f3028}
+.qfeedback{font-size:.86rem;margin-top:9px;line-height:1.45;color:var(--muted)}
+.score-box{margin-top:14px;border:1px solid var(--line);border-radius:12px;padding:13px 15px;background:#f8fafc;font-weight:800}
+.course-analysis{margin-top:14px;border-left:4px solid var(--accent);background:#f7faff;border-radius:10px;padding:16px 17px;line-height:1.62}
+.course-analysis h4{margin:0 0 8px}.course-analysis p{margin:0}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:13px}
+.compare-choice{border:1px solid var(--line);background:#fff;border-radius:12px;padding:14px;cursor:pointer;text-align:left}
+.compare-choice.selected{border-color:var(--accent);background:var(--soft)}
+.ai-box{margin-top:14px;border:1px dashed #aab7c8;border-radius:12px;padding:15px;background:#fcfdff}
+.ai-box strong{display:block;margin-bottom:6px}.ai-box p{margin:0;color:var(--muted);line-height:1.5}
+.final-card{text-align:center;padding:34px 24px}
+.summary{max-width:760px;margin:18px auto;text-align:left;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.summary-item{border:1px solid var(--line);border-radius:12px;background:#fbfcfe;padding:13px}.summary-item strong{display:block;margin-bottom:4px}
+.credit{text-align:center;color:#6b7480;font-size:13px;font-weight:600;margin-top:18px}
+@media(max-width:760px){.fact-grid,.summary{grid-template-columns:1fr}.network-strip{grid-template-columns:1fr}.link{transform:rotate(90deg)}.options,.compare-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="hero">
+    <div>
+      <div class="eyebrow">Module 1 · Lesson 3</div>
+      <h1>Activity 1.3.2 — Application Delivery Investigation</h1>
+      <p class="lead">Analyse realistic Transport-layer scenarios. Commit your own explanation first, test the reasoning with structured checks, then compare it with the course analysis. An optional AI-review prompt is provided at the end of each scenario.</p>
+      <div class="phase-nav">
+        <div class="phase-pill active" id="pill1">1 · Analyse</div>
+        <div class="phase-pill" id="pill2">2 · Check Reasoning</div>
+        <div class="phase-pill" id="pill3">3 · Verify</div>
+        <div class="phase-pill" id="pill4">4 · Reflect / AI Review</div>
+      </div>
+    </div>
+    <div class="progress-card">
+      <div class="progress-row"><span>Scenario progress</span><strong id="progressText">Scenario 1 of 3</strong></div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <section class="card" id="activityCard">
+    <div class="section-kicker" id="scenarioCount"></div>
+    <h2 id="scenarioHeading"></h2>
+    <p class="instruction" id="scenarioGoal"></p>
+
+    <div class="scenario">
+      <div class="scenario-title" id="scenarioTitle"></div>
+      <div class="scenario-text" id="scenarioText"></div>
+      <div class="network-strip">
+        <div class="device"><strong id="leftDevice"></strong><span id="leftNote"></span></div>
+        <div class="link">⇄</div>
+        <div class="device"><strong id="rightDevice"></strong><span id="rightNote"></span></div>
+      </div>
+      <div class="fact-grid" id="factGrid"></div>
+    </div>
+
+    <div class="step" id="step1">
+      <div class="step-head">
+        <div class="step-no">1</div>
+        <div><h3>Write your own analysis</h3><p id="analysisPrompt"></p></div>
+      </div>
+      <textarea id="studentAnswer" placeholder="Explain your reasoning here before checking any answers..."></textarea>
+      <div class="char-note"><span id="charCount">0</span> characters. Write at least 40 characters so that your reasoning is explicit.</div>
+      <div class="controls">
+        <button class="primary" id="commitBtn">Commit My Reasoning</button>
+      </div>
+      <div class="message" id="commitMessage"></div>
+    </div>
+
+    <div class="step hidden" id="step2">
+      <div class="step-head">
+        <div class="step-no">2</div>
+        <div><h3>Check the reasoning</h3><p>Answer the structured questions. These are marked locally in your browser and do not send your answer anywhere.</p></div>
+      </div>
+      <div class="questions" id="questions"></div>
+      <div class="controls">
+        <button class="primary" id="checkBtn">Check My Reasoning</button>
+        <button class="secondary" id="hintBtn">Give Me a Hint</button>
+      </div>
+      <div class="message" id="checkMessage"></div>
+      <div class="score-box hidden" id="scoreBox"></div>
+    </div>
+
+    <div class="step hidden" id="step3">
+      <div class="step-head">
+        <div class="step-no">3</div>
+        <div><h3>Verify against the course analysis</h3><p>Use this explanation as the reference point. Compare the concepts, not the wording.</p></div>
+      </div>
+      <div class="course-analysis"><h4>Course analysis</h4><p id="courseAnalysis"></p></div>
+      <div class="controls"><button class="primary" id="continueVerifyBtn">I Have Compared Them</button></div>
+    </div>
+
+    <div class="step hidden" id="step4">
+      <div class="step-head">
+        <div class="step-no">4</div>
+        <div><h3>Reflect and optionally ask AI for a second opinion</h3><p>Decide whether your original reasoning should be kept or revised. AI review is optional and must be verified against the course analysis above.</p></div>
+      </div>
+      <div class="compare-grid">
+        <button class="compare-choice" data-reflect="keep"><strong>Keep my answer</strong><br><span>My explanation already captures the important concepts.</span></button>
+        <button class="compare-choice" data-reflect="revise"><strong>Revise my answer</strong><br><span>I found a missing point or misconception.</span></button>
+      </div>
+      <textarea id="revisedAnswer" class="hidden" placeholder="Write your revised explanation here..."></textarea>
+
+      <div class="ai-box">
+        <strong>Optional AI review</strong>
+        <p>Copy the prepared prompt and paste it into an AI tool you already have access to. The prompt asks the AI to critique your reasoning rather than simply give an answer.</p>
+        <div class="controls">
+          <button class="secondary" id="copyAiBtn">Copy AI Review Prompt</button>
+        </div>
+        <div class="message" id="copyMessage"></div>
+      </div>
+
+      <div class="controls">
+        <button class="primary" id="nextScenarioBtn">Complete Scenario</button>
+      </div>
+    </div>
+
+    <div class="credit">Created by Zeeshan Basit</div>
+  </section>
+
+  <section class="card final-card hidden" id="completeCard">
+    <div style="font-size:3rem">✓</div>
+    <h2>Investigation complete</h2>
+    <p class="instruction" style="max-width:760px;margin:0 auto">You analysed three Transport-layer application-delivery scenarios, tested your reasoning, verified it against course explanations and reflected on your initial conclusions.</p>
+    <div class="summary" id="summary"></div>
+    <button class="primary" id="restartBtn">Start a New Attempt</button>
+    <div class="credit">Created by Zeeshan Basit</div>
+  </section>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+function shuffle(a){const x=[...a];for(let i=x.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[x[i],x[j]]=[x[j],x[i]]}return x}
+function drawCycle(pool,count,key){
+  const ids=pool.map(x=>x.id);let queue=[];
+  try{queue=JSON.parse(localStorage.getItem(key)||"[]").filter(id=>ids.includes(id))}catch(e){queue=[]}
+  const selected=[];
+  while(selected.length<count){if(queue.length===0)queue=shuffle(ids);const id=queue.shift();if(!selected.includes(id))selected.push(id)}
+  try{localStorage.setItem(key,JSON.stringify(queue))}catch(e){}
+  return selected.map(id=>pool.find(x=>x.id===id));
+}
+
+const scenarioBank=[
+{
+ id:"s01",heading:"Multiple applications, one network interface",goal:"Explain how Transport-layer port numbers distinguish simultaneous application communications.",
+ title:"Office-PC is using the network for three applications at the same time.",
+ text:"A web browser, an email application and an internal chat application are all active on Office-PC. The computer has one active network interface, but each application communication has a different source port.",
+ left:"Office-PC",leftNote:"Browser · Email · Chat",right:"Remote Services",rightNote:"Web · Mail · Chat",
+ facts:[["Browser","Source port 49152"],["Email","Source port 49153"],["Chat","Source port 49154"]],
+ prompt:"Why can these three application communications share the same network connection without the operating system confusing them?",
+ questions:[
+  {q:"Which information most directly distinguishes the three application communications on Office-PC?",options:["Their different source port numbers","The single IP address of Office-PC","The MAC address alone","The physical cable"],answer:0,feedback:"Source ports allow the Transport layer and operating system to distinguish concurrent application communications."},
+  {q:"What does the IP address identify at this level of the discussion?",options:["The host/network interface, not the individual application communication","The browser only","The source port","The email application only"],answer:0,feedback:"IP addressing identifies the host/interface at the Network layer; ports distinguish application/service contexts at the Transport layer."},
+  {q:"If all three applications used the network simultaneously, what is the key Transport-layer idea?",options:["Multiplexing multiple application communications using ports","Giving each application a separate physical cable","Giving each application a different MAC address","Removing application identifiers"],answer:0,feedback:"Transport can multiplex multiple application communications over the same network connection by keeping them distinguishable with port information."}
+ ],
+ hint:"Separate the role of the host's IP address from the role of Transport-layer port numbers.",
+ analysis:"Office-PC can support several application communications at the same time because the Transport layer uses port numbers to distinguish them. The IP address identifies the host/network interface at the Network layer, while the port information identifies the relevant application or service context at the Transport layer. Different source ports allow the operating system to keep the browser, email and chat communications separate even though they share the same network interface."
+},
+{
+ id:"s02",heading:"Returning traffic to the correct application",goal:"Use a destination port to identify which existing application communication should receive incoming data.",
+ title:"Three application communications are active on Office-PC when a response arrives.",
+ text:"Office-PC previously created three outgoing communications. A returning Transport-layer PDU arrives with destination port 49153.",
+ left:"Remote Service",leftNote:"Response traffic",right:"Office-PC",rightNote:"Active application communications",
+ facts:[["Browser","Source port 49152"],["Email","Source port 49153"],["Chat","Source port 49154"]],
+ prompt:"Which application communication should receive the incoming data, and why?",
+ questions:[
+  {q:"Which active communication matches destination port 49153?",options:["Email","Browser","Chat","All three"],answer:0,feedback:"The returning destination port matches the source port used by the email communication."},
+  {q:"Why is the destination port useful on the receiving host?",options:["It helps associate incoming Transport-layer data with the correct application communication","It identifies the physical cable","It replaces the destination IP address","It selects the MAC address"],answer:0,feedback:"The receiving system uses Transport-layer port information to associate incoming data with the appropriate application/service context."},
+  {q:"Would the IP address alone distinguish Browser, Email and Chat on the same Office-PC?",options:["No — they share the host address, so Transport-layer port information is needed","Yes — each application automatically receives a unique IP address","Yes — the IP address identifies the exact application","No — because applications use only MAC addresses"],answer:0,feedback:"The host's IP address gets the communication to the host; port information helps distinguish the application communication."}
+ ],
+ hint:"Compare the incoming destination port with the source ports used by the active application communications.",
+ analysis:"The incoming data should be associated with the email communication because its destination port, 49153, matches the source port used when that communication was created. The host's IP address identifies Office-PC, but it does not by itself distinguish the browser, email and chat communications running on that same host. Transport-layer port information provides that distinction."
+},
+{
+ id:"s03",heading:"A web request is sent to the wrong service port",goal:"Diagnose a destination-port mismatch without relying on memorising port numbers.",
+ title:"The intended web service is explicitly shown as listening on port 80.",
+ text:"Office-PC creates an HTTP web request using source port 49152. The web server is shown as listening on port 80, but the outgoing Transport-layer information contains destination port 5001.",
+ left:"Office-PC",leftNote:"Web Browser",right:"Web Server",rightNote:"Web service listens on port 80",
+ facts:[["Source Port","49152"],["Configured Destination","5001"],["Intended Service","Port 80"]],
+ prompt:"Analyse the problem. What is wrong with this Transport-layer information, and what should be corrected?",
+ questions:[
+  {q:"Which value is inconsistent with the scenario?",options:["Destination port 5001","Source port 49152","The existence of an IP address","The HTTP request"],answer:0,feedback:"The scenario explicitly states that the intended web service is listening on port 80."},
+  {q:"What should the destination port represent?",options:["The service/application expected at the receiving host","The sending application on Office-PC","The physical interface number","The destination MAC address"],answer:0,feedback:"The destination port identifies the service/application context expected at the receiver."},
+  {q:"What is the appropriate conceptual correction?",options:["Use destination port 80 for the intended service","Change the source port to 80 and keep destination 5001","Remove both port numbers","Replace the destination port with a MAC address"],answer:0,feedback:"Because the scenario defines the intended service as listening on port 80, that is the destination port the request should target."}
+ ],
+ hint:"The activity already tells you which port the intended receiving service uses. Compare that with the configured destination port.",
+ analysis:"The problem is the destination port. The scenario states that the intended web service is listening on port 80, but the request is being sent to destination port 5001. The source port identifies the sending application communication on Office-PC, while the destination port identifies the service expected at the receiving host. The destination port should therefore be corrected to 80."
+},
+{
+ id:"s04",heading:"Evaluate an administrator's claim",goal:"Distinguish host identification from application/service identification.",
+ title:"An administrator says that the destination IP address is enough to deliver data to the correct application.",
+ text:"A server has one IP address and is running several network services at the same time. The administrator argues that, because the packet has the correct destination IP address, no Transport-layer port information is necessary.",
+ left:"Client",leftNote:"Requests a service",right:"Server",rightNote:"Several services · One IP address",
+ facts:[["Server IP","One host address"],["Services","Several active"],["Claim","Ports are unnecessary"]],
+ prompt:"Evaluate the administrator's statement. Which part is correct, and which part is incomplete or wrong?",
+ questions:[
+  {q:"What does the destination IP address primarily identify here?",options:["The destination host/network interface","The exact server application","The source application","The transport process"],answer:0,feedback:"The destination IP address identifies the receiving host/interface at the Network layer."},
+  {q:"What additional information helps identify the intended receiving service/application context?",options:["Destination port","Source MAC address only","Physical connector type","Cable length"],answer:0,feedback:"The destination port provides the Transport-layer service/application identifier."},
+  {q:"Which evaluation is best?",options:["The claim is incomplete: IP can identify the host, but ports are needed to distinguish services/applications","The claim is fully correct because IP replaces ports","The claim is wrong because IP addresses identify only cables","Ports identify hosts while IP identifies applications"],answer:0,feedback:"Host delivery and application/service delivery are different responsibilities."}
+ ],
+ hint:"Ask two separate questions: Which host should receive the packet? Which service/application on that host should receive the Transport-layer data?",
+ analysis:"The administrator's claim is incomplete. The destination IP address identifies the destination host/network interface, which is necessary for Network-layer delivery. However, when several services or application communications exist on the same host, Transport-layer port information is needed to distinguish which service/application context should receive the data."
+},
+{
+ id:"s05",heading:"Several services on one server",goal:"Explain how one server address can support multiple services.",
+ title:"Server1 provides three different network services using the same network interface.",
+ text:"Clients reach the same server IP address, but the services are shown with different destination ports. The scenario defines Web as port 80, Service B as port 5001 and Service C as port 5002.",
+ left:"Client Devices",leftNote:"Different service requests",right:"Server1",rightNote:"One IP · Three services",
+ facts:[["Web","Destination 80"],["Service B","Destination 5001"],["Service C","Destination 5002"]],
+ prompt:"How can Server1 determine which service should receive each incoming communication even though all three services use the same server IP address?",
+ questions:[
+  {q:"Which field distinguishes the requested service on Server1?",options:["Destination port","Destination IP address alone","Source MAC address","Signal type"],answer:0,feedback:"Different destination ports distinguish the services sharing the same host address."},
+  {q:"What is common to all three communications in this scenario?",options:["The destination host/IP address","The destination port","The application","The service"],answer:0,feedback:"All communications target the same server host but different service ports."},
+  {q:"What concept does this demonstrate?",options:["Multiple services can share a host/network interface and be distinguished by ports","Every service requires a separate IP address","Every service requires a different physical NIC","Ports replace IP addressing completely"],answer:0,feedback:"Ports complement IP addressing by distinguishing application/service contexts on the host."}
+ ],
+ hint:"The server address gets the communication to Server1; compare the destination-port values to see what distinguishes the services.",
+ analysis:"All three communications can use the same destination IP address because that address identifies Server1. The destination port then distinguishes which service on Server1 should receive the Transport-layer data. In this scenario, ports 80, 5001 and 5002 separate the three service contexts while the host address remains the same."
+},
+{
+ id:"s06",heading:"A response is associated with the wrong application communication",goal:"Diagnose why a returning destination port matters on the client.",
+ title:"A browser request leaves Office-PC using source port 49152, but the returning data is associated with destination port 49154.",
+ text:"Office-PC has multiple active application communications. The browser used source port 49152 for its request. A response intended for that browser communication returns, but its Transport-layer destination port is 49154.",
+ left:"Server",leftNote:"Returning response",right:"Office-PC",rightNote:"Several active communications",
+ facts:[["Browser Source","49152"],["Returning Destination","49154"],["Other Active Port","49154"]],
+ prompt:"Explain why the returning destination port creates a delivery problem for the browser communication.",
+ questions:[
+  {q:"Which destination port should match the browser communication shown?",options:["49152","49154","80","The server IP address"],answer:0,feedback:"The returning traffic should be associated with the port used by the browser's active communication."},
+  {q:"What is the problem with destination port 49154 in this scenario?",options:["It identifies a different active application communication","It identifies the correct browser communication","It changes the destination IP address","It identifies the physical medium"],answer:0,feedback:"The receiving host would associate that port with a different application communication."},
+  {q:"What does this demonstrate?",options:["Port information is important for demultiplexing incoming data to the correct application communication","IP addresses are unnecessary","MAC addresses identify applications","Each response needs a new physical connection"],answer:0,feedback:"Incoming Transport-layer data must be associated with the appropriate application communication."}
+ ],
+ hint:"Compare the browser's original source port with the destination port on the returning communication.",
+ analysis:"The browser communication used source port 49152, so returning Transport-layer data for that communication should be associated with destination port 49152 on Office-PC. Destination port 49154 corresponds to a different active communication in the scenario. This illustrates demultiplexing: the receiving system uses port information to direct incoming Transport-layer data to the appropriate application communication."
+}
+];
+
+let scenarios=[],scenarioIndex=0,answers={},committed="",reflection=null,results=[];
+
+function startAttempt(){
+  scenarios=drawCycle(scenarioBank,3,"m1l3_a2_cycle");scenarioIndex=0;results=[];$("completeCard").classList.add("hidden");$("activityCard").classList.remove("hidden");renderScenario();
+}
+function setPills(step){for(let i=1;i<=4;i++){$("pill"+i).classList.toggle("active",i===step);$("pill"+i).classList.toggle("done",i<step)}}
+function factHTML(pair){return '<div class="fact"><strong>'+pair[0]+'</strong><span>'+pair[1]+'</span></div>'}
+function renderScenario(){
+  const s=scenarios[scenarioIndex];answers={};committed="";reflection=null;
+  $("scenarioCount").textContent="Scenario "+(scenarioIndex+1)+" of "+scenarios.length;
+  $("scenarioHeading").textContent=s.heading;$("scenarioGoal").textContent=s.goal;$("scenarioTitle").textContent=s.title;$("scenarioText").textContent=s.text;
+  $("leftDevice").textContent=s.left;$("leftNote").textContent=s.leftNote;$("rightDevice").textContent=s.right;$("rightNote").textContent=s.rightNote;
+  $("factGrid").innerHTML=s.facts.map(factHTML).join("");$("analysisPrompt").textContent=s.prompt;
+  $("studentAnswer").value="";$("studentAnswer").disabled=false;$("charCount").textContent="0";$("commitBtn").disabled=false;
+  ["step2","step3","step4"].forEach(id=>$(id).classList.add("hidden"));["commitMessage","checkMessage","copyMessage"].forEach(id=>{$(id).className="message";$(id).textContent=""});
+  $("scoreBox").classList.add("hidden");$("revisedAnswer").classList.add("hidden");$("revisedAnswer").value="";
+  document.querySelectorAll(".compare-choice").forEach(x=>x.classList.remove("selected"));
+  setPills(1);$("progressText").textContent="Scenario "+(scenarioIndex+1)+" of "+scenarios.length;$("progressFill").style.width=(scenarioIndex/scenarios.length*100)+"%";
+}
+$("studentAnswer").addEventListener("input",e=>$("charCount").textContent=e.target.value.trim().length);
+$("commitBtn").onclick=()=>{
+  const text=$("studentAnswer").value.trim();
+  if(text.length<40){$("commitMessage").className="message bad";$("commitMessage").textContent="Write a little more before continuing. The aim is to make your reasoning explicit, not just give a one-word answer.";return}
+  committed=text;$("studentAnswer").disabled=true;$("commitBtn").disabled=true;$("commitMessage").className="message good";$("commitMessage").textContent="Reasoning committed. Now test the concepts behind your explanation.";
+  renderQuestions();$("step2").classList.remove("hidden");setPills(2);$("step2").scrollIntoView({behavior:"smooth",block:"start"});
+};
+function renderQuestions(){
+  const qwrap=$("questions");qwrap.innerHTML="";const s=scenarios[scenarioIndex];
+  s.questions.forEach((q,qi)=>{
+    const card=document.createElement("div");card.className="qcard";
+    const t=document.createElement("div");t.className="qtext";t.textContent=(qi+1)+". "+q.q;card.appendChild(t);
+    const options=document.createElement("div");options.className="options";
+    q.options.forEach((op,oi)=>{const d=document.createElement("div");d.className="option";d.textContent=op;d.onclick=()=>{options.querySelectorAll(".option").forEach(x=>x.classList.remove("selected"));d.classList.add("selected");answers[qi]=oi};options.appendChild(d)});
+    const fb=document.createElement("div");fb.className="qfeedback";fb.id="qfb"+qi;card.appendChild(options);card.appendChild(fb);qwrap.appendChild(card);
+  });
+}
+$("hintBtn").onclick=()=>{$("checkMessage").className="message hint";$("checkMessage").textContent=scenarios[scenarioIndex].hint};
+$("checkBtn").onclick=()=>{
+  const s=scenarios[scenarioIndex];if(Object.keys(answers).length<s.questions.length){$("checkMessage").className="message bad";$("checkMessage").textContent="Answer all three structured questions before checking.";return}
+  let score=0;
+  [...document.querySelectorAll(".qcard")].forEach((card,qi)=>{
+    const q=s.questions[qi],chosen=answers[qi];const opts=[...card.querySelectorAll(".option")];
+    opts[chosen].classList.add(chosen===q.answer?"correct":"wrong");if(chosen===q.answer)score++;
+    $("qfb"+qi).textContent=chosen===q.answer?q.feedback:"Reconsider this point. "+s.hint;
+  });
+  $("scoreBox").classList.remove("hidden");$("scoreBox").textContent="Initial reasoning check: "+score+" / "+s.questions.length+" structured questions correct.";
+  $("checkMessage").className=score===s.questions.length?"message good":"message hint";
+  $("checkMessage").textContent=score===s.questions.length?"Your structured reasoning is consistent with the scenario. Now verify it against the course analysis.":"Use the feedback to identify where your original explanation may need revision. Then compare it with the course analysis.";
+  $("courseAnalysis").textContent=s.analysis;$("step3").classList.remove("hidden");setPills(3);
+  if(!results[scenarioIndex])results[scenarioIndex]={score:score,total:s.questions.length,reflection:null};
+  $("step3").scrollIntoView({behavior:"smooth",block:"start"});
+};
+$("continueVerifyBtn").onclick=()=>{$("step4").classList.remove("hidden");setPills(4);$("step4").scrollIntoView({behavior:"smooth",block:"start"})};
+document.querySelectorAll(".compare-choice").forEach(btn=>btn.onclick=()=>{
+  document.querySelectorAll(".compare-choice").forEach(x=>x.classList.remove("selected"));btn.classList.add("selected");reflection=btn.dataset.reflect;
+  $("revisedAnswer").classList.toggle("hidden",reflection!=="revise");
+});
+function aiPrompt(){
+  const s=scenarios[scenarioIndex];const answer=reflection==="revise"&&$("revisedAnswer").value.trim()?$("revisedAnswer").value.trim():committed;
+  return `You are reviewing a beginner networking student's reasoning. Do not simply give the answer first. Evaluate the student's explanation against the scenario and identify which concepts are correct, incomplete, or incorrect. Focus only on Transport-layer application delivery, source/destination ports, multiplexing/demultiplexing, and the distinction between host identification and application/service identification. Do not introduce advanced TCP mechanisms.
+
+SCENARIO:
+${s.title}
+${s.text}
+Facts: ${s.facts.map(f=>f[0]+": "+f[1]).join("; ")}
+
+QUESTION:
+${s.prompt}
+
+STUDENT ANSWER:
+${answer}
+
+Please respond using:
+1. Correct concepts
+2. Missing or inaccurate concepts
+3. Suggested improvement
+4. A revised explanation only after the evaluation
+
+The student will verify your response against their course material.`;
+}
+$("copyAiBtn").onclick=async()=>{
+  try{await navigator.clipboard.writeText(aiPrompt());$("copyMessage").className="message good";$("copyMessage").textContent="AI review prompt copied. Paste it into an AI tool you already have access to."}
+  catch(e){$("copyMessage").className="message bad";$("copyMessage").textContent="Your browser did not allow automatic copying. Select and copy your answer manually if you want an optional AI review."}
+};
+$("nextScenarioBtn").onclick=()=>{
+  if(!reflection){alert("Choose whether you would keep or revise your original answer before completing the scenario.");return}
+  if(reflection==="revise" && $("revisedAnswer").value.trim().length<30){alert("Write a short revised explanation before completing the scenario.");return}
+  results[scenarioIndex].reflection=reflection;
+  if(scenarioIndex<scenarios.length-1){scenarioIndex++;renderScenario();window.scrollTo({top:0,behavior:"smooth"})}
+  else showComplete();
+};
+function showComplete(){
+  $("activityCard").classList.add("hidden");$("completeCard").classList.remove("hidden");$("progressText").textContent="Complete";$("progressFill").style.width="100%";for(let i=1;i<=4;i++)$("pill"+i).classList.add("done");
+  const sum=$("summary");sum.innerHTML="";
+  results.forEach((r,i)=>{const d=document.createElement("div");d.className="summary-item";d.innerHTML="<strong>Scenario "+(i+1)+"</strong>"+r.score+" / "+r.total+" initial checks correct<br>"+(r.reflection==="revise"?"Revised reasoning":"Kept original reasoning");sum.appendChild(d)});
+}
+$("restartBtn").onclick=startAttempt;
+startAttempt();
+</script>
+</body>
+</html>
