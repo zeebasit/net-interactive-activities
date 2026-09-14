@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Application to Physical Layer Simulation</title>
+<style>
+:root{
+  --navy:#0b2f6b;
+  --line:#163a76;
+  --ink:#152238;
+  --muted:#5c6b7a;
+
+  --app:#dff4df;
+  --app2:#f2fbf2;
+
+  --tcp:#dcecff;
+  --tcp2:#eef6ff;
+
+  --ip:#ffe5a8;
+  --ip2:#fff3d3;
+
+  --eth:#ebe5ff;
+  --eth2:#f6f3ff;
+
+  --fcs:#ffd9df;
+  --fcs2:#fff1f4;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:#fff;
+  color:var(--ink);
+  font-family:Inter,"Segoe UI",Arial,sans-serif;
+}
+
+.page{
+  width:min(1260px,97vw);
+  margin:0 auto;
+  padding:22px 12px 34px;
+}
+
+h1{
+  margin:0 0 8px;
+  text-align:center;
+  color:var(--navy);
+  font-size:clamp(28px,4vw,48px);
+  line-height:1.1;
+}
+
+.subtitle{
+  max-width:980px;
+  margin:0 auto 18px;
+  text-align:center;
+  color:var(--muted);
+  font-size:clamp(14px,1.8vw,18px);
+}
+
+.scene{
+  position:relative;
+  height:1760px;
+  overflow:hidden;
+  border:1px solid #d7deea;
+  border-radius:18px;
+  background:
+    radial-gradient(circle at 10% 10%, rgba(188,217,255,.18), transparent 28%),
+    radial-gradient(circle at 90% 90%, rgba(255,229,168,.16), transparent 30%),
+    #fff;
+  box-shadow:0 10px 28px rgba(13,47,107,.08);
+}
+
+.layer-label{
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  color:var(--navy);
+  font-weight:800;
+  text-align:center;
+  letter-spacing:.01em;
+}
+
+.layer-label.app{top:34px;font-size:28px}
+.layer-label.transport{top:355px;font-size:30px}
+.layer-label.network{top:678px;font-size:30px}
+.layer-label.datalink{top:1003px;font-size:30px}
+.layer-label.physical{top:1340px;font-size:30px}
+
+.computer{
+  position:absolute;
+  left:42px;
+  top:102px;
+  width:225px;
+  height:180px;
+  border:3px solid var(--line);
+  border-radius:18px;
+  background:#f4f9ff;
+  padding:20px;
+  box-shadow:0 7px 18px rgba(13,47,107,.08);
+  opacity:0;
+  transform:translateY(10px);
+  animation:appear .8s .2s forwards;
+}
+
+.monitor{
+  width:100px;
+  height:66px;
+  margin:0 auto 12px;
+  border:5px solid var(--navy);
+  border-radius:8px;
+  position:relative;
+  background:#fff;
+}
+
+.monitor::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  bottom:-20px;
+  width:48px;
+  height:5px;
+  background:var(--navy);
+  transform:translateX(-50%);
+  box-shadow:0 9px 0 7px #fff, 0 9px 0 9px var(--navy);
+}
+
+.computer .name{
+  margin-top:26px;
+  text-align:center;
+  font-weight:800;
+  color:var(--navy);
+  font-size:20px;
+}
+
+.computer .appname{
+  margin-top:3px;
+  text-align:center;
+  color:var(--muted);
+  font-size:15px;
+}
+
+.thought{
+  position:absolute;
+  left:288px;
+  top:130px;
+  width:248px;
+  padding:13px 15px;
+  border:2px solid #9bb6d8;
+  border-radius:16px;
+  background:#fff;
+  color:var(--navy);
+  font-weight:700;
+  opacity:0;
+  transform:translateX(-10px);
+  animation:appearX .7s 1.0s forwards, vanish .5s 3.8s forwards;
+}
+
+.pdu-title{
+  font-size:23px;
+  font-weight:800;
+  color:#131313;
+  margin-bottom:7px;
+}
+
+.request{
+  font-size:19px;
+  color:#242424;
+}
+
+.field{
+  margin:6px 0;
+  font-size:18px;
+}
+
+.field strong{color:var(--navy)}
+
+.arrow1-label,.arrow2-label,.arrow3-label,.arrow4-label,.arrow5-label{
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  color:var(--navy);
+  font-weight:800;
+  font-size:19px;
+  opacity:0;
+  text-align:center;
+}
+
+.arrow1-label{top:290px; animation:fadeIn .6s 3.8s forwards, vanish .4s 6.4s forwards;}
+.arrow2-label{top:613px; animation:fadeIn .6s 9.0s forwards, vanish .4s 11.7s forwards;}
+.arrow3-label{top:939px; animation:fadeIn .6s 14.2s forwards, vanish .4s 17.2s forwards;}
+.arrow4-label{top:1265px; animation:fadeIn .6s 19.8s forwards, vanish .4s 22.7s forwards;}
+.arrow5-label{top:1496px; animation:fadeIn .6s 24.0s forwards;}
+
+.arrow1,.arrow2,.arrow3,.arrow4,.arrow5{
+  position:absolute;
+  left:50%;
+  width:6px;
+  background:var(--navy);
+  transform:translateX(-50%);
+  opacity:0;
+}
+
+.arrow1{top:320px;height:28px; animation:fadeIn .6s 4.0s forwards, vanish .4s 6.5s forwards;}
+.arrow2{top:645px;height:28px; animation:fadeIn .6s 9.2s forwards, vanish .4s 11.8s forwards;}
+.arrow3{top:970px;height:28px; animation:fadeIn .6s 14.4s forwards, vanish .4s 17.3s forwards;}
+.arrow4{top:1295px;height:28px; animation:fadeIn .6s 20.0s forwards, vanish .4s 22.8s forwards;}
+.arrow5{top:1526px;height:28px; animation:fadeIn .6s 24.2s forwards;}
+
+.arrow1::after,.arrow2::after,.arrow3::after,.arrow4::after,.arrow5::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  bottom:-14px;
+  transform:translateX(-50%);
+  border-left:15px solid transparent;
+  border-right:15px solid transparent;
+  border-top:19px solid var(--navy);
+}
+
+/* Application */
+.app-pdu{
+  position:absolute;
+  left:61%;
+  top:88px;
+  width:min(500px,44vw);
+  height:145px;
+  transform:translateX(-50%) scale(.96);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  border:3px solid var(--line);
+  border-radius:10px;
+  background:linear-gradient(180deg,var(--app),var(--app2));
+  box-shadow:0 7px 16px rgba(77,48,134,.10);
+  opacity:0;
+  animation:popIn .9s 2.3s forwards;
+}
+
+.app-caption{
+  position:absolute;
+  left:61%;
+  top:248px;
+  transform:translateX(-50%);
+  color:var(--navy);
+  font-weight:700;
+  font-size:18px;
+  opacity:0;
+  animation:fadeIn .7s 3.2s forwards;
+}
+
+.app-copy{
+  position:absolute;
+  left:61%;
+  top:88px;
+  width:min(500px,44vw);
+  height:145px;
+  transform:translateX(-50%) scale(.92);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  border:3px solid var(--line);
+  border-radius:10px;
+  background:linear-gradient(180deg,var(--app),var(--app2));
+  box-shadow:0 7px 16px rgba(77,48,134,.10);
+  opacity:0;
+  z-index:3;
+  animation:copyAppear .4s 4.4s forwards, appToTransport 1.9s 5.0s forwards, vanish .4s 7.2s forwards;
+}
+
+/* Transport */
+.transport-work{
+  position:absolute;
+  left:50%;
+  top:412px;
+  width:min(870px,86vw);
+  height:165px;
+  transform:translateX(-50%);
+  display:flex;
+}
+
+.tcp-header{
+  width:42%;
+  padding:18px 20px;
+  border:3px solid var(--line);
+  border-right:0;
+  border-radius:10px 0 0 10px;
+  background:linear-gradient(180deg,var(--tcp),var(--tcp2));
+  opacity:0;
+  transform:translateX(-70px);
+  animation:slideIn .9s 7.4s forwards;
+}
+
+.transport-payload{
+  width:58%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  border:3px solid var(--line);
+  border-radius:0 10px 10px 0;
+  background:linear-gradient(180deg,var(--app),var(--app2));
+  opacity:0;
+  transform:translateX(70px);
+  animation:slideInRight .9s 6.8s forwards;
+}
+
+.transport-caption{
+  position:absolute;
+  left:50%;
+  top:592px;
+  transform:translateX(-50%);
+  width:min(870px,86vw);
+  color:var(--navy);
+  font-size:22px;
+  font-weight:800;
+  text-align:center;
+  opacity:0;
+  animation:fadeIn .6s 8.3s forwards;
+}
+
+.transport-caption::before,.network-caption::before,.datalink-caption::before,.bits-caption::before,.signal-caption::before{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  top:-10px;
+  border-top:3px solid var(--navy);
+}
+
+.transport-caption span,.network-caption span,.datalink-caption span,.bits-caption span,.signal-caption span{
+  position:relative;
+  top:-25px;
+  padding:0 15px;
+  background:#fff;
+}
+
+.segment-copy{
+  position:absolute;
+  left:50%;
+  top:412px;
+  width:min(870px,86vw);
+  height:165px;
+  transform:translateX(-50%) scale(.98);
+  display:flex;
+  opacity:0;
+  z-index:4;
+  animation:segmentAppear .4s 9.7s forwards, segmentToNetwork 2.0s 10.3s forwards, vanish .4s 12.6s forwards;
+}
+
+.segment-copy .tcp-mini{
+  width:42%;
+  padding:18px 20px;
+  border:3px solid var(--line);
+  border-right:0;
+  border-radius:10px 0 0 10px;
+  background:linear-gradient(180deg,var(--tcp),var(--tcp2));
+}
+
+.segment-copy .app-mini{
+  width:58%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  border:3px solid var(--line);
+  border-radius:0 10px 10px 0;
+  background:linear-gradient(180deg,var(--app),var(--app2));
+}
+
+/* Network */
+.network-work{
+  position:absolute;
+  left:50%;
+  top:734px;
+  width:min(1050px,92vw);
+  height:172px;
+  transform:translateX(-50%);
+  display:flex;
+}
+
+.ip-header{
+  width:30%;
+  padding:18px 18px;
+  border:3px solid var(--line);
+  border-right:0;
+  border-radius:10px 0 0 10px;
+  background:linear-gradient(180deg,var(--ip),var(--ip2));
+  opacity:0;
+  transform:translateX(-70px);
+  animation:slideIn .95s 13.0s forwards;
+}
+
+.network-tcp{
+  width:29%;
+  padding:18px 17px;
+  border-top:3px solid var(--line);
+  border-bottom:3px solid var(--line);
+  border-right:0;
+  background:linear-gradient(180deg,var(--tcp),var(--tcp2));
+  opacity:0;
+  animation:fadeIn .8s 12.3s forwards;
+}
+
+.network-app{
+  width:41%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  border:3px solid var(--line);
+  border-radius:0 10px 10px 0;
+  background:linear-gradient(180deg,var(--app),var(--app2));
+  opacity:0;
+  animation:fadeIn .8s 12.3s forwards;
+}
+
+.network-caption{
+  position:absolute;
+  left:50%;
+  top:922px;
+  transform:translateX(-50%);
+  width:min(1050px,92vw);
+  color:var(--navy);
+  font-size:22px;
+  font-weight:800;
+  text-align:center;
+  opacity:0;
+  animation:fadeIn .6s 13.7s forwards;
+}
+
+.packet-copy{
+  position:absolute;
+  left:50%;
+  top:734px;
+  width:min(1050px,92vw);
+  height:172px;
+  transform:translateX(-50%) scale(.985);
+  display:flex;
+  opacity:0;
+  z-index:4;
+  animation:segmentAppear .4s 15.0s forwards, packetToDataLink 2.1s 15.7s forwards, vanish .4s 18.1s forwards;
+}
+
+.packet-copy .ip-mini{
+  width:30%;
+  padding:18px 18px;
+  border:3px solid var(--line);
+  border-right:0;
+  border-radius:10px 0 0 10px;
+  background:linear-gradient(180deg,var(--ip),var(--ip2));
+}
+
+.packet-copy .tcp-mini2{
+  width:29%;
+  padding:18px 17px;
+  border-top:3px solid var(--line);
+  border-bottom:3px solid var(--line);
+  border-right:0;
+  background:linear-gradient(180deg,var(--tcp),var(--tcp2));
+}
+
+.packet-copy .app-mini2{
+  width:41%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  border:3px solid var(--line);
+  border-radius:0 10px 10px 0;
+  background:linear-gradient(180deg,var(--app),var(--app2));
+}
+
+/* Data Link */
+.datalink-work{
+  position:absolute;
+  left:50%;
+  top:1060px;
+  width:min(1180px,95vw);
+  height:180px;
+  transform:translateX(-50%);
+  display:flex;
+}
+
+.eth-header{
+  width:24%;
+  padding:18px 16px;
+  border:3px solid var(--line);
+  border-right:0;
+  border-radius:10px 0 0 10px;
+  background:linear-gradient(180deg,var(--eth),var(--eth2));
+  opacity:0;
+  transform:translateX(-70px);
+  animation:slideIn .95s 18.7s forwards;
+}
+
+.dl-ip{
+  width:23%;
+  padding:18px 16px;
+  border-top:3px solid var(--line);
+  border-bottom:3px solid var(--line);
+  border-right:0;
+  background:linear-gradient(180deg,var(--ip),var(--ip2));
+  opacity:0;
+  animation:fadeIn .7s 18.0s forwards;
+}
+
+.dl-tcp{
+  width:22%;
+  padding:18px 16px;
+  border-top:3px solid var(--line);
+  border-bottom:3px solid var(--line);
+  border-right:0;
+  background:linear-gradient(180deg,var(--tcp),var(--tcp2));
+  opacity:0;
+  animation:fadeIn .7s 18.0s forwards;
+}
+
+.dl-app{
+  width:22%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  border-top:3px solid var(--line);
+  border-bottom:3px solid var(--line);
+  border-right:0;
+  background:linear-gradient(180deg,var(--app),var(--app2));
+  opacity:0;
+  animation:fadeIn .7s 18.0s forwards;
+}
+
+.fcs{
+  width:9%;
+  padding:18px 10px;
+  border:3px solid var(--line);
+  border-radius:0 10px 10px 0;
+  background:linear-gradient(180deg,var(--fcs),var(--fcs2));
+  text-align:center;
+  opacity:0;
+  transform:translateX(60px);
+  animation:slideInRight .95s 18.9s forwards;
+}
+
+.datalink-caption{
+  position:absolute;
+  left:50%;
+  top:1254px;
+  transform:translateX(-50%);
+  width:min(1180px,95vw);
+  color:var(--navy);
+  font-size:22px;
+  font-weight:800;
+  text-align:center;
+  opacity:0;
+  animation:fadeIn .6s 19.5s forwards;
+}
+
+/* Physical bits */
+.bits-box{
+  position:absolute;
+  left:50%;
+  top:1398px;
+  width:min(1050px,92vw);
+  height:112px;
+  transform:translateX(-50%);
+  border:3px solid var(--line);
+  border-radius:12px;
+  background:#fff;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  opacity:0;
+  animation:fadeIn .8s 23.2s forwards;
+}
+
+.bits-main{
+  font-size:22px;
+  font-weight:700;
+  color:#111;
+  letter-spacing:.04em;
+  text-align:center;
+  padding:0 16px;
+}
+
+.bits-sub{
+  margin-top:8px;
+  font-size:15px;
+  color:var(--muted);
+  font-style:italic;
+  text-align:center;
+}
+
+.bits-caption{
+  position:absolute;
+  left:50%;
+  top:1522px;
+  transform:translateX(-50%);
+  width:min(1050px,92vw);
+  color:var(--navy);
+  font-size:22px;
+  font-weight:800;
+  text-align:center;
+  opacity:0;
+  animation:fadeIn .6s 23.8s forwards;
+}
+
+/* Signal */
+.signal-box{
+  position:absolute;
+  left:50%;
+  top:1620px;
+  width:min(1150px,94vw);
+  height:92px;
+  transform:translateX(-50%);
+  border-radius:12px;
+  background:#f7fbff;
+  border:2px solid #cfdbeb;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 26px;
+  opacity:0;
+  animation:fadeIn .8s 27.0s forwards;
+}
+
+.device-small{
+  color:var(--navy);
+  font-weight:800;
+  font-size:22px;
+  min-width:140px;
+}
+
+.medium-wrap{
+  flex:1;
+  margin:0 14px;
+  position:relative;
+  height:46px;
+}
+
+.cable{
+  position:absolute;
+  left:0;
+  right:0;
+  top:22px;
+  height:6px;
+  background:#1970d6;
+  border-radius:999px;
+  box-shadow:0 0 0 1px rgba(25,112,214,.12);
+}
+
+.medium-label{
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  top:-4px;
+  color:var(--navy);
+  font-weight:800;
+  font-size:17px;
+  white-space:nowrap;
+}
+
+.wave{
+  position:absolute;
+  left:9%;
+  right:9%;
+  top:-2px;
+  height:30px;
+  opacity:0;
+  animation:fadeIn .4s 27.6s forwards;
+}
+
+.wave svg{
+  width:100%;
+  height:100%;
+  display:block;
+}
+
+.signal-caption{
+  position:absolute;
+  left:50%;
+  top:1726px;
+  transform:translateX(-50%);
+  width:min(1150px,94vw);
+  color:var(--navy);
+  font-size:22px;
+  font-weight:800;
+  text-align:center;
+  opacity:0;
+  animation:fadeIn .6s 28.1s forwards;
+}
+
+/* Controls */
+.controls{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:16px;
+}
+
+button{
+  border:0;
+  border-radius:10px;
+  padding:10px 18px;
+  font-size:15px;
+  font-weight:800;
+  cursor:pointer;
+}
+
+.replay{
+  background:var(--navy);
+  color:#fff;
+}
+
+.pause{
+  background:#edf3fb;
+  color:var(--navy);
+  border:1px solid #c8d5e8;
+}
+
+.speed-control{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:8px 12px;
+  border:1px solid #c8d5e8;
+  border-radius:10px;
+  background:#f8fbff;
+  color:var(--navy);
+  font-size:14px;
+  font-weight:700;
+}
+
+.speed-control input[type="range"]{
+  width:160px;
+  accent-color:var(--navy);
+  cursor:pointer;
+}
+
+.speed-value{
+  min-width:44px;
+  text-align:right;
+  font-variant-numeric:tabular-nums;
+}
+
+.note{
+  max-width:980px;
+  margin:14px auto 0;
+  text-align:center;
+  color:#526173;
+  font-size:14px;
+}
+
+.credit{
+  margin-top:18px;
+  text-align:center;
+  color:#6b7480;
+  font-size:13px;
+  font-weight:600;
+}
+
+/* Animation helpers */
+@keyframes appear{to{opacity:1;transform:translateY(0)}}
+@keyframes appearX{to{opacity:1;transform:translateX(0)}}
+@keyframes fadeIn{to{opacity:1}}
+@keyframes vanish{to{opacity:0}}
+@keyframes popIn{to{opacity:1;transform:translateX(-50%) scale(1)}}
+@keyframes copyAppear{to{opacity:.9}}
+@keyframes appToTransport{
+  0%{left:61%;top:88px;opacity:.9;transform:translateX(-50%) scale(.92)}
+  100%{left:58%;top:424px;opacity:.9;transform:translateX(-4%) scale(.82)}
+}
+@keyframes slideIn{to{opacity:1;transform:translateX(0)}}
+@keyframes slideInRight{to{opacity:1;transform:translateX(0)}}
+@keyframes segmentAppear{to{opacity:.92}}
+@keyframes segmentToNetwork{
+  0%{top:412px;opacity:.92;transform:translateX(-50%) scale(.98)}
+  100%{top:744px;opacity:.92;transform:translateX(-16%) scale(.79)}
+}
+@keyframes packetToDataLink{
+  0%{top:734px;opacity:.92;transform:translateX(-50%) scale(.985)}
+  100%{top:1070px;opacity:.92;transform:translateX(-19%) scale(.75)}
+}
+
+.paused *{
+  animation-play-state:paused !important;
+}
+
+@media (max-width:900px){
+  .scene{height:1950px}
+  .computer{left:18px;top:105px;width:182px;height:158px;padding:14px}
+  .monitor{width:82px;height:52px}
+  .computer .name{font-size:17px}
+  .computer .appname{font-size:13px}
+  .thought{display:none}
+
+  .app-pdu,.app-copy{left:66%;width:58vw;height:136px}
+  .app-caption{left:66%}
+
+  .transport-work,.segment-copy{width:93vw;height:180px}
+  .tcp-header,.segment-copy .tcp-mini{width:47%;padding:14px 12px}
+  .transport-payload,.segment-copy .app-mini{width:53%}
+
+  .network-work,.packet-copy{width:96vw;height:185px}
+  .ip-header,.packet-copy .ip-mini{width:34%;padding:14px 10px}
+  .network-tcp,.packet-copy .tcp-mini2{width:31%;padding:14px 10px}
+  .network-app,.packet-copy .app-mini2{width:35%}
+
+  .datalink-work{width:98vw;height:210px}
+  .eth-header{width:28%;padding:13px 8px}
+  .dl-ip{width:23%;padding:13px 8px}
+  .dl-tcp{width:21%;padding:13px 8px}
+  .dl-app{width:19%}
+  .fcs{width:9%;padding:13px 4px}
+
+  .bits-box{width:96vw;height:124px}
+  .signal-box{width:96vw;padding:0 12px}
+  .device-small{font-size:16px;min-width:72px}
+  .medium-label{font-size:14px;top:-1px}
+
+  .tcp-header h3,.ip-header h3,.eth-header h3{font-size:18px}
+  .pdu-title{font-size:19px}
+  .request{font-size:16px}
+  .field{font-size:15px}
+  .bits-main{font-size:17px}
+  .bits-sub{font-size:13px}
+
+  .transport-caption{width:93vw}
+  .network-caption{width:96vw}
+  .datalink-caption{width:98vw; top:1282px}
+  .bits-caption{width:96vw; top:1536px}
+  .signal-caption{width:96vw; top:1800px; font-size:20px}
+
+  .layer-label.transport{top:370px}
+  .layer-label.network{top:700px}
+  .layer-label.datalink{top:1040px}
+  .layer-label.physical{top:1380px}
+
+  .arrow3-label{top:972px}
+  .arrow3{top:1004px}
+  .arrow4-label{top:1298px}
+  .arrow4{top:1330px}
+  .arrow5-label{top:1558px}
+  .arrow5{top:1590px}
+
+  .signal-box{top:1670px}
+
+  @keyframes appToTransport{
+    0%{left:66%;top:88px;opacity:.9;transform:translateX(-50%) scale(.92)}
+    100%{left:58%;top:430px;opacity:.9;transform:translateX(-1%) scale(.78)}
+  }
+  @keyframes segmentToNetwork{
+    0%{top:412px;opacity:.92;transform:translateX(-50%) scale(.98)}
+    100%{top:744px;opacity:.92;transform:translateX(-12%) scale(.67)}
+  }
+  @keyframes packetToDataLink{
+    0%{top:734px;opacity:.92;transform:translateX(-50%) scale(.985)}
+    100%{top:1077px;opacity:.92;transform:translateX(-12%) scale(.62)}
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{
+    animation-duration:.001ms !important;
+    animation-delay:0ms !important;
+  }
+}
+</style>
+
+<style>
+/* --- Spacing correction: keeps each layer, PDU caption, and transition separate --- */
+
+.scene{
+  height:2070px;
+}
+
+/* Application */
+.layer-label.app{top:34px}
+.computer{top:102px}
+.thought{top:130px}
+.app-pdu,.app-copy{top:88px}
+.app-caption{top:255px}
+
+.arrow1-label{top:305px}
+.arrow1{top:338px}
+
+/* Transport */
+.layer-label.transport{top:385px}
+.transport-work,.segment-copy{top:440px}
+.transport-caption{top:625px}
+
+.arrow2-label{top:675px}
+.arrow2{top:708px}
+
+/* Network */
+.layer-label.network{top:755px}
+.network-work,.packet-copy{top:810px}
+.network-caption{top:997px}
+
+.arrow3-label{top:1048px}
+.arrow3{top:1081px}
+
+/* Data Link */
+.layer-label.datalink{top:1130px}
+.datalink-work{top:1190px}
+.datalink-caption{top:1385px}
+
+.arrow4-label{top:1438px}
+.arrow4{top:1471px}
+
+/* Physical */
+.layer-label.physical{top:1525px}
+.bits-box{top:1585px}
+.bits-caption{top:1715px}
+
+.arrow5-label{top:1768px}
+.arrow5{top:1801px}
+
+.signal-box{top:1870px}
+.signal-caption{top:1980px}
+
+/* Keep the moving copies aligned with the corrected layer positions. */
+@keyframes appToTransport{
+  0%{
+    left:61%;
+    top:88px;
+    opacity:.9;
+    transform:translateX(-50%) scale(.92);
+  }
+  100%{
+    left:58%;
+    top:452px;
+    opacity:.9;
+    transform:translateX(-4%) scale(.82);
+  }
+}
+
+@keyframes segmentToNetwork{
+  0%{
+    top:440px;
+    opacity:.92;
+    transform:translateX(-50%) scale(.98);
+  }
+  100%{
+    top:823px;
+    opacity:.92;
+    transform:translateX(-16%) scale(.79);
+  }
+}
+
+@keyframes packetToDataLink{
+  0%{
+    top:810px;
+    opacity:.92;
+    transform:translateX(-50%) scale(.985);
+  }
+  100%{
+    top:1202px;
+    opacity:.92;
+    transform:translateX(-19%) scale(.75);
+  }
+}
+
+/* Captions should sit clearly below their PDU boxes. */
+.transport-caption::before,
+.network-caption::before,
+.datalink-caption::before,
+.bits-caption::before,
+.signal-caption::before{
+  top:-9px;
+}
+
+/* Mobile/tablet spacing */
+@media (max-width:900px){
+  .scene{
+    height:2260px;
+  }
+
+  .layer-label.transport{top:395px}
+  .transport-work,.segment-copy{top:455px}
+  .transport-caption{top:650px}
+
+  .arrow2-label{top:704px}
+  .arrow2{top:738px}
+
+  .layer-label.network{top:790px}
+  .network-work,.packet-copy{top:850px}
+  .network-caption{top:1050px}
+
+  .arrow3-label{top:1105px}
+  .arrow3{top:1139px}
+
+  .layer-label.datalink{top:1190px}
+  .datalink-work{top:1255px}
+  .datalink-caption{top:1480px}
+
+  .arrow4-label{top:1535px}
+  .arrow4{top:1569px}
+
+  .layer-label.physical{top:1620px}
+  .bits-box{top:1685px}
+  .bits-caption{top:1820px}
+
+  .arrow5-label{top:1875px}
+  .arrow5{top:1909px}
+
+  .signal-box{top:1985px}
+  .signal-caption{top:2100px}
+
+  @keyframes appToTransport{
+    0%{
+      left:66%;
+      top:88px;
+      opacity:.9;
+      transform:translateX(-50%) scale(.92);
+    }
+    100%{
+      left:58%;
+      top:468px;
+      opacity:.9;
+      transform:translateX(-1%) scale(.78);
+    }
+  }
+
+  @keyframes segmentToNetwork{
+    0%{
+      top:455px;
+      opacity:.92;
+      transform:translateX(-50%) scale(.98);
+    }
+    100%{
+      top:865px;
+      opacity:.92;
+      transform:translateX(-12%) scale(.67);
+    }
+  }
+
+  @keyframes packetToDataLink{
+    0%{
+      top:850px;
+      opacity:.92;
+      transform:translateX(-50%) scale(.985);
+    }
+    100%{
+      top:1270px;
+      opacity:.92;
+      transform:translateX(-12%) scale(.62);
+    }
+  }
+}
+</style>
+
+</head>
+<body>
+<div class="page">
+  <h1>Application to Physical Layer Progression</h1>
+  <p class="subtitle">
+    Follow the same HTTP web request as it moves through encapsulation from the Application layer to the Data Link layer, and then see how the completed Ethernet frame is represented as bits and encoded into a physical signal.
+  </p>
+
+  <div class="scene" id="scene">
+    <!-- Application -->
+    <div class="layer-label app">Application Layer</div>
+
+    <div class="computer">
+      <div class="monitor"></div>
+      <div class="name">Source Computer</div>
+      <div class="appname">Web Browser</div>
+    </div>
+
+    <div class="thought">Browser creates an HTTP web request</div>
+
+    <div class="app-pdu">
+      <div>
+        <div class="pdu-title">Application Data</div>
+        <div class="request">HTTP Web Request</div>
+      </div>
+    </div>
+
+    <div class="app-copy">
+      <div>
+        <div class="pdu-title">Application Data</div>
+        <div class="request">HTTP Web Request</div>
+      </div>
+    </div>
+
+    <div class="app-caption">Application Layer PDU — Data</div>
+    <div class="arrow1-label">TCP adds a header</div>
+    <div class="arrow1"></div>
+
+    <!-- Transport -->
+    <div class="layer-label transport">Transport Layer</div>
+
+    <div class="transport-work">
+      <div class="tcp-header">
+        <h3>TCP Header</h3>
+        <div class="field"><strong>Source Port:</strong> 49152</div>
+        <div class="field"><strong>Destination Port:</strong> 80</div>
+        <div class="field">Other TCP control information</div>
+      </div>
+
+      <div class="transport-payload">
+        <div>
+          <div class="pdu-title">Application Data</div>
+          <div class="request">HTTP Web Request</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="transport-caption">
+      <span>Transport Layer PDU — TCP Segment</span>
+    </div>
+
+    <div class="segment-copy">
+      <div class="tcp-mini">
+        <h3>TCP Header</h3>
+        <div class="field"><strong>Source Port:</strong> 49152</div>
+        <div class="field"><strong>Destination Port:</strong> 80</div>
+      </div>
+      <div class="app-mini">
+        <div>
+          <div class="pdu-title">Application Data</div>
+          <div class="request">HTTP Web Request</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow2-label">IP adds a header</div>
+    <div class="arrow2"></div>
+
+    <!-- Network -->
+    <div class="layer-label network">Network Layer</div>
+
+    <div class="network-work">
+      <div class="ip-header">
+        <h3>IP Header</h3>
+        <div class="field"><strong>Source IP Address</strong></div>
+        <div class="field"><strong>Destination IP Address</strong></div>
+      </div>
+
+      <div class="network-tcp">
+        <h3>TCP Header</h3>
+        <div class="field"><strong>Source Port:</strong> 49152</div>
+        <div class="field"><strong>Destination Port:</strong> 80</div>
+      </div>
+
+      <div class="network-app">
+        <div>
+          <div class="pdu-title">Application Data</div>
+          <div class="request">HTTP Web Request</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="network-caption">
+      <span>Network Layer PDU — IP Packet</span>
+    </div>
+
+    <div class="packet-copy">
+      <div class="ip-mini">
+        <h3>IP Header</h3>
+        <div class="field"><strong>Source IP Address</strong></div>
+        <div class="field"><strong>Destination IP Address</strong></div>
+      </div>
+      <div class="tcp-mini2">
+        <h3>TCP Header</h3>
+        <div class="field"><strong>Source Port:</strong> 49152</div>
+        <div class="field"><strong>Destination Port:</strong> 80</div>
+      </div>
+      <div class="app-mini2">
+        <div>
+          <div class="pdu-title">Application Data</div>
+          <div class="request">HTTP Web Request</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow3-label">Ethernet adds a header and trailer</div>
+    <div class="arrow3"></div>
+
+    <!-- Data Link -->
+    <div class="layer-label datalink">Data Link Layer</div>
+
+    <div class="datalink-work">
+      <div class="eth-header">
+        <h3>Ethernet Header</h3>
+        <div class="field"><strong>Destination MAC Address</strong></div>
+        <div class="field"><strong>Source MAC Address</strong></div>
+        <div class="field"><strong>EtherType</strong></div>
+      </div>
+
+      <div class="dl-ip">
+        <h3>IP Header</h3>
+        <div class="field"><strong>Source IP Address</strong></div>
+        <div class="field"><strong>Destination IP Address</strong></div>
+      </div>
+
+      <div class="dl-tcp">
+        <h3>TCP Header</h3>
+        <div class="field"><strong>Source Port:</strong> 49152</div>
+        <div class="field"><strong>Destination Port:</strong> 80</div>
+      </div>
+
+      <div class="dl-app">
+        <div>
+          <div class="pdu-title">Application Data</div>
+          <div class="request">HTTP Web Request</div>
+        </div>
+      </div>
+
+      <div class="fcs">
+        <div class="pdu-title">FCS</div>
+        <div class="request" style="font-size:17px">(trailer)</div>
+      </div>
+    </div>
+
+    <div class="datalink-caption">
+      <span>Data Link Layer PDU — Ethernet Frame</span>
+    </div>
+
+    <div class="arrow4-label">Physical layer represents the frame as bits</div>
+    <div class="arrow4"></div>
+
+    <!-- Physical bits -->
+    <div class="layer-label physical">Physical Layer</div>
+
+    <div class="bits-box">
+      <div class="bits-main">10110100 01101001 11000100 01011010 11101010 00101101 ...</div>
+      <div class="bits-sub">Illustrative bit sequence — not the actual complete binary contents of the frame</div>
+    </div>
+
+    <div class="bits-caption">
+      <span>Physical Layer — Bits</span>
+    </div>
+
+    <div class="arrow5-label">Bits are encoded into a physical signal</div>
+    <div class="arrow5"></div>
+
+    <!-- Signal -->
+    <div class="signal-box">
+      <div class="device-small">Sending<br>Interface</div>
+
+      <div class="medium-wrap">
+        <div class="medium-label">Copper Ethernet Medium</div>
+        <div class="wave">
+          <svg viewBox="0 0 800 90" preserveAspectRatio="none" aria-hidden="true">
+            <polyline
+              points="0,68 50,68 50,22 105,22 105,68 165,68 165,16 245,16 245,68 315,68 315,28 390,28 390,68 455,68 455,18 530,18 530,68 605,68 605,32 680,32 680,68 800,68"
+              fill="none"
+              stroke="#1970d6"
+              stroke-width="7"
+              stroke-linejoin="round"
+              stroke-linecap="round"
+            />
+          </svg>
+        </div>
+        <div class="cable"></div>
+      </div>
+
+      <div class="device-small" style="text-align:right;">Signal<br>on the link</div>
+    </div>
+
+    <div class="signal-caption">
+      <span>Physical Transmission — Electrical Signal</span>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="replay" onclick="replayAnimation()">Replay animation</button>
+    <button class="pause" id="pauseBtn" onclick="togglePause()">Pause</button>
+
+    <div class="speed-control">
+      <label for="speedSlider">Speed</label>
+      <input
+        id="speedSlider"
+        type="range"
+        min="0.50"
+        max="1.50"
+        step="0.05"
+        value="0.75"
+        oninput="updateSpeed(this.value)"
+      />
+      <span class="speed-value" id="speedValue">0.75×</span>
+    </div>
+  </div>
+
+  <div class="note">
+    Scope stops at the point where the Physical layer has encoded the bit sequence into a signal. This simulation does not continue into receiver-side recovery or full decapsulation.
+  </div>
+
+  <div class="credit">Created by Zeeshan Basit</div>
+</div>
+
+<script>
+let paused = false;
+let playbackRate = 0.75;
+
+function applyPlaybackRate(){
+  const currentScene = document.getElementById("scene");
+  if(!currentScene) return;
+  currentScene.getAnimations({subtree:true}).forEach(animation=>{
+    animation.playbackRate = playbackRate;
+  });
+}
+
+function updateSpeed(value){
+  playbackRate = parseFloat(value);
+  document.getElementById("speedValue").textContent = playbackRate.toFixed(2) + "×";
+  applyPlaybackRate();
+}
+
+function replayAnimation(){
+  const currentScene = document.getElementById("scene");
+  currentScene.classList.remove("paused");
+  paused = false;
+
+  const clone = currentScene.cloneNode(true);
+  currentScene.parentNode.replaceChild(clone, currentScene);
+
+  document.getElementById("pauseBtn").textContent = "Pause";
+
+  requestAnimationFrame(()=>{
+    applyPlaybackRate();
+  });
+}
+
+function togglePause(){
+  const currentScene = document.getElementById("scene");
+  paused = !paused;
+  currentScene.classList.toggle("paused", paused);
+  document.getElementById("pauseBtn").textContent = paused ? "Resume" : "Pause";
+}
+
+window.addEventListener("load",()=>{
+  updateSpeed(document.getElementById("speedSlider").value);
+});
+</script>
+</body>
+</html>
