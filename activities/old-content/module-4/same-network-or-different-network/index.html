@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Module 4 Activity 3 — Same Network or Different Network?</title>
+<style>
+:root{
+ --bg:#f5f7fb;--panel:#fff;--text:#172033;--muted:#667085;--line:#d9e0ea;
+ --accent:#1769e0;--accent-dark:#0f4faa;--soft:#eef4ff;--good:#137a4b;
+ --good-bg:#edf9f2;--bad:#b42318;--bad-bg:#fff1f0;--hint:#805600;
+ --hint-bg:#fff7df;--shadow:0 12px 32px rgba(20,35,60,.08)
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(180deg,#f7f9fc 0,#f3f6fa 100%);color:var(--text)}
+button,input{font:inherit}button{touch-action:manipulation}
+.shell{max-width:1120px;margin:0 auto;padding:32px 20px 64px}
+.hero{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap;margin-bottom:20px}
+.eyebrow{color:var(--accent);font-weight:800;font-size:.82rem;letter-spacing:.06em;text-transform:uppercase}
+h1{margin:.28rem 0 .45rem;font-size:clamp(1.8rem,3.4vw,2.65rem)}
+.lead{margin:0;color:var(--muted);line-height:1.62;max-width:790px}
+.phase-nav{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 8px}
+.phase-pill{border:1px solid var(--line);background:#fff;color:#42526a;cursor:pointer;padding:9px 13px;border-radius:999px;font-weight:750;font-size:.9rem}
+.phase-pill:hover{border-color:#9fb6da}.phase-pill.active{background:var(--soft);border-color:#9fc0f7;color:var(--accent-dark)}
+.phase-help{color:var(--muted);font-size:.86rem;line-height:1.45;max-width:790px}
+.progress-card{min-width:245px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow)}
+.progress-row{display:flex;justify-content:space-between;gap:18px;font-size:.9rem;margin-bottom:8px}.progress-row+.progress-row{margin-top:10px}
+.progress-track{height:10px;background:#e7edf5;border-radius:999px;overflow:hidden}.progress-fill{height:100%;width:0;background:var(--accent);transition:width .25s ease}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:clamp(20px,3vw,30px)}
+.hidden{display:none!important}
+.intro-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:24px 0}
+.intro-step{border:1px solid var(--line);border-radius:14px;padding:17px;background:#fbfcfe}.intro-step h2{font-size:1rem;margin:0 0 6px}.intro-step p{font-size:.91rem;color:var(--muted);line-height:1.5;margin:0}
+.step-number{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:999px;background:var(--soft);color:var(--accent-dark);font-weight:850;margin-bottom:9px}
+.note{border:1px solid #c9daf7;background:#f6f9ff;border-radius:13px;padding:14px 16px;color:#34445b;line-height:1.55;margin:18px 0}
+.primary,.secondary,.ghost{border:none;border-radius:10px;padding:11px 16px;font-weight:800;cursor:pointer}
+.primary{background:var(--accent);color:#fff}.primary:hover:not(:disabled){background:var(--accent-dark)}
+.secondary{background:#eef2f7;color:#263245}.ghost{background:#fff;color:#263245;border:1px solid var(--line)}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid rgba(23,105,224,.28);outline-offset:2px}
+button:disabled,input:disabled{opacity:.67;cursor:not-allowed}
+.question-top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap}
+.question-kicker{font-size:.8rem;color:var(--muted);font-weight:850;text-transform:uppercase;letter-spacing:.05em}
+.stage-chip{display:inline-flex;padding:7px 11px;border-radius:999px;background:var(--soft);color:var(--accent-dark);font-weight:800;font-size:.82rem}
+#questionTitle{font-size:clamp(1.35rem,2.5vw,1.75rem);margin:.28rem 0 .4rem}.instruction{color:var(--muted);line-height:1.58;margin:0}
+.topology{display:grid;grid-template-columns:1fr 130px 1fr;align-items:center;gap:18px;margin:24px 0}
+.device{border:1px solid var(--line);border-radius:16px;background:#fbfcfe;padding:20px;text-align:center}
+.device-icon{width:58px;height:44px;border:3px solid #536174;border-radius:6px;margin:0 auto 12px;position:relative;background:#fff}
+.device-icon:after{content:"";position:absolute;width:27px;height:3px;background:#536174;bottom:-9px;left:13px;box-shadow:0 5px 0 #536174}
+.device h3{margin:0 0 9px}.address{font:850 clamp(1rem,2.6vw,1.35rem) ui-monospace,SFMono-Regular,Consolas,monospace;color:#243754;word-break:break-word}
+.mask{color:var(--muted);font-size:.88rem;margin-top:5px}
+.connection{position:relative;height:70px;display:flex;align-items:center;justify-content:center}
+.connection:before{content:"";position:absolute;left:0;right:0;height:4px;background:#b4c0d0;border-radius:999px}
+.question-mark{z-index:1;display:flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:999px;background:#fff;border:3px solid var(--accent);color:var(--accent);font-size:1.45rem;font-weight:900}
+.work-panel{border:1px solid var(--line);border-radius:16px;background:#fbfcfe;padding:18px}
+.work-panel h3{margin:0 0 5px;font-size:1.05rem}.work-panel>p{margin:0 0 16px;color:var(--muted);line-height:1.5}
+.network-fields{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field{display:flex;flex-direction:column;gap:7px}.field label{font-weight:800;font-size:.9rem}
+.field input{width:100%;border:1px solid #aebbd0;border-radius:10px;padding:12px 13px;background:#fff;color:var(--text);font:750 1rem ui-monospace,SFMono-Regular,Consolas,monospace}
+.decision-title{font-weight:800;font-size:.9rem;margin:18px 0 9px}
+.decision-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.decision{border:1px solid var(--line);border-radius:12px;padding:14px;background:#fff;color:#263245;font-weight:800;cursor:pointer}
+.decision:hover{border-color:#9fb6da}.decision.selected{border-color:var(--accent);outline:3px solid rgba(23,105,224,.13);background:#f6f9ff;color:var(--accent-dark)}
+.helper{margin-top:16px;border:1px solid var(--line);border-radius:13px;background:#fff;overflow:hidden}
+.helper summary{cursor:pointer;padding:13px 15px;font-weight:800;color:#344054}.helper[open] summary{border-bottom:1px solid var(--line)}
+.helper-body{padding:14px;overflow-x:auto}.helper-note{margin:0 0 10px;color:var(--muted);font-size:.85rem}
+.binary-table{min-width:650px;display:grid;grid-template-columns:92px repeat(8,1fr);gap:4px;align-items:center}
+.binary-label{font-size:.76rem;color:#536174;font-weight:850}.bcell{display:flex;align-items:center;justify-content:center;min-height:32px;border:1px solid var(--line);border-radius:7px;background:#fff;font:850 .82rem ui-monospace,SFMono-Regular,Consolas,monospace}
+.bcell.weight{background:#eef2f7;color:#42526a;font-size:.72rem}.bcell.one{background:#e8f1ff;border-color:#b6cef3;color:#0f4faa}
+.helper-divider{grid-column:1/-1;height:5px}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+.message{display:none;margin-top:18px;border-radius:12px;padding:14px 16px;line-height:1.55}.message.good{display:block;background:var(--good-bg);color:var(--good);border:1px solid #b8e2cc}.message.bad{display:block;background:var(--bad-bg);color:var(--bad);border:1px solid #f0c5c2}.message.hint{display:block;background:var(--hint-bg);color:var(--hint);border:1px solid #efd792}
+.explanation{display:none;margin-top:15px;border:1px solid var(--line);border-radius:14px;padding:16px;background:#fbfcfe;line-height:1.58}.explanation.show{display:block}.explanation h3{font-size:1rem;margin:0 0 7px}.explanation p{margin:0;color:#42526a}
+.credit{margin-top:20px;text-align:center;color:#6b7480;font-size:13px;font-weight:600}
+.results{text-align:center}.result-score{font-size:clamp(2.2rem,7vw,4rem);font-weight:900;color:var(--accent);margin:8px 0}.result-sub{color:var(--muted);line-height:1.55}
+.result-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:22px 0;text-align:left}.result-item{border:1px solid var(--line);border-radius:13px;padding:15px;background:#fbfcfe}.result-item strong{display:block;font-size:1.25rem;margin-bottom:3px}.result-item span{color:var(--muted);font-size:.88rem}
+.review{margin:18px 0;text-align:left;border:1px solid var(--line);border-radius:14px;overflow:hidden}.review-row{display:flex;justify-content:space-between;gap:12px;padding:11px 14px;border-bottom:1px solid var(--line)}.review-row:last-child{border-bottom:0}.status-good{color:var(--good);font-weight:800}.status-review{color:var(--bad);font-weight:800}
+@media(max-width:780px){.intro-grid,.result-grid,.network-fields{grid-template-columns:1fr}.topology{grid-template-columns:1fr}.connection{height:65px}.connection:before{top:0;bottom:0;left:50%;right:auto;width:4px;height:auto}.progress-card{width:100%}.shell{padding:22px 12px 44px}.card{border-radius:15px}}
+@media(max-width:520px){.decision-grid{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main class="shell">
+<header class="hero">
+ <div>
+  <div class="eyebrow">Old Content · Module 4 · Practice Activity</div>
+  <h1>Same Network or Different Network?</h1>
+  <p class="lead">Calculate the network address of two IPv4 hosts, compare the results and decide whether the hosts can communicate directly or require a router.</p>
+  <nav class="phase-nav" aria-label="Activity phases">
+   <button type="button" class="phase-pill" id="phase1Btn">Phase 1 · Build the Method</button>
+   <button type="button" class="phase-pill" id="phase2Btn">Phase 2 · Boundary Decisions</button>
+   <button type="button" class="phase-pill" id="phase3Btn">Phase 3 · Challenge</button>
+  </nav>
+  <div class="phase-help">Open any phase directly for review. Selecting a phase starts at its first question and resets the current score.</div>
+ </div>
+ <aside class="progress-card hidden" id="progressCard" aria-label="Activity progress">
+  <div class="progress-row"><span id="progressLabel">Question 1 of 10</span><strong id="percentText">0%</strong></div>
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="progress-row"><span>Score</span><strong id="scoreText">0 / 10</strong></div>
+ </aside>
+</header>
+
+<section class="card" id="introCard">
+ <div class="question-kicker">Module 4 Activity 3</div>
+ <h2>Network addresses—not visual similarity—determine the answer</h2>
+ <p class="instruction">Two addresses can look very close and still belong to different networks. They can also look different while remaining inside the same subnet. Calculate before deciding.</p>
+ <div class="intro-grid">
+  <article class="intro-step"><div class="step-number">1</div><h2>Calculate PC-A’s network</h2><p>Apply the subnet mask to PC-A’s IPv4 address.</p></article>
+  <article class="intro-step"><div class="step-number">2</div><h2>Calculate PC-B’s network</h2><p>Use the same process independently for the second host.</p></article>
+  <article class="intro-step"><div class="step-number">3</div><h2>Compare the results</h2><p>Matching network addresses mean local communication; different addresses require routing.</p></article>
+ </div>
+ <div class="note"><strong>Balanced practice:</strong> Every full attempt contains exactly five same-network and five different-network scenarios. You have two attempts per question.</div>
+ <button class="primary" id="startBtn">Start Activity</button>
+ <div class="credit">Created by Zeeshan Basit</div>
+</section>
+
+<section class="card hidden" id="questionCard">
+ <div class="question-top">
+  <div><div class="question-kicker" id="questionNumber"></div><h2 id="questionTitle">Compare the two hosts</h2><p class="instruction" id="questionInstruction"></p></div>
+  <div class="stage-chip" id="stageChip"></div>
+ </div>
+ <div class="topology">
+  <article class="device"><div class="device-icon" aria-hidden="true"></div><h3>PC-A</h3><div class="address" id="ipA"></div><div class="mask" id="maskA"></div></article>
+  <div class="connection" aria-label="Unknown network relationship"><div class="question-mark">?</div></div>
+  <article class="device"><div class="device-icon" aria-hidden="true"></div><h3>PC-B</h3><div class="address" id="ipB"></div><div class="mask" id="maskB"></div></article>
+ </div>
+ <div class="work-panel">
+  <h3>Show your network calculations</h3>
+  <p>Enter each network address in dotted-decimal notation, then make your decision.</p>
+  <div class="network-fields">
+   <div class="field"><label for="networkA">PC-A network address</label><input id="networkA" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="Example: 192.168.10.0"></div>
+   <div class="field"><label for="networkB">PC-B network address</label><input id="networkB" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="Example: 192.168.10.0"></div>
+  </div>
+  <div class="decision-title">These hosts are on:</div>
+  <div class="decision-grid">
+   <button type="button" class="decision" data-decision="same">The same network</button>
+   <button type="button" class="decision" data-decision="different">Different networks</button>
+  </div>
+  <details class="helper">
+   <summary>Open binary AND helper</summary>
+   <div class="helper-body">
+    <p class="helper-note" id="helperNote"></p>
+    <div class="binary-table" id="binaryTable"></div>
+   </div>
+  </details>
+ </div>
+ <div class="controls"><button class="primary" id="checkBtn">Check Answer</button><button class="ghost" id="clearBtn">Clear Answer</button><button class="primary hidden" id="nextBtn">Next Question</button></div>
+ <div class="message" id="message" role="status" aria-live="polite"></div>
+ <div class="explanation" id="explanation"><h3>Worked solution</h3><p id="explanationText"></p></div>
+ <div class="credit">Created by Zeeshan Basit</div>
+</section>
+
+<section class="card results hidden" id="resultsCard">
+ <div class="question-kicker">Activity complete</div><h2>Your result</h2><div class="result-score" id="finalScore"></div><p class="result-sub" id="resultMessage"></p>
+ <div class="result-grid">
+  <div class="result-item"><strong id="correctTotal"></strong><span>Solved within two attempts</span></div>
+  <div class="result-item"><strong id="firstTryTotal"></strong><span>Correct on the first attempt</span></div>
+  <div class="result-item"><strong id="reviewTotal"></strong><span>Questions to review</span></div>
+ </div>
+ <div class="review" id="reviewList"></div><button class="primary" id="restartBtn">Try Another Set</button>
+ <div class="credit">Created by Zeeshan Basit</div>
+</section>
+</main>
+
+<script>
+(function(){
+"use strict";
+var TOTAL=10,STORAGE_KEY="net-old-m4-same-different-previous-set-v1";
+var questions=[],index=0,correctTotal=0,firstTryTotal=0,attempts=0,resolved=false,decision=null,outcomes=[];
+function byId(id){return document.getElementById(id)}
+function randomInt(min,max){return Math.floor(Math.random()*(max-min+1))+min}
+function ipToInt(o){return((((o[0]*256+o[1])*256+o[2])*256+o[3])>>>0)}
+function intToIp(n){return[(n>>>24)&255,(n>>>16)&255,(n>>>8)&255,n&255]}
+function maskInt(prefix){return prefix===0?0:(0xFFFFFFFF<<(32-prefix))>>>0}
+function networkInt(ip,prefix){return(ipToInt(ip)&maskInt(prefix))>>>0}
+function networkIp(ip,prefix){return intToIp(networkInt(ip,prefix))}
+function maskIp(prefix){return intToIp(maskInt(prefix))}
+function ipString(o){return o.join(".")}
+function bits(n){return n.toString(2).padStart(8,"0")}
+function readPrevious(){try{var p=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");return Array.isArray(p)?p:[]}catch(e){return[]}}
+function saveSet(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(questions.map(function(q){return q.key})))}catch(e){}}
+function randomCandidate(prefix,same){
+ var family=randomInt(0,2);
+ if(prefix<24)family=1;
+ if(family===0)return[10,randomInt(1,253),randomInt(1,253),randomInt(1,253)];
+ if(family===1)return[172,randomInt(16,30),randomInt(1,253),randomInt(1,253)];
+ return[192,168,randomInt(1,253),randomInt(1,253)];
+}
+function buildScenario(prefix,same,stage,previous,used){
+ var a,b,key,size=Math.pow(2,32-prefix);
+ for(var tries=0;tries<600;tries++){
+  var candidate=same?randomCandidate(prefix,true):[10,randomInt(1,252),randomInt(1,252),randomInt(1,252)];
+  var net=networkInt(candidate,prefix);
+  if(same){
+   var offA=randomInt(1,size-2),offB=randomInt(1,size-2);
+   if(offA===offB)continue;
+   a=intToIp((net+offA)>>>0);b=intToIp((net+offB)>>>0);
+  }else{
+   var next=net+size;
+   if(next>=ipToInt([11,0,0,0]))continue;
+   var edge=Math.min(10,size-2);
+   a=intToIp((net+size-randomInt(2,edge))>>>0);
+   b=intToIp((next+randomInt(1,edge))>>>0);
+  }
+  key=ipString(a)+"|"+ipString(b)+"/"+prefix;
+  if(used.has(key)||(tries<350&&previous.indexOf(key)!==-1))continue;
+  used.add(key);
+  return{a:a,b:b,prefix:prefix,same:same,stage:stage,key:key};
+ }
+ used.add(key);
+ return{a:a,b:b,prefix:prefix,same:same,stage:stage,key:key};
+}
+function generateQuestions(){
+ var previous=readPrevious(),used=new Set(),lastPrefix=Math.random()<.5?29:30;
+ var specs=[
+  [24,true,"Build the method"],[24,false,"Build the method"],[25,true,"Build the method"],
+  [25,false,"Boundary decisions"],[26,true,"Boundary decisions"],[27,false,"Boundary decisions"],[28,true,"Boundary decisions"],
+  [28,false,"Challenge"],[20,true,"Challenge"],[lastPrefix,false,"Challenge"]
+ ];
+ questions=specs.map(function(s){return buildScenario(s[0],s[1],s[2],previous,used)});saveSet();
+}
+function normalizeIp(text){
+ var clean=String(text||"").trim().split("/")[0],parts=clean.split(".");
+ if(parts.length!==4)return null;
+ var nums=parts.map(function(p){return/^\d{1,3}$/.test(p)?Number(p):NaN});
+ if(nums.some(function(n){return!Number.isInteger(n)||n<0||n>255}))return null;
+ return nums.join(".");
+}
+function activeOctet(prefix){return prefix%8===0?Math.min(3,Math.floor(prefix/8)):Math.floor(prefix/8)}
+function tableRow(label,value,className){
+ return'<span class="binary-label">'+label+'</span>'+value.map(function(v){return'<span class="bcell '+(className||"")+(v==="1"?" one":"")+'">'+v+'</span>'}).join("");
+}
+function renderHelper(q){
+ var o=activeOctet(q.prefix),mask=maskIp(q.prefix);
+ byId("helperNote").textContent="Focus on Octet "+(o+1)+", where the network/host boundary is visible. Compare each address with the mask; only 1 AND 1 produces 1.";
+ var values=["128","64","32","16","8","4","2","1"];
+ byId("binaryTable").innerHTML=
+  tableRow("Place value",values,"weight")+'<span class="helper-divider"></span>'+
+  tableRow("PC-A",bits(q.a[o]).split(""),"")+
+  tableRow("PC-B",bits(q.b[o]).split(""),"")+
+  tableRow("Mask",bits(mask[o]).split(""),"");
+}
+function updatePhaseNav(){
+ var phase=index<3?1:(index<7?2:3);
+ [1,2,3].forEach(function(n){byId("phase"+n+"Btn").classList.toggle("active",n===phase);byId("phase"+n+"Btn").setAttribute("aria-current",n===phase?"step":"false")});
+}
+function updateProgress(){
+ var completed=index+(resolved?1:0),percent=Math.round(completed/TOTAL*100);
+ byId("progressLabel").textContent="Question "+(index+1)+" of "+TOTAL;byId("percentText").textContent=percent+"%";
+ byId("progressFill").style.width=percent+"%";byId("scoreText").textContent=correctTotal+" / "+TOTAL;
+}
+function instructionFor(q){
+ if(q.stage==="Build the method")return"Calculate both network addresses before deciding. Do not judge only by how similar the host addresses look.";
+ if(q.stage==="Boundary decisions")return"These addresses are positioned around subnet boundaries. Use the /"+q.prefix+" mask carefully.";
+ return q.prefix<24?"The network boundary is inside the third octet. Calculate both network IDs before comparing them.":"The subnet is small and the addresses are close to a boundary. Calculate rather than guess.";
+}
+function selectDecision(value){
+ if(resolved)return;decision=value;
+ Array.prototype.forEach.call(document.querySelectorAll(".decision"),function(b){b.classList.toggle("selected",b.getAttribute("data-decision")===value);b.setAttribute("aria-pressed",b.getAttribute("data-decision")===value?"true":"false")});
+}
+function renderQuestion(){
+ var q=questions[index];attempts=0;resolved=false;decision=null;
+ byId("questionNumber").textContent="Question "+(index+1)+" of "+TOTAL;byId("questionInstruction").textContent=instructionFor(q);byId("stageChip").textContent=q.stage;
+ byId("ipA").textContent=ipString(q.a)+"/"+q.prefix;byId("ipB").textContent=ipString(q.b)+"/"+q.prefix;
+ var mask="Subnet mask: "+ipString(maskIp(q.prefix));byId("maskA").textContent=mask;byId("maskB").textContent=mask;
+ byId("networkA").value="";byId("networkB").value="";
+ Array.prototype.forEach.call(document.querySelectorAll(".decision"),function(b){b.classList.remove("selected");b.disabled=false;b.setAttribute("aria-pressed","false")});
+ var details=document.querySelector(".helper");if(details)details.open=false;
+ renderHelper(q);byId("message").className="message";byId("message").innerHTML="";
+ byId("explanation").className="explanation";byId("explanationText").innerHTML="";
+ byId("checkBtn").classList.remove("hidden");byId("clearBtn").classList.remove("hidden");byId("nextBtn").classList.add("hidden");
+ byId("networkA").disabled=false;byId("networkB").disabled=false;
+ updatePhaseNav();updateProgress();window.scrollTo({top:0,behavior:"smooth"});
+}
+function status(q){
+ var expectedA=ipString(networkIp(q.a,q.prefix)),expectedB=ipString(networkIp(q.b,q.prefix));
+ return{a:normalizeIp(byId("networkA").value)===expectedA,b:normalizeIp(byId("networkB").value)===expectedB,d:decision===(q.same?"same":"different"),expectedA:expectedA,expectedB:expectedB};
+}
+function hintFor(s){
+ var items=[];if(!s.a)items.push("PC-A network address");if(!s.b)items.push("PC-B network address");if(!s.d)items.push("same/different decision");
+ return"Review: "+items.join(", ")+". Apply the mask to each host independently, then compare the two network addresses.";
+}
+function solutionFor(q,s){
+ var relation=q.same?"the same network":"different networks";
+ var route=q.same?"They can communicate locally without sending the packet to a router.":"Communication between them requires a router.";
+ return"PC-A network: <strong>"+s.expectedA+"/"+q.prefix+"</strong>. PC-B network: <strong>"+s.expectedB+"/"+q.prefix+"</strong>. The network addresses "+(q.same?"match":"do not match")+", so the hosts are on <strong>"+relation+"</strong>. "+route;
+}
+function fillSolution(q,s){
+ byId("networkA").value=s.expectedA;byId("networkB").value=s.expectedB;selectDecision(q.same?"same":"different");
+}
+function lock(){
+ byId("networkA").disabled=true;byId("networkB").disabled=true;
+ Array.prototype.forEach.call(document.querySelectorAll(".decision"),function(b){b.disabled=true});
+}
+function finish(solved,s){
+ resolved=true;if(solved){correctTotal++;if(attempts===1)firstTryTotal++}
+ outcomes.push({stage:questions[index].stage,solved:solved,firstTry:solved&&attempts===1});
+ byId("explanationText").innerHTML=solutionFor(questions[index],s);byId("explanation").classList.add("show");
+ byId("checkBtn").classList.add("hidden");byId("clearBtn").classList.add("hidden");byId("nextBtn").classList.remove("hidden");
+ byId("nextBtn").textContent=index===TOTAL-1?"View Results":"Next Question";lock();updateProgress();
+}
+function checkAnswer(){
+ if(resolved)return;var q=questions[index],s=status(q);attempts++;
+ if(s.a&&s.b&&s.d){byId("message").className="message good";byId("message").innerHTML="<strong>Correct.</strong> You calculated both network addresses before comparing them.";finish(true,s)}
+ else if(attempts===1){byId("message").className="message hint";byId("message").innerHTML="<strong>Not quite.</strong> "+hintFor(s)+" Try once more."}
+ else{fillSolution(q,s);byId("message").className="message bad";byId("message").innerHTML="<strong>Review the worked solution.</strong> The decision follows from whether the calculated network addresses match.";finish(false,s)}
+}
+function clearAnswer(){
+ if(resolved)return;byId("networkA").value="";byId("networkB").value="";decision=null;
+ Array.prototype.forEach.call(document.querySelectorAll(".decision"),function(b){b.classList.remove("selected");b.setAttribute("aria-pressed","false")});
+}
+function showResults(){
+ byId("questionCard").classList.add("hidden");byId("progressCard").classList.add("hidden");byId("resultsCard").classList.remove("hidden");
+ byId("finalScore").textContent=correctTotal+" / "+TOTAL;byId("correctTotal").textContent=correctTotal;byId("firstTryTotal").textContent=firstTryTotal;byId("reviewTotal").textContent=TOTAL-correctTotal;
+ byId("resultMessage").textContent=correctTotal===TOTAL&&firstTryTotal>=9?"Excellent. You consistently used network addresses rather than visual similarity.":
+  correctTotal>=9?"Strong result. Review any boundary case and repeat with another balanced set.":
+  correctTotal>=7?"The method is developing. Repeat the activity and calculate both network addresses before every decision.":
+  "Return to the AND process, calculate each network address separately and then compare the results.";
+ var stages=["Build the method","Boundary decisions","Challenge"];
+ byId("reviewList").innerHTML=stages.map(function(stage){var g=outcomes.filter(function(o){return o.stage===stage}),n=g.filter(function(o){return o.solved}).length,ok=g.length>0&&n===g.length;return'<div class="review-row"><span>'+stage+': '+n+' / '+g.length+'</span><span class="'+(ok?"status-good":"status-review")+'">'+(ok?"Secure":"Review")+'</span></div>'}).join("");
+ window.scrollTo({top:0,behavior:"smooth"});
+}
+function openAt(start,newSet){
+ if(newSet||questions.length===0)generateQuestions();index=start;correctTotal=0;firstTryTotal=0;outcomes=[];
+ byId("introCard").classList.add("hidden");byId("resultsCard").classList.add("hidden");byId("questionCard").classList.remove("hidden");byId("progressCard").classList.remove("hidden");renderQuestion();
+}
+Array.prototype.forEach.call(document.querySelectorAll(".decision"),function(b){b.addEventListener("click",function(){selectDecision(b.getAttribute("data-decision"))})});
+["networkA","networkB"].forEach(function(id){byId(id).addEventListener("keydown",function(e){if(e.key==="Enter"&&!resolved)checkAnswer()})});
+byId("startBtn").addEventListener("click",function(){openAt(0,true)});byId("restartBtn").addEventListener("click",function(){openAt(0,true)});
+byId("phase1Btn").addEventListener("click",function(){openAt(0,false)});byId("phase2Btn").addEventListener("click",function(){openAt(3,false)});byId("phase3Btn").addEventListener("click",function(){openAt(7,false)});
+byId("checkBtn").addEventListener("click",checkAnswer);byId("clearBtn").addEventListener("click",clearAnswer);
+byId("nextBtn").addEventListener("click",function(){if(index===TOTAL-1)showResults();else{index++;renderQuestion()}});
+})();
+</script>
+</body>
+</html>
