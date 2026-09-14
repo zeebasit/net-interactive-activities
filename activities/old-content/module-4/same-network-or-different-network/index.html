@@ -178,9 +178,8 @@ function ipString(o){return o.join(".")}
 function bits(n){return n.toString(2).padStart(8,"0")}
 function readPrevious(){try{var p=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");return Array.isArray(p)?p:[]}catch(e){return[]}}
 function saveSet(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(questions.map(function(q){return q.key})))}catch(e){}}
-function randomCandidate(prefix,same){
+function randomCandidate(){
  var family=randomInt(0,2);
- if(prefix<24)family=1;
  if(family===0)return[10,randomInt(1,253),randomInt(1,253),randomInt(1,253)];
  if(family===1)return[172,randomInt(16,30),randomInt(1,253),randomInt(1,253)];
  return[192,168,randomInt(1,253),randomInt(1,253)];
@@ -188,7 +187,7 @@ function randomCandidate(prefix,same){
 function buildScenario(prefix,same,stage,previous,used){
  var a,b,key,size=Math.pow(2,32-prefix);
  for(var tries=0;tries<600;tries++){
-  var candidate=same?randomCandidate(prefix,true):[10,randomInt(1,252),randomInt(1,252),randomInt(1,252)];
+  var candidate=same?randomCandidate():[10,randomInt(1,252),randomInt(1,252),randomInt(1,252)];
   var net=networkInt(candidate,prefix);
   if(same){
    var offA=randomInt(1,size-2),offB=randomInt(1,size-2);
@@ -210,12 +209,14 @@ function buildScenario(prefix,same,stage,previous,used){
  return{a:a,b:b,prefix:prefix,same:same,stage:stage,key:key};
 }
 function generateQuestions(){
- var previous=readPrevious(),used=new Set(),lastPrefix=Math.random()<.5?29:30;
+ var previous=readPrevious(),used=new Set(),smallSamePrefix=Math.random()<.5?29:30;
+ var smallDifferentPrefix=smallSamePrefix===29?30:29;
  var specs=[
   [24,true,"Build the method"],[24,false,"Build the method"],[25,true,"Build the method"],
   [25,false,"Boundary decisions"],[26,true,"Boundary decisions"],[27,false,"Boundary decisions"],[28,true,"Boundary decisions"],
-  [28,false,"Challenge"],[20,true,"Challenge"],[lastPrefix,false,"Challenge"]
+  [28,false,"Challenge"],[smallSamePrefix,true,"Challenge"],[smallDifferentPrefix,false,"Challenge"]
  ];
+ if(specs.some(function(s){return s[0]<24||s[0]>30}))throw new Error("Generated prefix outside /24–/30");
  questions=specs.map(function(s){return buildScenario(s[0],s[1],s[2],previous,used)});saveSet();
 }
 function normalizeIp(text){
@@ -251,7 +252,7 @@ function updateProgress(){
 function instructionFor(q){
  if(q.stage==="Build the method")return"Calculate both network addresses before deciding. Do not judge only by how similar the host addresses look.";
  if(q.stage==="Boundary decisions")return"These addresses are positioned around subnet boundaries. Use the /"+q.prefix+" mask carefully.";
- return q.prefix<24?"The network boundary is inside the third octet. Calculate both network IDs before comparing them.":"The subnet is small and the addresses are close to a boundary. Calculate rather than guess.";
+ return"The subnet is small and the addresses are close to a boundary. Calculate both network IDs rather than guessing.";
 }
 function selectDecision(value){
  if(resolved)return;decision=value;
