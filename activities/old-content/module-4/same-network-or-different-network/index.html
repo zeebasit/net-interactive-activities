@@ -227,7 +227,7 @@ function normalizeIp(text){
 }
 function activeOctet(prefix){return prefix%8===0?Math.min(3,Math.floor(prefix/8)):Math.floor(prefix/8)}
 function tableRow(label,value,className){
- return'<span class="binary-label">'+label+'</span>'+value.map(function(v){return'<span class="bcell '+(className||"")+(v==="1"?" one":"")+'">'+v+'</span>'}).join("");
+ return'<span class="binary-label">'+label+'</span>'+value.map(function(v){return'<span class="bcell '+(className||"")+((className||"")!=="weight"&&v==="1"?" one":"")+'">'+v+'</span>'}).join("");
 }
 function renderHelper(q){
  var o=activeOctet(q.prefix),mask=maskIp(q.prefix);
