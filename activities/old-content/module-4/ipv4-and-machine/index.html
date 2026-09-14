@@ -101,6 +101,10 @@ button:disabled,input:disabled{opacity:.67;cursor:not-allowed}
   border-radius:7px;background:#fff;font:850 .88rem ui-monospace,SFMono-Regular,Consolas,monospace
 }
 .bit.one{background:#e8f1ff;border-color:#b6cef3;color:#0f4faa}
+.bit.weight-bit{
+  min-height:27px;background:#eef2f7;border-color:#d3dbe7;color:#42526a;
+  font-size:.72rem
+}
 button.bit{width:100%;cursor:pointer}
 button.bit:hover{border-color:#7fa7df}
 button.bit.on{background:var(--accent);border-color:var(--accent);color:#fff}
@@ -355,6 +359,12 @@ function generateQuestions(){
 function bitCell(bit,extra){
   return'<span class="bit '+(bit==="1"?"one ":"")+(extra||"")+'">'+bit+'</span>';
 }
+function weightRowHtml(){
+  return'<div class="binary-row"><span class="row-label">Value</span>'+
+    [128,64,32,16,8,4,2,1].map(function(value){
+      return'<span class="bit weight-bit">'+value+'</span>';
+    }).join("")+'</div>';
+}
 function rowHtml(label,bits){
   return'<div class="binary-row"><span class="row-label">'+label+'</span>'+
     bits.split("").map(function(bit){return bitCell(bit,"")}).join("")+'</div>';
@@ -371,7 +381,7 @@ function resultRowHtml(octetIndex){
 function octetCardHtml(q,i){
   return'<article class="octet-card" id="octetCard'+i+'">'+
     '<div class="octet-title">Octet '+(i+1)+'<span>IP '+q.ip[i]+' · Mask '+q.mask[i]+'</span></div>'+
-    rowHtml("IP",octetBits(q.ip[i]))+rowHtml("Mask",octetBits(q.mask[i]))+
+    weightRowHtml()+rowHtml("IP",octetBits(q.ip[i]))+rowHtml("Mask",octetBits(q.mask[i]))+
     '<div class="and-line"></div>'+resultRowHtml(i)+
     '<div class="decimal-answer"><label for="decimal'+i+'">Decimal result</label>'+
     '<input id="decimal'+i+'" type="number" min="0" max="255" inputmode="numeric" autocomplete="off" placeholder="0–255"></div></article>';
