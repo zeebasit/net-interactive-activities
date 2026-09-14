@@ -2589,6 +2589,9 @@ function aiPrompt(){
   const s=scenarios[scenarioIndex];const answer=reflection==="revise"&&$("revisedAnswer").value.trim()?$("revisedAnswer").value.trim():committed;
   return `You are reviewing a beginner networking student's reasoning from a lesson on layered network communication. Do not simply give the answer first. Evaluate the student's explanation against the scenario and identify which concepts are correct, incomplete, or incorrect. Keep the review within the concepts taught in this activity: Application data, Transport-layer ports and application delivery, Network-layer IP addressing, Data Link frames/MAC addressing/local-link delivery, Physical-layer bits/signals, encapsulation, decapsulation, and layer responsibilities. Do not introduce advanced TCP mechanisms, routing-table logic, subnetting, ARP, VLANs or other later-course topics.
 
+SCENARIO CATEGORY:
+${s.category}
+
 SCENARIO:
 ${s.title}
 ${s.text}
