@@ -64,6 +64,18 @@ h2{margin:.25rem 0 .4rem;font-size:clamp(1.35rem,2.5vw,1.75rem)}
 .subnet-btn:hover{border-color:#9fb6da}.subnet-btn.selected{border-color:var(--accent);outline:3px solid rgba(23,105,224,.13);background:#f6f9ff}
 .subnet-btn strong{display:block;margin-bottom:3px}.subnet-btn span{display:block;color:var(--muted);font:750 .78rem ui-monospace,SFMono-Regular,Consolas,monospace}
 .selected-line{margin-top:13px;color:#344054;line-height:1.5;min-height:24px}
+.summary-section{margin-top:24px;padding-top:20px;border-top:1px solid var(--line)}
+.summary-head{display:flex;justify-content:space-between;gap:12px;align-items:end;flex-wrap:wrap;margin-bottom:10px}
+.summary-head h3{margin:0;font-size:1.05rem}
+.summary-note{color:var(--muted);font-size:.84rem}
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:#fff}
+.subnet-table{width:100%;min-width:920px;border-collapse:collapse;text-align:left}
+.subnet-table th,.subnet-table td{padding:11px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+.subnet-table th{background:#eef2f7;color:#42526a;font-size:.78rem;text-transform:uppercase;letter-spacing:.035em}
+.subnet-table td{font:700 .84rem ui-monospace,SFMono-Regular,Consolas,monospace}
+.subnet-table tbody tr:last-child td{border-bottom:0}
+.subnet-table tbody tr.selected{background:#eef4ff}
+.subnet-table tbody tr.selected td:first-child{color:var(--accent-dark);font-weight:900}
 .detail-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:22px 0}
 .detail{border:1px solid var(--line);border-radius:13px;padding:15px;background:#fbfcfe}.detail-label{display:block;color:var(--muted);font-size:.78rem;font-weight:800}.detail-value{display:block;margin-top:5px;font:850 .98rem ui-monospace,SFMono-Regular,Consolas,monospace;word-break:break-word}
 .role-strip{display:grid;grid-template-columns:1fr 3fr 1fr;margin:18px 0 6px;align-items:center;text-align:center}
@@ -128,6 +140,27 @@ h2{margin:.25rem 0 .4rem;font-size:clamp(1.35rem,2.5vw,1.75rem)}
       <div class="range-toolbar"><span class="page-status" id="pageStatus"></span><div class="page-controls"><button class="small-btn" id="previousPage" type="button">Previous</button><button class="small-btn" id="nextPage" type="button">Next</button></div></div>
       <div class="subnet-grid" id="subnetGrid"></div>
       <div class="selected-line" id="selectedLine" aria-live="polite"></div>
+      <div class="summary-section">
+        <div class="summary-head">
+          <h3>Subnet summary</h3>
+          <span class="summary-note" id="summaryNote"></span>
+        </div>
+        <div class="table-wrap">
+          <table class="subnet-table">
+            <thead>
+              <tr>
+                <th>Subnet</th>
+                <th>Network address</th>
+                <th>Subnet mask</th>
+                <th>First host</th>
+                <th>Last host</th>
+                <th>Broadcast</th>
+              </tr>
+            </thead>
+            <tbody id="summaryBody"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -185,6 +218,19 @@ function renderRanges(){
  byId("pageStatus").textContent=totalPages===1?"Showing all "+subnets()+" subnets":"Showing subnets "+start+"–"+(end-1)+" of "+subnets();byId("previousPage").disabled=page===0;byId("nextPage").disabled=page>=totalPages-1;
  byId("subnetGrid").innerHTML=Array.from({length:end-start},function(_,offset){var i=start+offset,d=subnetData(i);return'<button type="button" class="subnet-btn'+(i===selectedSubnet?' selected':'')+'" data-subnet="'+i+'"><strong>Subnet '+i+'</strong><span>.'+d.network+' – .'+d.broadcast+'</span></button>'}).join("");
  bindSubnetButtons();var selected=subnetData(selectedSubnet);byId("selectedLine").innerHTML="Selected: <strong>Subnet "+selected.id+"</strong> — "+full(selected.network)+"/"+prefix()+" to "+full(selected.broadcast)+".";
+ renderSummaryTable();
+}
+function renderSummaryTable(){
+ var count=Math.min(subnets(),8),mask="255.255.255."+maskLast();
+ byId("summaryNote").textContent=subnets()<=8?
+  "Showing all "+subnets()+" available subnet"+(subnets()===1?"":"s")+".":+
+  "Showing the first 8 of "+subnets()+" subnets.";
+ byId("summaryBody").innerHTML=Array.from({length:count},function(_,i){
+  var d=subnetData(i);
+  return'<tr class="'+(i===selectedSubnet?'selected':'')+'"><td>Subnet '+i+'</td>'+
+   '<td>'+full(d.network)+'/'+prefix()+'</td><td>'+mask+'</td>'+
+   '<td>'+full(d.first)+'</td><td>'+full(d.last)+'</td><td>'+full(d.broadcast)+'</td></tr>';
+ }).join("");
 }
 function bindSubnetButtons(){Array.prototype.forEach.call(document.querySelectorAll("[data-subnet]"),function(button){button.addEventListener("click",function(){selectedSubnet=Number(button.getAttribute("data-subnet"));page=Math.floor(selectedSubnet/perPage);renderRanges();if(activePhase===3)renderInspection()})})}
 function renderInspection(){
