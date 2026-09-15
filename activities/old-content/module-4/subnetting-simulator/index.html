@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Module 4 — Subnet Split Simulator</title>
+<style>
+:root{
+  --bg:#f5f7fb;--panel:#fff;--text:#172033;--muted:#667085;--line:#d9e0ea;
+  --accent:#1769e0;--accent-dark:#0f4faa;--soft:#eef4ff;--network:#1769e0;
+  --host:#d97706;--good:#137a4b;--shadow:0 12px 32px rgba(20,35,60,.08)
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(180deg,#f7f9fc 0,#f3f6fa 100%);color:var(--text)}
+button{font:inherit;touch-action:manipulation}
+.shell{max-width:1180px;margin:0 auto;padding:32px 20px 64px}
+.hero{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;flex-wrap:wrap;margin-bottom:20px}
+.eyebrow{color:var(--accent);font-weight:800;font-size:.82rem;letter-spacing:.06em;text-transform:uppercase}
+h1{margin:.28rem 0 .45rem;font-size:clamp(1.8rem,3.4vw,2.65rem)}
+.lead{margin:0;color:var(--muted);line-height:1.62;max-width:800px}
+.phase-nav{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 7px}
+.phase-pill{border:1px solid var(--line);background:#fff;color:#42526a;cursor:pointer;padding:9px 13px;border-radius:999px;font-weight:750;font-size:.9rem}
+.phase-pill:hover{border-color:#9fb6da}.phase-pill.active{background:var(--soft);border-color:#9fc0f7;color:var(--accent-dark)}
+.phase-help{color:var(--muted);font-size:.86rem;line-height:1.45}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:clamp(20px,3vw,30px)}
+.control-panel{min-width:min(100%,300px);background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px 16px;box-shadow:var(--shadow)}
+.control-title{display:flex;justify-content:space-between;gap:12px;align-items:center;font-weight:800;margin-bottom:11px}
+.prefix-badge{background:var(--soft);color:var(--accent-dark);padding:5px 9px;border-radius:999px;font:850 .9rem ui-monospace,SFMono-Regular,Consolas,monospace}
+.borrow-controls{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.borrow-btn{border:1px solid var(--line);background:#fff;color:#42526a;border-radius:8px;min-height:40px;cursor:pointer;font-weight:800}
+.borrow-btn:hover{border-color:#9fb6da}.borrow-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.control-caption{margin-top:9px;color:var(--muted);font-size:.8rem;line-height:1.4}
+.section-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+.section-kicker{font-size:.8rem;color:var(--muted);font-weight:850;text-transform:uppercase;letter-spacing:.05em}
+h2{margin:.25rem 0 .4rem;font-size:clamp(1.35rem,2.5vw,1.75rem)}
+.instruction{color:var(--muted);line-height:1.58;margin:0;max-width:850px}
+.metric-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:22px 0}
+.metric{border:1px solid var(--line);border-radius:13px;padding:14px;background:#fbfcfe}
+.metric-label{display:block;color:var(--muted);font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+.metric-value{display:block;margin-top:5px;font:900 clamp(1.15rem,3vw,1.55rem) ui-monospace,SFMono-Regular,Consolas,monospace}
+.formula{display:block;margin-top:4px;color:#536174;font-size:.8rem}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin:12px 0;color:#536174;font-size:.86rem}
+.legend span{display:flex;align-items:center;gap:7px}.swatch{width:15px;height:15px;border-radius:4px}.swatch.network{background:var(--network)}.swatch.host{background:var(--host)}
+.address-binary{margin-top:18px;border:1px solid var(--line);border-radius:16px;padding:18px;background:#fbfcfe;overflow-x:auto}
+.address-prefix{font:850 1rem ui-monospace,SFMono-Regular,Consolas,monospace;margin-bottom:14px;color:#344054}
+.bit-grid{min-width:650px;display:grid;grid-template-columns:90px repeat(8,1fr);gap:5px;align-items:center}
+.row-label{font-size:.78rem;color:#536174;font-weight:850}
+.bit{min-height:42px;border:1px solid var(--line);border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;text-align:center;font:850 .88rem ui-monospace,SFMono-Regular,Consolas,monospace}
+.bit.weight{min-height:30px;background:#eef2f7;color:#42526a;font-size:.72rem}
+.bit.network{background:#e8f1ff;border-color:#a8c4ee;color:#0f4faa}.bit.host{background:#fff3df;border-color:#efca8d;color:#8a5300}
+.bit.boundary{box-shadow:inset -3px 0 0 #4c5f78}
+.role-row{min-width:650px;display:grid;grid-template-columns:90px repeat(8,1fr);gap:5px;margin-top:7px}
+.role{padding:6px 3px;border-radius:7px;text-align:center;font-size:.72rem;font-weight:800}.role.network{background:#e8f1ff;color:#0f4faa}.role.host{background:#fff3df;color:#8a5300}
+.explain-box{margin-top:16px;border-left:4px solid var(--accent);background:#f6f9ff;padding:13px 15px;border-radius:0 11px 11px 0;line-height:1.55;color:#34445b}
+.space-panel{margin-top:22px;border:1px solid var(--line);border-radius:16px;padding:18px;background:#fbfcfe}
+.space-title{display:flex;justify-content:space-between;gap:12px;align-items:end;flex-wrap:wrap;margin-bottom:12px}.space-title h3{margin:0;font-size:1.05rem}.space-title span{color:var(--muted);font-size:.84rem}
+.address-bar{display:flex;height:58px;border-radius:10px;overflow:hidden;background:#e7edf5;margin-bottom:16px}
+.bar-segment{min-width:1px;border:0;border-right:1px solid rgba(255,255,255,.72);background:var(--accent);opacity:.68;cursor:pointer;padding:0;color:transparent;transition:opacity .16s,transform .16s}
+.bar-segment:hover{opacity:.88}.bar-segment.selected{opacity:1;box-shadow:inset 0 0 0 3px #0b3b81;transform:scaleY(1.08);z-index:1}
+.range-toolbar{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin:4px 0 10px}.page-status{color:var(--muted);font-size:.86rem}.page-controls{display:flex;gap:8px}
+.small-btn{border:1px solid var(--line);background:#fff;color:#344054;border-radius:8px;padding:7px 11px;font-weight:800;cursor:pointer}.small-btn:disabled{opacity:.45;cursor:not-allowed}
+.subnet-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.subnet-btn{border:1px solid var(--line);border-radius:11px;background:#fff;color:#263245;padding:11px;text-align:left;cursor:pointer;min-height:66px}
+.subnet-btn:hover{border-color:#9fb6da}.subnet-btn.selected{border-color:var(--accent);outline:3px solid rgba(23,105,224,.13);background:#f6f9ff}
+.subnet-btn strong{display:block;margin-bottom:3px}.subnet-btn span{display:block;color:var(--muted);font:750 .78rem ui-monospace,SFMono-Regular,Consolas,monospace}
+.selected-line{margin-top:13px;color:#344054;line-height:1.5;min-height:24px}
+.detail-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:22px 0}
+.detail{border:1px solid var(--line);border-radius:13px;padding:15px;background:#fbfcfe}.detail-label{display:block;color:var(--muted);font-size:.78rem;font-weight:800}.detail-value{display:block;margin-top:5px;font:850 .98rem ui-monospace,SFMono-Regular,Consolas,monospace;word-break:break-word}
+.role-strip{display:grid;grid-template-columns:1fr 3fr 1fr;margin:18px 0 6px;align-items:center;text-align:center}
+.endpoint{font:850 .83rem ui-monospace,SFMono-Regular,Consolas,monospace;color:#344054}.usable{height:18px;background:linear-gradient(90deg,#cdebdc,#78c59e);border-radius:999px;margin:0 10px}.role-caption{text-align:center;color:var(--muted);font-size:.82rem}
+.phase{display:none}.phase.active{display:block}
+.credit{margin-top:20px;text-align:center;color:#6b7480;font-size:13px;font-weight:600}
+@media(max-width:860px){.metric-grid,.detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.subnet-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.shell{padding:22px 12px 44px}.card{border-radius:15px}.control-panel{width:100%}.metric-grid,.detail-grid{grid-template-columns:1fr}.subnet-grid{grid-template-columns:1fr}.role-strip{grid-template-columns:1fr;gap:7px}.usable{width:100%;margin:0}.borrow-controls{gap:4px}.borrow-btn{min-height:44px}.address-bar{height:48px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main class="shell">
+<header class="hero">
+  <div>
+    <div class="eyebrow">Module 4 · Interactive Simulation</div>
+    <h1>Subnet Split Simulator</h1>
+    <p class="lead">Explore how borrowing host bits divides one <strong>192.168.70.0/24</strong> network into smaller, equal-sized subnets.</p>
+    <nav class="phase-nav" aria-label="Simulation stages">
+      <button class="phase-pill active" id="phase1Btn" type="button">Stage 1 · Borrow Host Bits</button>
+      <button class="phase-pill" id="phase2Btn" type="button">Stage 2 · Build Subnet Ranges</button>
+      <button class="phase-pill" id="phase3Btn" type="button">Stage 3 · Inspect a Subnet</button>
+    </nav>
+    <div class="phase-help">Move between the stages at any time. Your selected prefix and subnet remain unchanged.</div>
+  </div>
+  <aside class="control-panel" aria-label="Borrowed bit control">
+    <div class="control-title"><span>Host bits borrowed</span><span class="prefix-badge" id="prefixBadge">/26</span></div>
+    <div class="borrow-controls" id="borrowControls"></div>
+    <div class="control-caption">Select 0–6 borrowed bits. The simulation supports /24 through /30.</div>
+  </aside>
+</header>
+
+<section class="card">
+  <div class="phase active" id="phase1">
+    <div class="section-head"><div><div class="section-kicker">Stage 1</div><h2>Borrow host bits to create subnets</h2><p class="instruction">The original /24 has eight host bits in its final octet. Borrowing bits moves the network boundary to the right.</p></div></div>
+    <div class="metric-grid">
+      <div class="metric"><span class="metric-label">New prefix</span><strong class="metric-value" id="newPrefix"></strong><span class="formula" id="prefixFormula"></span></div>
+      <div class="metric"><span class="metric-label">Number of subnets</span><strong class="metric-value" id="subnetCount"></strong><span class="formula" id="subnetFormula"></span></div>
+      <div class="metric"><span class="metric-label">Addresses per subnet</span><strong class="metric-value" id="addressCount"></strong><span class="formula" id="addressFormula"></span></div>
+      <div class="metric"><span class="metric-label">Usable hosts per subnet</span><strong class="metric-value" id="usableCount"></strong><span class="formula" id="usableFormula"></span></div>
+    </div>
+    <div class="legend"><span><i class="swatch network"></i>Network and borrowed bits</span><span><i class="swatch host"></i>Remaining host bits</span></div>
+    <div class="address-binary">
+      <div class="address-prefix">192.168.70.<span id="lastOctetPattern">00000000</span></div>
+      <div class="bit-grid" id="borrowBitGrid"></div>
+      <div class="role-row" id="roleRow"></div>
+    </div>
+    <div class="explain-box" id="borrowExplanation" aria-live="polite"></div>
+  </div>
+
+  <div class="phase" id="phase2">
+    <div class="section-head"><div><div class="section-kicker">Stage 2</div><h2>See the subnet boundaries</h2><p class="instruction">The block size is the number of addresses in each subnet. Every new network address increases by that amount.</p></div></div>
+    <div class="metric-grid">
+      <div class="metric"><span class="metric-label">Subnet mask</span><strong class="metric-value" id="maskValue"></strong></div>
+      <div class="metric"><span class="metric-label">Block size</span><strong class="metric-value" id="blockSize"></strong><span class="formula">Next network = current network + block size</span></div>
+      <div class="metric"><span class="metric-label">First network</span><strong class="metric-value">.0</strong></div>
+      <div class="metric"><span class="metric-label">Final address</span><strong class="metric-value">.255</strong></div>
+    </div>
+    <div class="space-panel">
+      <div class="space-title"><h3>192.168.70.0–192.168.70.255</h3><span id="divisionLabel"></span></div>
+      <div class="address-bar" id="addressBar" aria-label="Visual division of the /24 address space"></div>
+      <div class="range-toolbar"><span class="page-status" id="pageStatus"></span><div class="page-controls"><button class="small-btn" id="previousPage" type="button">Previous</button><button class="small-btn" id="nextPage" type="button">Next</button></div></div>
+      <div class="subnet-grid" id="subnetGrid"></div>
+      <div class="selected-line" id="selectedLine" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <div class="phase" id="phase3">
+    <div class="section-head"><div><div class="section-kicker">Stage 3</div><h2>Inspect the selected subnet</h2><p class="instruction">Network and broadcast addresses identify the boundaries. Assignable host addresses lie between them.</p></div></div>
+    <div class="detail-grid">
+      <div class="detail"><span class="detail-label">Network address</span><strong class="detail-value" id="detailNetwork"></strong></div>
+      <div class="detail"><span class="detail-label">First usable host</span><strong class="detail-value" id="detailFirst"></strong></div>
+      <div class="detail"><span class="detail-label">Last usable host</span><strong class="detail-value" id="detailLast"></strong></div>
+      <div class="detail"><span class="detail-label">Broadcast address</span><strong class="detail-value" id="detailBroadcast"></strong></div>
+    </div>
+    <div class="role-strip"><span class="endpoint" id="networkEndpoint"></span><div class="usable" aria-hidden="true"></div><span class="endpoint" id="broadcastEndpoint"></span></div>
+    <div class="role-caption">Network address · usable host range · broadcast address</div>
+    <div class="address-binary">
+      <div class="address-prefix" id="selectedSubnetTitle"></div>
+      <div class="bit-grid" id="inspectBitGrid"></div>
+      <div class="role-row" id="inspectRoleRow"></div>
+    </div>
+    <div class="explain-box" id="inspectExplanation"></div>
+  </div>
+  <div class="credit">Created by Zeeshan Basit</div>
+</section>
+</main>
+<script>
+(function(){
+"use strict";
+var borrowed=2,activePhase=1,selectedSubnet=1,page=0,perPage=16;
+var weights=[128,64,32,16,8,4,2,1];
+function byId(id){return document.getElementById(id)}
+function power(base,exponent){return Math.pow(base,exponent)}
+function prefix(){return 24+borrowed}
+function subnets(){return power(2,borrowed)}
+function addresses(){return power(2,8-borrowed)}
+function usable(){return Math.max(0,addresses()-2)}
+function maskLast(){return borrowed===0?0:256-power(2,8-borrowed)}
+function bits(value){return value.toString(2).padStart(8,"0")}
+function subnetData(id){var network=id*addresses(),broadcast=network+addresses()-1;return{id:id,network:network,first:network+1,last:broadcast-1,broadcast:broadcast,pattern:bits(id).slice(8-borrowed)}}
+function full(last){return"192.168.70."+last}
+function setPhase(number){activePhase=number;[1,2,3].forEach(function(n){byId("phase"+n).classList.toggle("active",n===number);byId("phase"+n+"Btn").classList.toggle("active",n===number);byId("phase"+n+"Btn").setAttribute("aria-current",n===number?"step":"false")});if(number===2)renderRanges();if(number===3)renderInspection()}
+function renderControls(){byId("borrowControls").innerHTML=[0,1,2,3,4,5,6].map(function(n){return'<button type="button" class="borrow-btn'+(n===borrowed?' active':'')+'" data-borrow="'+n+'" aria-pressed="'+(n===borrowed)+'">'+n+'</button>'}).join("");Array.prototype.forEach.call(document.querySelectorAll(".borrow-btn"),function(button){button.addEventListener("click",function(){borrowed=Number(button.getAttribute("data-borrow"));selectedSubnet=Math.min(selectedSubnet,subnets()-1);page=Math.floor(selectedSubnet/perPage);renderAll()})})}
+function bitCells(value,rowClass){return bits(value).split("").map(function(bit,i){var cls=i<borrowed?"network":"host";var boundary=i===borrowed-1?" boundary":"";return'<span class="bit '+cls+boundary+'">'+bit+'</span>'}).join("")}
+function roleCells(){return weights.map(function(_,i){return'<span class="role '+(i<borrowed?'network':'host')+'">'+(i<borrowed?'Borrowed':'Host')+'</span>'}).join("")}
+function gridRows(rows){var html='<span class="row-label">Place value</span>'+weights.map(function(w){return'<span class="bit weight">'+w+'</span>'}).join("");rows.forEach(function(row){html+='<span class="row-label">'+row.label+'</span>'+bitCells(row.value,row.className)});return html}
+function renderStage1(){
+ byId("prefixBadge").textContent="/"+prefix();byId("newPrefix").textContent="/"+prefix();byId("prefixFormula").textContent="/24 + "+borrowed+" borrowed bit"+(borrowed===1?"":"s");
+ byId("subnetCount").textContent=subnets();byId("subnetFormula").textContent="2^"+borrowed+" = "+subnets();byId("addressCount").textContent=addresses();byId("addressFormula").textContent="2^"+(8-borrowed)+" = "+addresses();
+ byId("usableCount").textContent=usable();byId("usableFormula").textContent=addresses()+" - 2 = "+usable();byId("lastOctetPattern").textContent="00000000";
+ byId("borrowBitGrid").innerHTML=gridRows([{label:"Network",value:0}]);byId("roleRow").innerHTML='<span class="row-label">Bit role</span>'+roleCells();
+ var text=borrowed===0?"No bits are borrowed. The original /24 remains one network with 254 usable host addresses.":"Borrowing "+borrowed+" host bit"+(borrowed===1?"":"s")+" creates "+subnets()+" equal subnet"+(subnets()===1?"":"s")+". "+(8-borrowed)+" host bit"+((8-borrowed)===1?" remains":"s remain")+" in each subnet.";byId("borrowExplanation").textContent=text;
+}
+function renderRanges(){
+ byId("maskValue").textContent="255.255.255."+maskLast();byId("blockSize").textContent=addresses();byId("divisionLabel").textContent=subnets()+" subnet"+(subnets()===1?"":"s")+" × "+addresses()+" addresses";
+ byId("addressBar").innerHTML=Array.from({length:subnets()},function(_,i){return'<button type="button" class="bar-segment'+(i===selectedSubnet?' selected':'')+'" data-subnet="'+i+'" style="flex:1" aria-label="Select subnet '+i+', addresses '+(i*addresses())+' to '+(i*addresses()+addresses()-1)+'"></button>'}).join("");
+ var totalPages=Math.ceil(subnets()/perPage);page=Math.min(page,totalPages-1);var start=page*perPage,end=Math.min(start+perPage,subnets());
+ byId("pageStatus").textContent=totalPages===1?"Showing all "+subnets()+" subnets":"Showing subnets "+start+"–"+(end-1)+" of "+subnets();byId("previousPage").disabled=page===0;byId("nextPage").disabled=page>=totalPages-1;
+ byId("subnetGrid").innerHTML=Array.from({length:end-start},function(_,offset){var i=start+offset,d=subnetData(i);return'<button type="button" class="subnet-btn'+(i===selectedSubnet?' selected':'')+'" data-subnet="'+i+'"><strong>Subnet '+i+'</strong><span>.'+d.network+' – .'+d.broadcast+'</span></button>'}).join("");
+ bindSubnetButtons();var selected=subnetData(selectedSubnet);byId("selectedLine").innerHTML="Selected: <strong>Subnet "+selected.id+"</strong> — "+full(selected.network)+"/"+prefix()+" to "+full(selected.broadcast)+".";
+}
+function bindSubnetButtons(){Array.prototype.forEach.call(document.querySelectorAll("[data-subnet]"),function(button){button.addEventListener("click",function(){selectedSubnet=Number(button.getAttribute("data-subnet"));page=Math.floor(selectedSubnet/perPage);renderRanges();if(activePhase===3)renderInspection()})})}
+function renderInspection(){
+ var d=subnetData(selectedSubnet);byId("detailNetwork").textContent=full(d.network)+"/"+prefix();byId("detailFirst").textContent=full(d.first);byId("detailLast").textContent=full(d.last);byId("detailBroadcast").textContent=full(d.broadcast);
+ byId("networkEndpoint").textContent="."+d.network;byId("broadcastEndpoint").textContent="."+d.broadcast;byId("selectedSubnetTitle").textContent="Subnet "+d.id+" · borrowed bits "+(borrowed===0?"none":d.pattern.padStart(borrowed,"0"));
+ byId("inspectBitGrid").innerHTML=gridRows([{label:"Network",value:d.network},{label:"Broadcast",value:d.broadcast}]);byId("inspectRoleRow").innerHTML='<span class="row-label">Bit role</span>'+roleCells();
+ var pattern=borrowed===0?"no borrowed-bit pattern":d.pattern.padStart(borrowed,"0");byId("inspectExplanation").textContent="Subnet "+d.id+" uses borrowed bits "+pattern+". Its network address sets all remaining host bits to 0; its broadcast address sets all remaining host bits to 1.";
+}
+function renderAll(){renderControls();renderStage1();renderRanges();renderInspection()}
+byId("phase1Btn").addEventListener("click",function(){setPhase(1)});byId("phase2Btn").addEventListener("click",function(){setPhase(2)});byId("phase3Btn").addEventListener("click",function(){setPhase(3)});
+byId("previousPage").addEventListener("click",function(){if(page>0){page--;renderRanges()}});byId("nextPage").addEventListener("click",function(){if((page+1)*perPage<subnets()){page++;renderRanges()}});
+renderAll();
+})();
+</script>
+</body>
+</html>
