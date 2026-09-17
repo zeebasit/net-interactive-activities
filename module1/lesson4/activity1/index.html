@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IOS Configuration Challenge — Lesson 1.4</title>
+<style>
+:root{
+  --bg:#f4f7fb;--panel:#ffffff;--text:#172033;--muted:#607086;--border:#d8e0ea;
+  --accent:#0b66c3;--accent2:#eaf3ff;--good:#0d7a46;--warn:#9a5b00;--bad:#a32626;
+  --terminal:#0b1020;--terminalText:#d8f3dc;--terminalMuted:#8fa7bb;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif;line-height:1.45}
+header{background:#fff;border-bottom:1px solid var(--border);padding:22px 24px}
+header .wrap{max-width:1500px;margin:0 auto}
+h1{font-size:1.65rem;margin:0 0 6px}
+header p{margin:0;color:var(--muted)}
+main{max-width:1500px;margin:0 auto;padding:20px 24px 36px}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px}
+button{border:1px solid var(--border);background:#fff;color:var(--text);border-radius:8px;padding:10px 14px;font-weight:600;cursor:pointer}
+button:hover{border-color:#aab8c8}
+button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+button.secondary{background:var(--accent2);border-color:#bfd9f6;color:#174f85}
+button:disabled{opacity:.5;cursor:not-allowed}
+.pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);background:#fff;border-radius:999px;padding:7px 11px;font-size:.9rem}
+.grid{display:grid;grid-template-columns:minmax(280px,0.9fr) minmax(520px,1.6fr) minmax(260px,.75fr);gap:16px;align-items:start}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.card h2{font-size:1rem;margin:0;padding:14px 16px;border-bottom:1px solid var(--border);background:#fbfcfe}
+.card .body{padding:16px}
+.brief-title{font-size:1.05rem;font-weight:700;margin-bottom:5px}
+.small{font-size:.9rem;color:var(--muted)}
+.requirements{padding-left:20px;margin:14px 0 0}
+.requirements li{margin:8px 0}
+.phase-banner{border-left:4px solid var(--accent);background:var(--accent2);padding:10px 12px;border-radius:6px;margin-bottom:12px}
+.phase-banner strong{display:block}
+.terminal-card{background:var(--terminal);border-color:#1d2944}
+.terminal-head{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:11px 14px;border-bottom:1px solid #24314f;color:#dfe8f4;background:#111a2f}
+.terminal-head .hint{font-size:.82rem;color:#9eb0c4}
+#terminal{height:560px;overflow:auto;padding:14px 16px;font:14px/1.45 Consolas,Monaco,"Courier New",monospace;color:var(--terminalText);white-space:pre-wrap;word-break:break-word}
+.t-line.output{color:var(--terminalText)}
+.t-line.command{color:#fff}
+.t-line.system{color:#ffd58a}
+.t-line.error{color:#ff9f9f}
+.t-line.help{color:#b7d7ff}
+.input-row{display:flex;align-items:center;gap:8px;border-top:1px solid #24314f;padding:11px 14px;background:#0f172b}
+#prompt{font:14px Consolas,Monaco,"Courier New",monospace;color:#fff;white-space:nowrap}
+#cmd{flex:1;min-width:0;border:0;outline:0;background:transparent;color:#fff;font:14px Consolas,Monaco,"Courier New",monospace;padding:8px 0}
+.progress-box{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.metric{border:1px solid var(--border);border-radius:9px;padding:12px}
+.metric .n{font-size:1.35rem;font-weight:800}
+.metric .l{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.status{margin-top:14px;border-radius:8px;padding:11px 12px;background:#f7f9fc;border:1px solid var(--border)}
+.status.good{background:#edf8f2;border-color:#bfe3cf;color:#155c39}
+.status.warn{background:#fff7e8;border-color:#ecd4a2;color:#744500}
+.status.bad{background:#fff0f0;border-color:#edc2c2;color:#7d2020}
+.hint-box{margin-top:14px;min-height:90px;border:1px dashed #bac7d6;border-radius:8px;padding:12px;color:var(--muted);font-size:.92rem}
+kbd{font-family:Consolas,monospace;border:1px solid #c8d0da;background:#fff;border-bottom-width:2px;border-radius:4px;padding:1px 5px;font-size:.85em;color:#243247}
+.legend{margin-top:14px;padding-top:12px;border-top:1px solid var(--border);font-size:.88rem;color:var(--muted)}
+.report{display:none;margin-top:16px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px}
+.report h2{margin:0 0 12px}
+.report-grid{display:grid;grid-template-columns:repeat(5,minmax(110px,1fr));gap:10px}
+.report .metric{background:#fbfcfe}
+.details{margin-top:14px;border-top:1px solid var(--border);padding-top:12px}
+code{font-family:Consolas,monospace;background:#f3f6fa;border-radius:4px;padding:1px 4px}
+@media(max-width:1100px){.grid{grid-template-columns:1fr}.terminal-card{order:1}.brief-card{order:0}.progress-card{order:2}#terminal{height:500px}.report-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:620px){main,header{padding-left:12px;padding-right:12px}.toolbar{align-items:stretch}.toolbar button{flex:1 1 auto}.progress-box{grid-template-columns:1fr 1fr}#terminal{height:430px}.report-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>IOS Configuration Challenge</h1>
+    <p>Module 1 · Lesson 1.4 — configure, verify, save, diagnose and repair SW1 using an IOS-like CLI.</p>
+  </div>
+</header>
+<main>
+  <div class="toolbar">
+    <button id="newBtn" class="primary">Shuffle New Challenge</button>
+    <button id="checkBtn" class="secondary">Check Configuration</button>
+    <button id="hintBtn">Request Hint</button>
+    <button id="resetBtn">Reset Current Challenge</button>
+    <span class="pill">Challenge <strong id="challengeId">—</strong></span>
+    <span class="pill">Phase <strong id="phaseLabel">1</strong> of 2</span>
+  </div>
+
+  <div class="grid">
+    <section class="card brief-card">
+      <h2>Challenge Brief</h2>
+      <div class="body">
+        <div class="phase-banner" id="phaseBanner"></div>
+        <div class="brief-title" id="briefTitle"></div>
+        <div class="small" id="briefContext"></div>
+        <ol class="requirements" id="requirements"></ol>
+        <div class="legend">
+          Use IOS help when needed: <kbd>?</kbd>, partial command + <kbd>?</kbd>, and <kbd>Tab</kbd> are supported. Abbreviations such as <code>conf t</code>, <code>sh run</code> and <code>int g0/1</code> are accepted when unambiguous.
+        </div>
+      </div>
+    </section>
+
+    <section class="card terminal-card">
+      <div class="terminal-head">
+        <strong>SW1 Console</strong>
+        <span class="hint">↑/↓ command history · Tab completion</span>
+      </div>
+      <div id="terminal" aria-live="polite"></div>
+      <form id="terminalForm" class="input-row" autocomplete="off">
+        <span id="prompt">Switch&gt;</span>
+        <input id="cmd" aria-label="IOS command" autocomplete="off" spellcheck="false" autofocus>
+      </form>
+    </section>
+
+    <aside class="card progress-card">
+      <h2>Progress</h2>
+      <div class="body">
+        <div class="progress-box">
+          <div class="metric"><div class="n" id="objectiveCount">0/0</div><div class="l">Objectives met</div></div>
+          <div class="metric"><div class="n" id="score">100</div><div class="l">Current score</div></div>
+          <div class="metric"><div class="n" id="commandCount">0</div><div class="l">Commands</div></div>
+          <div class="metric"><div class="n" id="errorCount">0</div><div class="l">CLI errors</div></div>
+        </div>
+        <div id="status" class="status">Configure the device from the brief. Individual missing objectives are intentionally hidden.</div>
+        <div class="hint-box" id="hintBox">No hints requested. Use IOS contextual help first.</div>
+      </div>
+    </aside>
+  </div>
+
+  <section class="report" id="report">
+    <h2>Challenge Complete</h2>
+    <div class="report-grid">
+      <div class="metric"><div class="n" id="finalScore">—</div><div class="l">Final score</div></div>
+      <div class="metric"><div class="n" id="finalCommands">—</div><div class="l">Commands entered</div></div>
+      <div class="metric"><div class="n" id="finalErrors">—</div><div class="l">CLI errors</div></div>
+      <div class="metric"><div class="n" id="finalHelp">—</div><div class="l">IOS help uses</div></div>
+      <div class="metric"><div class="n" id="finalHints">—</div><div class="l">Direct hints</div></div>
+    </div>
+    <div class="details" id="reportDetails"></div>
+  </section>
+</main>
+
+<script>
+(() => {
+'use strict';
+
+const $ = id => document.getElementById(id);
+const terminal = $('terminal');
+const cmdInput = $('cmd');
+
+const themes = [
+  ['Initial switch commissioning','SW1 has been unpacked for the office network and must be prepared for handover.'],
+  ['Configuration handover','A colleague has cabled SW1. Complete the required baseline configuration before handover.'],
+  ['Office switch baseline','Apply the organisation\'s Lesson 1.4 baseline to SW1 and verify the result.'],
+  ['Workshop build','SW1 is ready for a classroom build. Configure it entirely from the CLI brief.'],
+  ['Technician practical','Complete the requested configuration without a command list, then prove that it is correct.'],
+  ['New desk connection','Prepare SW1 and its designated office-facing interface for service.'],
+  ['Device readiness check','Bring SW1 to the specified state, verify it and save it for restart.'],
+  ['Configuration standardisation','SW1 must match the office baseline before it can be signed off.'],
+  ['Switch preparation','Use IOS commands to prepare, inspect and save SW1.'],
+  ['CLI competency check','Demonstrate mode navigation, configuration and verification on SW1.'],
+  ['Pre-handover validation','Configure SW1, validate the active and unused interfaces, and preserve the result.'],
+  ['Office network staging','SW1 is being staged before deployment. Complete the required configuration and checks.'],
+  ['Configuration audit build','Build the requested state and use show commands to provide evidence.'],
+  ['Practical revision challenge','Complete a fresh randomized Lesson 1.4 configuration from requirements only.'],
+  ['Switch deployment preparation','Prepare SW1 for deployment using only the CLI and the stated requirements.'],
+  ['Independent IOS challenge','Configure and validate SW1 without step-by-step command instructions.']
+];
+
+const secrets = ['Net26Secure','SwitchLab26','OfficeEnable7','CoreAccess26','AdminMode9','LabSecret42','EnableNET8','SecureExec26','DeviceKey17','CampusMode5','ExecAccess31','NetOpsSecret6'];
+const consolePasswords = ['Console26','LocalAccess7','DeskConsole4','ConsoleLab9','OfficeLocal8','AccessLine3','LocalLine26','ConsoleKey5','SwitchConsole2','TechAccess6'];
+const vtyPasswords = ['Remote26','VTYAccess7','RemoteLine4','OfficeVTY8','VTYLab9','LineRemote3','RemoteKey5','SwitchVTY2','TechRemote6','VTYPass31'];
+const banners = [
+  'Authorised access only',
+  'Network administrators only',
+  'Office network device - authorised users only',
+  'Unauthorised access is prohibited',
+  'Managed network device - authorised access only',
+  'Access restricted to approved personnel',
+  'Administrative access only',
+  'This system is for authorised use only',
+  'Restricted network equipment',
+  'Noroff networking lab - authorised access only',
+  'Configuration access restricted',
+  'Use of this device requires authorisation'
+];
+const descriptions = ['Office-PC','Office-PC-Link','Office Workstation','Office-PC Connection','User-Desk-Link','Office-End-Device'];
+const interfaceCombos = [
+  {speed:'auto',duplex:'auto'},
+  {speed:'100',duplex:'full'},
+  {speed:'100',duplex:'auto'},
+  {speed:'1000',duplex:'full'},
+  {speed:'1000',duplex:'auto'}
+];
+const delimiters = ['#','$','!','%','^'];
+
+const initialInterface = name => ({name,description:'',adminDown:false,speed:'auto',duplex:'auto',connected:true});
+const defaultConfig = () => ({
+  hostname:'Switch', enableSecret:'', servicePasswordEncryption:false, banner:'', bannerDelimiter:'#',
+  console:{password:'',login:false}, vty:{password:'',login:false},
+  interfaces:{'g0/1':initialInterface('GigabitEthernet0/1'),'g0/2':initialInterface('GigabitEthernet0/2')}
+});
+
+let running, startup, target, phase=1, mode='user', lineContext=null, interfaceContext=null;
+let stats, challengeSeed, pendingCopy=false, challengeComplete=false;
+let history=[], historyIndex=0;
+let phase2StartCommand=0, injectedFaultNames=[];
+
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function deepClone(x){ return JSON.parse(JSON.stringify(x)); }
+function randId(){ return 'L4-' + Math.random().toString(36).slice(2,6).toUpperCase() + '-' + Math.floor(100+Math.random()*900); }
+
+function newStats(){return {commands:0,errors:0,helpUses:0,hints:0,phase1Checks:0,phase2Checks:0,verification:{run:false,start:false,brief:false,int:false},phase2Verification:{run:false,brief:false},actions:{activeNoShutdown:false,unusedShutdown:false,activeSpeed:false,activeDuplex:false},saved:false};}
+
+function buildTarget(){
+  const activeKey = Math.random()<.5 ? 'g0/1':'g0/2';
+  const unusedKey = activeKey==='g0/1' ? 'g0/2':'g0/1';
+  const combo = pick(interfaceCombos);
+  return {
+    hostname:'SW1',
+    enableSecret:pick(secrets),
+    servicePasswordEncryption:true,
+    banner:pick(banners),
+    bannerDelimiter:pick(delimiters),
+    console:{password:pick(consolePasswords),login:true},
+    vty:{password:pick(vtyPasswords),login:true},
+    activeKey, unusedKey,
+    activeDescription:pick(descriptions),
+    activeSpeed:combo.speed,
+    activeDuplex:combo.duplex,
+    unusedDescription:'Unused',
+    activeAdminDown:false,
+    unusedAdminDown:true
+  };
+}
+
+function startChallenge(){
+  challengeSeed = randId();
+  running = defaultConfig(); startup = null; target = buildTarget();
+  phase=1; mode='user'; lineContext=null; interfaceContext=null; pendingCopy=false; challengeComplete=false;
+  stats=newStats(); history=[]; historyIndex=0; phase2StartCommand=0; injectedFaultNames=[];
+  terminal.innerHTML=''; $('report').style.display='none'; $('challengeId').textContent=challengeSeed; $('status').className='status'; $('status').textContent='Configure the device from the brief. Individual missing objectives are intentionally hidden.'; $('hintBox').textContent='No hints requested. Use IOS contextual help first.';
+  const theme=pick(themes); $('briefTitle').textContent=theme[0]; $('briefContext').textContent=theme[1];
+  renderBrief(); updatePrompt(); updateProgress();
+  print('Cisco IOS Software, Lesson 1.4 educational simulator','output');
+  print('Type ? for context-sensitive help.','help');
+  print('','output');
+  cmdInput.value=''; cmdInput.focus();
+}
+
+function renderBrief(){
+  $('phaseLabel').textContent=phase;
+  const req=$('requirements'); req.innerHTML='';
+  if(phase===1){
+    $('phaseBanner').innerHTML='<strong>Phase 1 — Configure and verify</strong>Complete the full baseline, verify it with show commands, and save it.';
+    const active=running.interfaces[target.activeKey].name;
+    const unused=running.interfaces[target.unusedKey].name;
+    const items=[
+      `Set the device hostname to ${target.hostname}.`,
+      `Set the privileged EXEC secret to ${target.enableSecret}.`,
+      `Protect console line 0 with password ${target.console.password} and require login.`,
+      `Protect VTY lines 0–4 with password ${target.vty.password} and require login.`,
+      `Enable encryption of configured plaintext line passwords.`,
+      `Configure this exact MOTD banner: “${target.banner}”.`,
+      `On ${active}, set description “${target.activeDescription}”, speed ${target.activeSpeed}, duplex ${target.activeDuplex}, and ensure the interface is administratively enabled.`,
+      `On ${unused}, set description “Unused” and administratively disable the interface.`,
+      `Display the active running configuration.`,
+      `Display the saved startup configuration.`,
+      `Display a concise summary of interface status.`,
+      `Display detailed interface information for ${active}.`,
+      `Save the active configuration so it survives a restart.`
+    ];
+    items.forEach(x=>{const li=document.createElement('li');li.textContent=x;req.appendChild(li)});
+  }else{
+    $('phaseBanner').innerHTML='<strong>Phase 2 — Diagnose and repair</strong>Three hidden changes have been made to the running configuration.';
+    const items=[
+      'Use verification commands to determine what changed. The faults are not identified for you.',
+      'Repair all three hidden configuration faults so SW1 again matches the Phase 1 brief.',
+      'Verify the repaired running configuration and interface status.',
+      'Save the repaired configuration to startup configuration.'
+    ];
+    items.forEach(x=>{const li=document.createElement('li');li.textContent=x;req.appendChild(li)});
+  }
+}
+
+function promptText(){
+  const h=running.hostname;
+  if(mode==='user') return h+'>';
+  if(mode==='priv') return h+'#';
+  if(mode==='global') return h+'(config)#';
+  if(mode==='line') return h+'(config-line)#';
+  if(mode==='interface') return h+'(config-if)#';
+  return h+'>';
+}
+function updatePrompt(){$('prompt').textContent=promptText();}
+
+function print(text,type='output'){
+  const div=document.createElement('div'); div.className='t-line '+type; div.textContent=text; terminal.appendChild(div); terminal.scrollTop=terminal.scrollHeight;
+}
+function printCommand(prompt,cmd){ print(prompt+' '+cmd,'command'); }
+function cliError(msg){stats.errors++;print(msg,'error');updateProgress();}
+function invalid(raw){
+  const p=' '.repeat(promptText().length+1+Math.max(0,raw.indexOf(' ')+1));
+  print(p+'^','error'); cliError("% Invalid input detected at '^' marker.");
+}
+function incomplete(){cliError('% Incomplete command.');}
+function ambiguous(raw){cliError('% Ambiguous command:  "'+raw+'"');}
+
+function normalizeInterface(s){
+  const v=(s||'').toLowerCase().replace(/\s+/g,'');
+  if(['g0/1','gi0/1','gig0/1','gigabitethernet0/1'].includes(v)) return 'g0/1';
+  if(['g0/2','gi0/2','gig0/2','gigabitethernet0/2'].includes(v)) return 'g0/2';
+  return null;
+}
+
+function resolve(token,options){
+  token=(token||'').toLowerCase();
+  if(!token) return {type:'none'};
+  const exact=options.find(x=>x===token); if(exact) return {type:'ok',value:exact};
+  const matches=options.filter(x=>x.startsWith(token));
+  if(matches.length===1) return {type:'ok',value:matches[0]};
+  if(matches.length>1) return {type:'ambiguous',matches};
+  return {type:'invalid'};
+}
+
+function availableFirst(){
+  if(mode==='user') return ['enable','exit'];
+  if(mode==='priv') return ['configure','copy','disable','exit','show'];
+  if(mode==='global') return ['banner','enable','end','exit','hostname','interface','line','service'];
+  if(mode==='line') return ['end','exit','login','no','password'];
+  if(mode==='interface') return ['description','duplex','end','exit','no','shutdown','speed'];
+  return [];
+}
+
+function helpFor(rawNoQuestion){
+  stats.helpUses++; updateProgress();
+  const raw=rawNoQuestion;
+  const endsSpace=/\s$/.test(raw);
+  const trimmed=raw.trim();
+  if(trimmed==='') return availableFirst().map(x=>x.padEnd(16)+'IOS command').join('\n');
+  const tokens=trimmed.split(/\s+/);
+  if(!endsSpace && tokens.length===1){
+    const prefix=tokens[0].toLowerCase();
+    const m=availableFirst().filter(x=>x.startsWith(prefix));
+    return m.length ? m.map(x=>x.padEnd(16)+'IOS command').join('\n') : '% Unrecognized command';
+  }
+  const first=resolve(tokens[0],availableFirst());
+  if(first.type!=='ok') return first.type==='ambiguous' ? first.matches.join('    ') : '% Unrecognized command';
+  const c=first.value;
+  if(mode==='priv'){
+    if(c==='configure') return 'terminal        Configure from the terminal';
+    if(c==='copy' && tokens.length<=1) return 'running-config  Copy from current system configuration';
+    if(c==='copy' && resolve(tokens[1]||'', ['running-config']).type==='ok') return 'startup-config  Copy to startup configuration';
+    if(c==='show'){
+      if(tokens.length<=1) return ['interfaces','ip','running-config','startup-config'].map(x=>x.padEnd(18)+'Show information').join('\n');
+      const s=resolve(tokens[1],['interfaces','ip','running-config','startup-config']);
+      if(s.type==='ok' && s.value==='ip'){
+        if(tokens.length<=2) return 'interface         IP interface information';
+        const i=resolve(tokens[2],['interface']); if(i.type==='ok') return 'brief             Brief interface summary';
+      }
+      if(s.type==='ok' && s.value==='interfaces') return 'GigabitEthernet0/1\nGigabitEthernet0/2\n<cr>';
+      return '<cr>';
+    }
+  }
+  if(mode==='global'){
+    if(c==='hostname') return 'WORD             This system\'s network name';
+    if(c==='enable') return 'secret           Assign a privileged EXEC secret';
+    if(c==='service') return 'password-encryption  Encrypt configured passwords';
+    if(c==='banner') return 'motd             Message-of-the-day banner';
+    if(c==='line') return 'console          Primary terminal line\nvty              Virtual terminal';
+    if(c==='interface') return 'GigabitEthernet0/1\nGigabitEthernet0/2';
+    if(c==='exit'||c==='end') return '<cr>';
+  }
+  if(mode==='line'){
+    if(c==='password') return 'LINE             Set a password';
+    if(c==='login') return '<cr>';
+    if(c==='no') return 'login            Disable password checking';
+    return '<cr>';
+  }
+  if(mode==='interface'){
+    if(c==='description') return 'LINE             Interface specific description';
+    if(c==='speed') return '10\n100\n1000\nauto';
+    if(c==='duplex') return 'auto\nfull\nhalf';
+    if(c==='no') return 'shutdown         Enable the interface administratively';
+    if(c==='shutdown'||c==='exit'||c==='end') return '<cr>';
+  }
+  return '<cr>';
+}
+
+function getTabCompletions(raw){
+  const endsSpace=/\s$/.test(raw); const trimmed=raw.trim();
+  if(!trimmed) return [];
+  const tokens=trimmed.split(/\s+/); const last=endsSpace?'':tokens[tokens.length-1].toLowerCase();
+  if(tokens.length===1 && !endsSpace) return availableFirst().filter(x=>x.startsWith(last));
+  const first=resolve(tokens[0],availableFirst()); if(first.type!=='ok') return [];
+  const c=first.value;
+  let opts=[];
+  if(mode==='priv'){
+    if(c==='configure') opts=['terminal'];
+    else if(c==='copy') opts=tokens.length<=2?['running-config']:['startup-config'];
+    else if(c==='show'){
+      if(tokens.length<=2) opts=['interfaces','ip','running-config','startup-config'];
+      else if(resolve(tokens[1],['ip']).type==='ok') opts=tokens.length<=3?['interface']:['brief'];
+      else if(resolve(tokens[1],['interfaces']).type==='ok') opts=['GigabitEthernet0/1','GigabitEthernet0/2'];
+    }
+  }else if(mode==='global'){
+    if(c==='enable') opts=['secret']; else if(c==='service') opts=['password-encryption']; else if(c==='banner') opts=['motd'];
+    else if(c==='line') opts=tokens.length<=2?['console','vty']:[]; else if(c==='interface') opts=['GigabitEthernet0/1','GigabitEthernet0/2'];
+  }else if(mode==='interface'){
+    if(c==='speed') opts=['10','100','1000','auto']; else if(c==='duplex') opts=['auto','full','half']; else if(c==='no') opts=['shutdown'];
+  }else if(mode==='line' && c==='no') opts=['login'];
+  return opts.filter(x=>x.toLowerCase().startsWith(last));
+}
+
+function completeTab(){
+  const raw=cmdInput.value; const comps=getTabCompletions(raw);
+  if(comps.length===1){
+    const endsSpace=/\s$/.test(raw); const parts=raw.trim().split(/\s+/);
+    if(endsSpace) cmdInput.value=raw+comps[0]+' ';
+    else{parts[parts.length-1]=comps[0];cmdInput.value=parts.join(' ')+' ';}
+  }else if(comps.length>1){ print(comps.join('    '),'help'); }
+}
+
+function processCommand(raw){
+  if(pendingCopy){
+    if(raw.trim()==='' || raw.trim().toLowerCase()==='startup-config'){
+      startup=deepClone(running); pendingCopy=false; stats.saved=true;
+      print('Building configuration...','output'); print('[OK]','output'); updateProgress(); return;
+    }
+    pendingCopy=false; cliError('% Destination filename not supported in this activity. Use the default [startup-config].'); return;
+  }
+
+  if(raw.includes('?')){
+    const q=raw.lastIndexOf('?'); const before=raw.slice(0,q); print(helpFor(before),'help'); return;
+  }
+
+  const trimmed=raw.trim(); if(trimmed==='') return;
+  stats.commands++;
+  const tokens=trimmed.split(/\s+/); const first=resolve(tokens[0],availableFirst());
+  if(first.type==='ambiguous'){ambiguous(tokens[0]);return;} if(first.type==='invalid'){invalid(trimmed);return;}
+  const c=first.value;
+
+  if(mode==='user'){
+    if(c==='enable'){mode='priv';updatePrompt();return;}
+    if(c==='exit'){print('Connection closed.','system');return;}
+  }
+
+  if(mode==='priv'){
+    if(c==='disable'){mode='user';updatePrompt();return;}
+    if(c==='exit'){mode='user';updatePrompt();return;}
+    if(c==='configure'){
+      if(tokens.length<2){incomplete();return;} const r=resolve(tokens[1],['terminal']); if(r.type==='ambiguous'){ambiguous(tokens[1]);return;} if(r.type!=='ok'){invalid(trimmed);return;}
+      mode='global';updatePrompt();return;
+    }
+    if(c==='copy'){
+      if(tokens.length<3){incomplete();return;} const a=resolve(tokens[1],['running-config']), b=resolve(tokens[2],['startup-config']);
+      if(a.type!=='ok'||b.type!=='ok'){invalid(trimmed);return;}
+      print('Destination filename [startup-config]?','output'); pendingCopy=true; return;
+    }
+    if(c==='show'){handleShow(tokens,trimmed);return;}
+  }
+
+  if(mode==='global'){
+    if(c==='exit'){mode='priv';updatePrompt();return;}
+    if(c==='end'){mode='priv';updatePrompt();return;}
+    if(c==='hostname'){
+      if(tokens.length<2){incomplete();return;} running.hostname=tokens.slice(1).join('').replace(/[^A-Za-z0-9_-]/g,''); if(!running.hostname){invalid(trimmed);return;} updatePrompt();updateProgress();return;
+    }
+    if(c==='enable'){
+      if(tokens.length<3){incomplete();return;} const r=resolve(tokens[1],['secret']); if(r.type!=='ok'){invalid(trimmed);return;} running.enableSecret=tokens.slice(2).join(' ');updateProgress();return;
+    }
+    if(c==='service'){
+      if(tokens.length<2){incomplete();return;} const r=resolve(tokens[1],['password-encryption']); if(r.type!=='ok'){invalid(trimmed);return;} running.servicePasswordEncryption=true;updateProgress();return;
+    }
+    if(c==='banner'){
+      if(tokens.length<3){incomplete();return;} const r=resolve(tokens[1],['motd']); if(r.type!=='ok'){invalid(trimmed);return;}
+      const prefixMatch=trimmed.match(/^\S+\s+\S+\s+(.+)$/); if(!prefixMatch){incomplete();return;}
+      const rest=prefixMatch[1]; const d=rest[0]; if(rest.length<3 || rest[rest.length-1]!==d){cliError('% Banner delimiter must appear at the beginning and end of the message.');return;}
+      running.banner=rest.slice(1,-1); running.bannerDelimiter=d; updateProgress();return;
+    }
+    if(c==='line'){
+      if(tokens.length<2){incomplete();return;}
+      const r=resolve(tokens[1],['console','vty']); if(r.type==='ambiguous'){ambiguous(tokens[1]);return;} if(r.type!=='ok'){invalid(trimmed);return;}
+      if(r.value==='console'){
+        if(tokens.length<3||tokens[2]!=='0'){invalid(trimmed);return;} lineContext='console';mode='line';updatePrompt();return;
+      }
+      if(r.value==='vty'){
+        if(tokens.length<4||tokens[2]!=='0'||tokens[3]!=='4'){invalid(trimmed);return;} lineContext='vty';mode='line';updatePrompt();return;
+      }
+    }
+    if(c==='interface'){
+      if(tokens.length<2){incomplete();return;} const k=normalizeInterface(tokens[1]); if(!k){invalid(trimmed);return;} interfaceContext=k;mode='interface';updatePrompt();return;
+    }
+  }
+
+  if(mode==='line'){
+    if(c==='exit'){mode='global';lineContext=null;updatePrompt();return;}
+    if(c==='end'){mode='priv';lineContext=null;updatePrompt();return;}
+    if(c==='password'){
+      if(tokens.length<2){incomplete();return;} running[lineContext].password=tokens.slice(1).join(' ');updateProgress();return;
+    }
+    if(c==='login'){running[lineContext].login=true;updateProgress();return;}
+    if(c==='no'){
+      if(tokens.length<2){incomplete();return;} const r=resolve(tokens[1],['login']); if(r.type!=='ok'){invalid(trimmed);return;} running[lineContext].login=false;updateProgress();return;
+    }
+  }
+
+  if(mode==='interface'){
+    const intf=running.interfaces[interfaceContext];
+    if(c==='exit'){mode='global';interfaceContext=null;updatePrompt();return;}
+    if(c==='end'){mode='priv';interfaceContext=null;updatePrompt();return;}
+    if(c==='description'){
+      if(tokens.length<2){incomplete();return;} intf.description=tokens.slice(1).join(' ');updateProgress();return;
+    }
+    if(c==='shutdown'){intf.adminDown=true; if(interfaceContext===target.unusedKey) stats.actions.unusedShutdown=true; updateProgress();return;}
+    if(c==='no'){
+      if(tokens.length<2){incomplete();return;} const r=resolve(tokens[1],['shutdown']); if(r.type!=='ok'){invalid(trimmed);return;} intf.adminDown=false; if(interfaceContext===target.activeKey) stats.actions.activeNoShutdown=true; updateProgress();return;
+    }
+    if(c==='speed'){
+      if(tokens.length<2){incomplete();return;} const r=resolve(tokens[1],['10','100','1000','auto']); if(r.type!=='ok'){invalid(trimmed);return;} intf.speed=r.value; if(interfaceContext===target.activeKey) stats.actions.activeSpeed=true; updateProgress();return;
+    }
+    if(c==='duplex'){
+      if(tokens.length<2){incomplete();return;} const r=resolve(tokens[1],['auto','full','half']); if(r.type!=='ok'){invalid(trimmed);return;} intf.duplex=r.value; if(interfaceContext===target.activeKey) stats.actions.activeDuplex=true; updateProgress();return;
+    }
+  }
+  invalid(trimmed);
+}
+
+function handleShow(tokens,trimmed){
+  if(tokens.length<2){incomplete();return;}
+  const r=resolve(tokens[1],['interfaces','ip','running-config','startup-config']);
+  if(r.type==='ambiguous'){ambiguous(tokens[1]);return;} if(r.type!=='ok'){invalid(trimmed);return;}
+  if(r.value==='running-config'){
+    print(showConfig(running),'output');
+    if(phase===1) stats.verification.run=true; else stats.phase2Verification.run=true;
+    updateProgress(); return;
+  }
+  if(r.value==='startup-config'){
+    print(startup?showConfig(startup):'% startup-config is not present','output'); stats.verification.start=true;updateProgress();return;
+  }
+  if(r.value==='ip'){
+    if(tokens.length<4){incomplete();return;} const a=resolve(tokens[2],['interface']), b=resolve(tokens[3],['brief']); if(a.type!=='ok'||b.type!=='ok'){invalid(trimmed);return;}
+    print(showIpInterfaceBrief(),'output'); if(phase===1) stats.verification.brief=true; else stats.phase2Verification.brief=true;updateProgress();return;
+  }
+  if(r.value==='interfaces'){
+    let k=null; if(tokens.length>=3){k=normalizeInterface(tokens[2]); if(!k){invalid(trimmed);return;}}
+    if(k){print(showInterface(k),'output'); if(phase===1 && k===target.activeKey) stats.verification.int=true;}
+    else print(showInterface('g0/1')+'\n\n'+showInterface('g0/2'),'output');
+    updateProgress();return;
+  }
+}
+
+function hiddenPassword(p,encrypted){
+  if(!p) return '';
+  return encrypted ? '7 <simulated-encrypted-password>' : p;
+}
+function showConfig(c){
+  const lines=['Building configuration...','','Current configuration:','!','hostname '+c.hostname];
+  if(c.servicePasswordEncryption) lines.push('service password-encryption');
+  if(c.enableSecret) lines.push('enable secret 5 <simulated-secret-hash>');
+  if(c.banner) lines.push('banner motd '+(c.bannerDelimiter||'#')+c.banner+(c.bannerDelimiter||'#'));
+  lines.push('!');
+  ['g0/1','g0/2'].forEach(k=>{
+    const i=c.interfaces[k]; lines.push('interface '+i.name); if(i.description) lines.push(' description '+i.description);
+    if(i.speed!=='auto') lines.push(' speed '+i.speed); else lines.push(' speed auto');
+    if(i.duplex!=='auto') lines.push(' duplex '+i.duplex); else lines.push(' duplex auto');
+    lines.push(i.adminDown?' shutdown':' no shutdown'); lines.push('!');
+  });
+  lines.push('line con 0'); if(c.console.password) lines.push(' password '+hiddenPassword(c.console.password,c.servicePasswordEncryption)); if(c.console.login) lines.push(' login'); lines.push('!');
+  lines.push('line vty 0 4'); if(c.vty.password) lines.push(' password '+hiddenPassword(c.vty.password,c.servicePasswordEncryption)); if(c.vty.login) lines.push(' login'); lines.push('!','end');
+  return lines.join('\n');
+}
+function showIpInterfaceBrief(){
+  const header='Interface              IP-Address      OK? Method Status                Protocol';
+  const rows=['g0/1','g0/2'].map(k=>{
+    const i=running.interfaces[k]; const status=i.adminDown?'administratively down':'up'; const proto=i.adminDown?'down':'up';
+    return i.name.padEnd(23)+'unassigned'.padEnd(16)+'YES unset  '+status.padEnd(22)+proto;
+  });
+  return [header,...rows].join('\n');
+}
+function showInterface(k){
+  const i=running.interfaces[k]; const state=i.adminDown?'administratively down':'up'; const proto=i.adminDown?'down':'up';
+  const d=i.description?('\n  Description: '+i.description):'';
+  const dup=i.duplex==='auto'?'Auto-duplex':(i.duplex==='full'?'Full-duplex':'Half-duplex');
+  const sp=i.speed==='auto'?'Auto-speed':i.speed+'Mb/s';
+  return `${i.name} is ${state}, line protocol is ${proto}${d}\n  ${dup}, ${sp}\n  Hardware is Gigabit Ethernet\n  Administrative state: ${i.adminDown?'shutdown':'enabled'}`;
+}
+
+function phase1ObjectiveResults(){
+  const a=running.interfaces[target.activeKey], u=running.interfaces[target.unusedKey];
+  const checks=[
+    ['Hostname',running.hostname===target.hostname],
+    ['Enable secret',running.enableSecret===target.enableSecret],
+    ['Console password',running.console.password===target.console.password],
+    ['Console login',running.console.login===true],
+    ['VTY password',running.vty.password===target.vty.password],
+    ['VTY login',running.vty.login===true],
+    ['Password encryption',running.servicePasswordEncryption===true],
+    ['MOTD banner',running.banner===target.banner],
+    ['Active interface description',a.description===target.activeDescription],
+    ['Active interface enabled with no shutdown',a.adminDown===false && stats.actions.activeNoShutdown],
+    ['Active interface speed command',a.speed===target.activeSpeed && stats.actions.activeSpeed],
+    ['Active interface duplex command',a.duplex===target.activeDuplex && stats.actions.activeDuplex],
+    ['Unused interface description',u.description===target.unusedDescription],
+    ['Unused interface shutdown command',u.adminDown===true && stats.actions.unusedShutdown],
+    ['show running-config used',stats.verification.run],
+    ['show startup-config used',stats.verification.start],
+    ['show ip interface brief used',stats.verification.brief],
+    ['show interfaces used for active interface',stats.verification.int],
+    ['Saved startup configuration matches running configuration',startup!==null && configsEquivalentToTarget(startup)]
+  ];
+  return checks;
+}
+
+function configsEquivalentToTarget(c){
+  if(!c) return false;
+  const a=c.interfaces[target.activeKey],u=c.interfaces[target.unusedKey];
+  return c.hostname===target.hostname && c.enableSecret===target.enableSecret && c.console.password===target.console.password && c.console.login && c.vty.password===target.vty.password && c.vty.login && c.servicePasswordEncryption && c.banner===target.banner && a.description===target.activeDescription && !a.adminDown && a.speed===target.activeSpeed && a.duplex===target.activeDuplex && u.description===target.unusedDescription && u.adminDown;
+}
+function configOnlyChecks(){return phase1ObjectiveResults().slice(0,14);}
+
+const faultBank=[
+  {name:'hostname',apply:()=>running.hostname='SWX'},
+  {name:'enable secret',apply:()=>running.enableSecret='WrongSecret'},
+  {name:'password encryption',apply:()=>running.servicePasswordEncryption=false},
+  {name:'MOTD banner',apply:()=>running.banner='Temporary maintenance access'},
+  {name:'console password',apply:()=>running.console.password='WrongConsole'},
+  {name:'console login',apply:()=>running.console.login=false},
+  {name:'VTY password',apply:()=>running.vty.password='WrongVTY'},
+  {name:'VTY login',apply:()=>running.vty.login=false},
+  {name:'active interface description',apply:()=>running.interfaces[target.activeKey].description='Incorrect-Link'},
+  {name:'active interface administrative state',apply:()=>running.interfaces[target.activeKey].adminDown=true},
+  {name:'active interface speed',apply:()=>running.interfaces[target.activeKey].speed=(target.activeSpeed==='100'?'auto':'100')},
+  {name:'active interface duplex',apply:()=>running.interfaces[target.activeKey].duplex=(target.activeDuplex==='full'?'auto':'full')},
+  {name:'unused interface description',apply:()=>running.interfaces[target.unusedKey].description='Active-Link'},
+  {name:'unused interface administrative state',apply:()=>running.interfaces[target.unusedKey].adminDown=false}
+];
+
+function injectFaults(){
+  const shuffled=[...faultBank].sort(()=>Math.random()-.5); const chosen=[]; const usedGroups=new Set();
+  for(const f of shuffled){
+    const group=f.name.includes('active interface')?'active':f.name.includes('unused interface')?'unused':f.name.includes('console')?'console':f.name.includes('VTY')?'vty':f.name;
+    if(usedGroups.has(group)) continue; chosen.push(f); usedGroups.add(group); if(chosen.length===3) break;
+  }
+  chosen.forEach(f=>f.apply()); injectedFaultNames=chosen.map(f=>f.name); phase2StartCommand=stats.commands; stats.phase2Verification={run:false,brief:false}; stats.saved=false; updatePrompt();
+}
+
+function phase2Results(){
+  return [
+    ['All hidden faults repaired',configsEquivalentToTarget(running)],
+    ['Running configuration verified after faults',stats.phase2Verification.run],
+    ['Interface status verified after faults',stats.phase2Verification.brief],
+    ['Repaired configuration saved',startup!==null && configsEquivalentToTarget(startup)]
+  ];
+}
+
+function checkConfiguration(){
+  if(challengeComplete) return;
+  if(phase===1){
+    stats.phase1Checks++; const results=phase1ObjectiveResults(); const met=results.filter(x=>x[1]).length;
+    if(met===results.length){
+      print('% Assessment: Phase 1 complete. Configuration, verification and save objectives satisfied.','system');
+      phase=2; injectFaults(); renderBrief(); $('status').className='status warn'; $('status').textContent='Three hidden changes were injected into the running configuration. Diagnose them without being told where they are.'; print('','output'); print('*** TROUBLESHOOTING EVENT: Another technician changed three settings in running-config. ***','system'); print('Use show commands to identify and repair the faults, then save the corrected configuration.','system'); updateProgress();
+    }else{
+      $('status').className='status warn'; $('status').textContent=`Phase 1 check: ${met} of ${results.length} objectives are currently satisfied. Missing items are intentionally not identified.`;
+      print(`% Assessment: ${met}/${results.length} objectives currently satisfied. Continue verifying and configuring.`, 'system'); updateProgress();
+    }
+  }else{
+    stats.phase2Checks++; const results=phase2Results(); const met=results.filter(x=>x[1]).length;
+    if(met===results.length){completeChallenge();}
+    else{ $('status').className='status warn'; $('status').textContent=`Phase 2 check: ${met} of ${results.length} completion conditions are satisfied.`; print(`% Assessment: troubleshooting phase ${met}/${results.length} conditions satisfied.`, 'system'); updateProgress(); }
+  }
+}
+
+function missingPhase1(){return phase1ObjectiveResults().filter(x=>!x[1]).map(x=>x[0]);}
+function requestHint(){
+  if(challengeComplete) return;
+  stats.hints++; let text='';
+  if(phase===1){
+    const missing=missingPhase1();
+    if(!missing.length) text='All Phase 1 objectives appear complete. Use Check Configuration.';
+    else if(stats.hints%3===1){
+      const categories=[]; if(missing.some(x=>/Console|VTY|secret|encryption|banner/i.test(x))) categories.push('device access/security settings'); if(missing.some(x=>/interface/i.test(x))) categories.push('interface settings'); if(missing.some(x=>/^show|Saved/i.test(x))) categories.push('verification/save steps'); if(missing.some(x=>/Hostname/i.test(x))) categories.push('basic device identity');
+      text='Review: '+(categories.join(', ')||'the challenge brief')+'. Individual missing commands are still hidden.';
+    }else if(stats.hints%3===2){ text='One unresolved objective is: '+missing[0]+'. Check your current IOS mode and use ? for valid commands.'; }
+    else{
+      const m=missing[0];
+      if(/Console/i.test(m)) text='Enter global configuration mode, select line console 0, then review password/login.';
+      else if(/VTY/i.test(m)) text='Enter global configuration mode, select line vty 0 4, then review password/login.';
+      else if(/speed|duplex|description|enabled|shutdown/i.test(m)) text='Enter the required interface configuration mode and inspect description, speed, duplex and shutdown state.';
+      else if(/show running/i.test(m)) text='From privileged EXEC mode, display the running configuration.';
+      else if(/show startup/i.test(m)) text='From privileged EXEC mode, display the startup configuration.';
+      else if(/show ip/i.test(m)) text='From privileged EXEC mode, use the brief interface summary show command.';
+      else if(/show interfaces/i.test(m)) text='From privileged EXEC mode, display detailed information for the active GigabitEthernet interface.';
+      else if(/Saved/i.test(m)) text='Copy the running configuration to startup configuration and accept the default destination filename.';
+      else text='Use the brief and IOS ? help to locate the required command from the correct mode.';
+    }
+  }else{
+    const cfgMissing=configOnlyChecks().filter(x=>!x[1]).map(x=>x[0]);
+    if(cfgMissing.length){
+      if(stats.hints%2===1) text='The hidden fault is within: '+(cfgMissing[0].toLowerCase().includes('interface')?'interface configuration':'device/line configuration')+'. Compare running-config with the Phase 1 requirements.';
+      else text='One changed area is: '+cfgMissing[0]+'. Repair it, verify again, and save.';
+    }else if(!stats.phase2Verification.run || !stats.phase2Verification.brief) text='The configuration appears repaired, but the troubleshooting phase still requires fresh verification using running-config and the brief interface summary.';
+    else text='The repaired running configuration still needs to be saved to startup configuration.';
+  }
+  $('hintBox').textContent=text; updateProgress();
+}
+
+function currentScore(){return Math.max(0,100-(stats.hints*2));}
+function updateProgress(){
+  let res=phase===1?phase1ObjectiveResults():phase2Results();
+  $('objectiveCount').textContent=res.filter(x=>x[1]).length+'/'+res.length;
+  $('score').textContent=currentScore(); $('commandCount').textContent=stats.commands; $('errorCount').textContent=stats.errors;
+  if(!challengeComplete && phase===1 && !$('status').classList.contains('warn')) $('status').textContent='Configure the device from the brief. Individual missing objectives are intentionally hidden.';
+}
+
+function completeChallenge(){
+  challengeComplete=true; const final=currentScore(); $('status').className='status good'; $('status').textContent='Challenge complete. SW1 matches the required baseline, the troubleshooting faults were repaired, and startup configuration is current.';
+  print('% Challenge complete. Configuration validated and saved.','system');
+  $('finalScore').textContent=final+'/100'; $('finalCommands').textContent=stats.commands; $('finalErrors').textContent=stats.errors; $('finalHelp').textContent=stats.helpUses; $('finalHints').textContent=stats.hints;
+  $('reportDetails').innerHTML=`<strong>${challengeSeed}</strong> completed successfully. The activity generated three troubleshooting faults from a bank of ${faultBank.length} fault types. This attempt used hidden faults affecting: <em>${injectedFaultNames.join(', ')}</em>.<br><br>CLI errors do not reduce the score; experimenting is allowed. Direct hints reduce the score by 2 points each. IOS contextual help does not reduce the score.`;
+  $('report').style.display='block'; $('report').scrollIntoView({behavior:'smooth',block:'start'}); updateProgress();
+}
+
+function resetCurrent(){
+  if(!confirm('Reset this challenge to its starting state? The same challenge requirements will be kept.')) return;
+  running=defaultConfig();startup=null;phase=1;mode='user';lineContext=null;interfaceContext=null;pendingCopy=false;challengeComplete=false;stats=newStats();history=[];historyIndex=0;terminal.innerHTML='';$('report').style.display='none';renderBrief();updatePrompt();updateProgress();$('status').className='status';$('status').textContent='Challenge reset. The same requirements are still active.';$('hintBox').textContent='No hints requested. Use IOS contextual help first.';print('Cisco IOS Software, Lesson 1.4 educational simulator','output');print('Challenge reset.','system');cmdInput.focus();
+}
+
+$('terminalForm').addEventListener('submit',e=>{
+  e.preventDefault(); const raw=cmdInput.value; printCommand(promptText(),raw);
+  if(raw.trim()!=='' && !pendingCopy){history.push(raw);historyIndex=history.length;}
+  cmdInput.value=''; processCommand(raw); updatePrompt(); updateProgress();
+});
+cmdInput.addEventListener('keydown',e=>{
+  if(e.key==='Tab'){e.preventDefault();completeTab();}
+  else if(e.key==='ArrowUp'){e.preventDefault();if(history.length){historyIndex=Math.max(0,historyIndex-1);cmdInput.value=history[historyIndex]||'';}}
+  else if(e.key==='ArrowDown'){e.preventDefault();if(history.length){historyIndex=Math.min(history.length,historyIndex+1);cmdInput.value=history[historyIndex]||'';}}
+});
+$('newBtn').addEventListener('click',()=>{if(confirm('Generate a new randomized challenge? Current progress will be lost.'))startChallenge();});
+$('checkBtn').addEventListener('click',checkConfiguration);
+$('hintBtn').addEventListener('click',requestHint);
+$('resetBtn').addEventListener('click',resetCurrent);
+
+document.addEventListener('click',e=>{if(e.target.closest('.terminal-card'))cmdInput.focus();});
+startChallenge();
+})();
+</script>
+</body>
+</html>
