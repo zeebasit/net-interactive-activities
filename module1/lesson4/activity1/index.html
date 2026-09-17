@@ -34,6 +34,11 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .requirements li{margin:8px 0}
 .phase-banner{border-left:4px solid var(--accent);background:var(--accent2);padding:10px 12px;border-radius:6px;margin-bottom:12px}
 .phase-banner strong{display:block}
+.brief-tabs{display:flex;gap:8px;padding:12px 16px 0;border-bottom:1px solid var(--border);background:#fff}
+.brief-tab{border:1px solid var(--border);border-bottom:none;background:#f7f9fc;color:var(--muted);padding:9px 13px;border-radius:8px 8px 0 0;font-weight:700;cursor:pointer}
+.brief-tab.active{background:var(--accent2);color:var(--accent);border-color:#b8d5f5}
+.brief-tab:disabled{opacity:.5;cursor:not-allowed}
+.creator{margin-top:5px!important;font-size:.9rem;color:var(--muted)}
 .terminal-card{background:var(--terminal);border-color:#1d2944}
 .terminal-head{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:11px 14px;border-bottom:1px solid #24314f;color:#dfe8f4;background:#111a2f}
 .terminal-head .hint{font-size:.82rem;color:#9eb0c4}
@@ -72,6 +77,7 @@ code{font-family:Consolas,monospace;background:#f3f6fa;border-radius:4px;padding
   <div class="wrap">
     <h1>IOS Configuration Challenge</h1>
     <p>Module 1 · Lesson 1.4 — configure, verify, save, diagnose and repair SW1 using an IOS-like CLI.</p>
+    <p class="creator">Created by Zeeshan Basit</p>
   </div>
 </header>
 <main>
@@ -87,6 +93,10 @@ code{font-family:Consolas,monospace;background:#f3f6fa;border-radius:4px;padding
   <div class="grid">
     <section class="card brief-card">
       <h2>Challenge Brief</h2>
+      <div class="brief-tabs" role="tablist" aria-label="Challenge sections">
+        <button type="button" class="brief-tab active" id="challengeTab" role="tab" aria-selected="true">Challenge</button>
+        <button type="button" class="brief-tab" id="troubleshootTab" role="tab" aria-selected="false" disabled>Troubleshooting</button>
+      </div>
       <div class="body">
         <div class="phase-banner" id="phaseBanner"></div>
         <div class="brief-title" id="briefTitle"></div>
@@ -200,6 +210,7 @@ const defaultConfig = () => ({
 });
 
 let running, startup, target, phase=1, mode='user', lineContext=null, interfaceContext=null;
+let activeBriefTab='challenge';
 let stats, challengeSeed, pendingCopy=false, challengeComplete=false;
 let history=[], historyIndex=0;
 let phase2StartCommand=0, injectedFaultNames=[];
@@ -235,7 +246,7 @@ function buildTarget(){
 function startChallenge(){
   challengeSeed = randId();
   running = defaultConfig(); startup = null; target = buildTarget();
-  phase=1; mode='user'; lineContext=null; interfaceContext=null; pendingCopy=false; challengeComplete=false;
+  phase=1; mode='user'; lineContext=null; interfaceContext=null; pendingCopy=false; challengeComplete=false; activeBriefTab='challenge';
   stats=newStats(); history=[]; historyIndex=0; phase2StartCommand=0; injectedFaultNames=[];
   terminal.innerHTML=''; $('report').style.display='none'; $('challengeId').textContent=challengeSeed; $('status').className='status'; $('status').textContent='Configure the device from the brief. Individual missing objectives are intentionally hidden.'; $('hintBox').textContent='No hints requested. Use IOS contextual help first.';
   const theme=pick(themes); $('briefTitle').textContent=theme[0]; $('briefContext').textContent=theme[1];
@@ -246,11 +257,27 @@ function startChallenge(){
   cmdInput.value=''; cmdInput.focus();
 }
 
+function setBriefTab(tab){
+  if(tab==='troubleshooting' && phase<2) return;
+  activeBriefTab=tab;
+  renderBrief();
+}
+
 function renderBrief(){
   $('phaseLabel').textContent=phase;
+  const challengeTab=$('challengeTab');
+  const troubleshootTab=$('troubleshootTab');
+  troubleshootTab.disabled=phase<2;
+  challengeTab.classList.toggle('active',activeBriefTab==='challenge');
+  troubleshootTab.classList.toggle('active',activeBriefTab==='troubleshooting');
+  challengeTab.setAttribute('aria-selected',activeBriefTab==='challenge'?'true':'false');
+  troubleshootTab.setAttribute('aria-selected',activeBriefTab==='troubleshooting'?'true':'false');
+
   const req=$('requirements'); req.innerHTML='';
-  if(phase===1){
-    $('phaseBanner').innerHTML='<strong>Phase 1 — Configure and verify</strong>Complete the full baseline, verify it with show commands, and save it.';
+  if(activeBriefTab==='challenge'){
+    $('phaseBanner').innerHTML=phase===1
+      ? '<strong>Phase 1 — Configure and verify</strong>Complete the full baseline, verify it with show commands, and save it.'
+      : '<strong>Original Challenge — Phase 1 baseline</strong>This brief remains available while troubleshooting so the required baseline can be checked at any time.';
     const active=running.interfaces[target.activeKey].name;
     const unused=running.interfaces[target.unusedKey].name;
     const items=[
@@ -270,7 +297,7 @@ function renderBrief(){
     ];
     items.forEach(x=>{const li=document.createElement('li');li.textContent=x;req.appendChild(li)});
   }else{
-    $('phaseBanner').innerHTML='<strong>Phase 2 — Diagnose and repair</strong>Three hidden changes have been made to the running configuration.';
+    $('phaseBanner').innerHTML='<strong>Phase 2 — Diagnose and repair</strong>Three hidden changes have been made to the running configuration. The Challenge tab remains available for reference.';
     const items=[
       'Use verification commands to determine what changed. The faults are not identified for you.',
       'Repair all three hidden configuration faults so SW1 again matches the Phase 1 brief.',
@@ -280,7 +307,6 @@ function renderBrief(){
     items.forEach(x=>{const li=document.createElement('li');li.textContent=x;req.appendChild(li)});
   }
 }
-
 function promptText(){
   const h=running.hostname;
   if(mode==='user') return h+'>';
@@ -658,7 +684,7 @@ function checkConfiguration(){
     stats.phase1Checks++; const results=phase1ObjectiveResults(); const met=results.filter(x=>x[1]).length;
     if(met===results.length){
       print('% Assessment: Phase 1 complete. Configuration, verification and save objectives satisfied.','system');
-      phase=2; injectFaults(); renderBrief(); $('status').className='status warn'; $('status').textContent='Three hidden changes were injected into the running configuration. Diagnose them without being told where they are.'; print('','output'); print('*** TROUBLESHOOTING EVENT: Another technician changed three settings in running-config. ***','system'); print('Use show commands to identify and repair the faults, then save the corrected configuration.','system'); updateProgress();
+      phase=2; activeBriefTab='troubleshooting'; injectFaults(); renderBrief(); $('status').className='status warn'; $('status').textContent='Three hidden changes were injected into the running configuration. Diagnose them without being told where they are.'; print('','output'); print('*** TROUBLESHOOTING EVENT: Another technician changed three settings in running-config. ***','system'); print('Use show commands to identify and repair the faults, then save the corrected configuration.','system'); updateProgress();
     }else{
       $('status').className='status warn'; $('status').textContent=`Phase 1 check: ${met} of ${results.length} objectives are currently satisfied. Missing items are intentionally not identified.`;
       print(`% Assessment: ${met}/${results.length} objectives currently satisfied. Continue verifying and configuring.`, 'system'); updateProgress();
@@ -722,8 +748,11 @@ function completeChallenge(){
 
 function resetCurrent(){
   if(!confirm('Reset this challenge to its starting state? The same challenge requirements will be kept.')) return;
-  running=defaultConfig();startup=null;phase=1;mode='user';lineContext=null;interfaceContext=null;pendingCopy=false;challengeComplete=false;stats=newStats();history=[];historyIndex=0;terminal.innerHTML='';$('report').style.display='none';renderBrief();updatePrompt();updateProgress();$('status').className='status';$('status').textContent='Challenge reset. The same requirements are still active.';$('hintBox').textContent='No hints requested. Use IOS contextual help first.';print('Cisco IOS Software, Lesson 1.4 educational simulator','output');print('Challenge reset.','system');cmdInput.focus();
+  running=defaultConfig();startup=null;phase=1;mode='user';lineContext=null;interfaceContext=null;pendingCopy=false;challengeComplete=false;activeBriefTab='challenge';stats=newStats();history=[];historyIndex=0;terminal.innerHTML='';$('report').style.display='none';renderBrief();updatePrompt();updateProgress();$('status').className='status';$('status').textContent='Challenge reset. The same requirements are still active.';$('hintBox').textContent='No hints requested. Use IOS contextual help first.';print('Cisco IOS Software, Lesson 1.4 educational simulator','output');print('Challenge reset.','system');cmdInput.focus();
 }
+
+$('challengeTab').addEventListener('click',()=>setBriefTab('challenge'));
+$('troubleshootTab').addEventListener('click',()=>setBriefTab('troubleshooting'));
 
 $('terminalForm').addEventListener('submit',e=>{
   e.preventDefault(); const raw=cmdInput.value; printCommand(promptText(),raw);
