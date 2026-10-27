@@ -6,15 +6,15 @@
 <title>Module 4 Activity 1 — Binary &amp; Hex Builder</title>
 <style>
   :root{
-    --bg:#f5f7fb;--panel:#fff;--text:#172033;--muted:#667085;--line:#d9e0ea;
-    --accent:#1769e0;--accent-dark:#0f4faa;--soft:#eef4ff;--good:#137a4b;
+    --bg:#FAFAF8;--panel:#fff;--text:#1A1A19;--muted:#5C5C5B;--line:#DBDBD9;
+    --accent:#E12B21;--accent-dark:#AA0D04;--soft:#FFF1EF;--good:#137a4b;
     --good-bg:#edf9f2;--bad:#b42318;--bad-bg:#fff1f0;--hint:#805600;
     --hint-bg:#fff7df;--shadow:0 12px 32px rgba(20,35,60,.08);
   }
   *{box-sizing:border-box}
   body{
     margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-    background:linear-gradient(180deg,#f7f9fc 0,#f3f6fa 100%);color:var(--text);
+    background:linear-gradient(180deg,#FAFAF8 0,#F4F4F2 100%);color:var(--text);
   }
   button,input{font:inherit}
   button{touch-action:manipulation}
@@ -99,7 +99,7 @@
   button.bit{cursor:pointer}
   button.bit:hover{border-color:#7fa7df}
   button.bit.on{background:var(--accent);border-color:var(--accent);color:#fff}
-  .bit.static.on{background:#e4eefc;border-color:#9fc0f7;color:#0f4faa}
+  .bit.static.on{background:#e4eefc;border-color:#9fc0f7;color:#AA0D04}
   .nibble-labels{
     min-width:624px;display:grid;grid-template-columns:1fr 1fr;gap:18px;
     margin-top:8px;text-align:center;color:var(--muted);font-size:.78rem;font-weight:750
@@ -148,6 +148,15 @@
     .card{border-radius:15px}
   }
   @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+
+<style id="noroff-blush-shared-theme">
+/* Noroff Blush palette. Only presentation is changed; simulations retain their semantic status and protocol colors. No logo. */
+:root{--bg:#FAFAF8;--background:#FAFAF8;--panel:#FFFFFF;--card:#FFFFFF;--foreground:#1A1A19;--card-foreground:#1A1A19;--ink:#1A1A19;--text:#1A1A19;--muted:#5C5C5B;--muted-foreground:#5C5C5B;--sub:#5C5C5B;--line:#DBDBD9;--border:#DBDBD9;--primary:#E12B21;--blue:#E12B21;--accent:#E12B21;--accent-dark:#AA0D04;--accent2:#AA0D04;--accent-2:#AA0D04;--pale:#FFF1EF;--soft:#FFF1EF;--soft2:#F4F4F2;--blue2:#FFF1EF;--navy:#40403E;--primary-foreground:#FFFFFF}
+html{color-scheme:light}body{background:#FAFAF8;color:#1A1A19;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+:where(.card,.panel,.tile,.question,.module-card,.step-card){border-color:#DBDBD9}
+:where(a,button,input,textarea,select):focus-visible{outline-color:#AA0D04}
+:where(.tab.active,.nav-item.active,.phase-pill.active,.stagebtn.active){background:#FFABA6!important;color:#1A1A19!important;border-color:#E12B21!important}
 </style>
 </head>
 <body>

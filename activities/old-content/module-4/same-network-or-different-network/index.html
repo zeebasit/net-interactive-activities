@@ -6,13 +6,13 @@
 <title>Module 4 Activity 3 — Same Network or Different Network?</title>
 <style>
 :root{
- --bg:#f5f7fb;--panel:#fff;--text:#172033;--muted:#667085;--line:#d9e0ea;
- --accent:#1769e0;--accent-dark:#0f4faa;--soft:#eef4ff;--good:#137a4b;
+ --bg:#FAFAF8;--panel:#fff;--text:#1A1A19;--muted:#5C5C5B;--line:#DBDBD9;
+ --accent:#E12B21;--accent-dark:#AA0D04;--soft:#FFF1EF;--good:#137a4b;
  --good-bg:#edf9f2;--bad:#b42318;--bad-bg:#fff1f0;--hint:#805600;
  --hint-bg:#fff7df;--shadow:0 12px 32px rgba(20,35,60,.08)
 }
 *{box-sizing:border-box}
-body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(180deg,#f7f9fc 0,#f3f6fa 100%);color:var(--text)}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(180deg,#FAFAF8 0,#F4F4F2 100%);color:var(--text)}
 button,input{font:inherit}button{touch-action:manipulation}
 .shell{max-width:1120px;margin:0 auto;padding:32px 20px 64px}
 .hero{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap;margin-bottom:20px}
@@ -64,7 +64,7 @@ button:disabled,input:disabled{opacity:.67;cursor:not-allowed}
 .helper-body{padding:14px;overflow-x:auto}.helper-note{margin:0 0 10px;color:var(--muted);font-size:.85rem}
 .binary-table{min-width:650px;display:grid;grid-template-columns:92px repeat(8,1fr);gap:4px;align-items:center}
 .binary-label{font-size:.76rem;color:#536174;font-weight:850}.bcell{display:flex;align-items:center;justify-content:center;min-height:32px;border:1px solid var(--line);border-radius:7px;background:#fff;font:850 .82rem ui-monospace,SFMono-Regular,Consolas,monospace}
-.bcell.weight{background:#eef2f7;color:#42526a;font-size:.72rem}.bcell.one{background:#e8f1ff;border-color:#b6cef3;color:#0f4faa}
+.bcell.weight{background:#eef2f7;color:#42526a;font-size:.72rem}.bcell.one{background:#FFF1EF;border-color:#b6cef3;color:#AA0D04}
 .helper-divider{grid-column:1/-1;height:5px}
 .controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
 .message{display:none;margin-top:18px;border-radius:12px;padding:14px 16px;line-height:1.55}.message.good{display:block;background:var(--good-bg);color:var(--good);border:1px solid #b8e2cc}.message.bad{display:block;background:var(--bad-bg);color:var(--bad);border:1px solid #f0c5c2}.message.hint{display:block;background:var(--hint-bg);color:var(--hint);border:1px solid #efd792}
@@ -76,6 +76,15 @@ button:disabled,input:disabled{opacity:.67;cursor:not-allowed}
 @media(max-width:780px){.intro-grid,.result-grid,.network-fields{grid-template-columns:1fr}.topology{grid-template-columns:1fr}.connection{height:65px}.connection:before{top:0;bottom:0;left:50%;right:auto;width:4px;height:auto}.progress-card{width:100%}.shell{padding:22px 12px 44px}.card{border-radius:15px}}
 @media(max-width:520px){.decision-grid{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+
+<style id="noroff-blush-shared-theme">
+/* Noroff Blush palette. Only presentation is changed; simulations retain their semantic status and protocol colors. No logo. */
+:root{--bg:#FAFAF8;--background:#FAFAF8;--panel:#FFFFFF;--card:#FFFFFF;--foreground:#1A1A19;--card-foreground:#1A1A19;--ink:#1A1A19;--text:#1A1A19;--muted:#5C5C5B;--muted-foreground:#5C5C5B;--sub:#5C5C5B;--line:#DBDBD9;--border:#DBDBD9;--primary:#E12B21;--blue:#E12B21;--accent:#E12B21;--accent-dark:#AA0D04;--accent2:#AA0D04;--accent-2:#AA0D04;--pale:#FFF1EF;--soft:#FFF1EF;--soft2:#F4F4F2;--blue2:#FFF1EF;--navy:#40403E;--primary-foreground:#FFFFFF}
+html{color-scheme:light}body{background:#FAFAF8;color:#1A1A19;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+:where(.card,.panel,.tile,.question,.module-card,.step-card){border-color:#DBDBD9}
+:where(a,button,input,textarea,select):focus-visible{outline-color:#AA0D04}
+:where(.tab.active,.nav-item.active,.phase-pill.active,.stagebtn.active){background:#FFABA6!important;color:#1A1A19!important;border-color:#E12B21!important}
 </style>
 </head>
 <body>
