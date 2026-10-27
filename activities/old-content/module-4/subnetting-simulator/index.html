@@ -6,12 +6,12 @@
 <title>Module 4 — Subnet Split Simulator</title>
 <style>
 :root{
-  --bg:#f5f7fb;--panel:#fff;--text:#172033;--muted:#667085;--line:#d9e0ea;
-  --accent:#1769e0;--accent-dark:#0f4faa;--soft:#eef4ff;--network:#1769e0;
+  --bg:#FAFAF8;--panel:#fff;--text:#1A1A19;--muted:#5C5C5B;--line:#DBDBD9;
+  --accent:#E12B21;--accent-dark:#AA0D04;--soft:#FFF1EF;--network:#E12B21;
   --host:#d97706;--good:#137a4b;--shadow:0 12px 32px rgba(20,35,60,.08)
 }
 *{box-sizing:border-box}
-body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(180deg,#f7f9fc 0,#f3f6fa 100%);color:var(--text)}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(180deg,#FAFAF8 0,#F4F4F2 100%);color:var(--text)}
 button{font:inherit;touch-action:manipulation}
 .shell{max-width:1180px;margin:0 auto;padding:32px 20px 64px}
 .hero{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;flex-wrap:wrap;margin-bottom:20px}
@@ -20,7 +20,7 @@ h1{margin:.28rem 0 .45rem;font-size:clamp(1.8rem,3.4vw,2.65rem)}
 .lead{margin:0;color:var(--muted);line-height:1.62;max-width:800px}
 .phase-nav{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 7px}
 .phase-pill{border:1px solid var(--line);background:#fff;color:#42526a;cursor:pointer;padding:9px 13px;border-radius:999px;font-weight:750;font-size:.9rem}
-.phase-pill:hover{border-color:#9fb6da}.phase-pill.active{background:var(--soft);border-color:#9fc0f7;color:var(--accent-dark)}
+.phase-pill:hover{border-color:#9fb6da}.phase-pill.active{background:var(--soft);border-color:#FFABA6;color:var(--accent-dark)}
 .phase-help{color:var(--muted);font-size:.86rem;line-height:1.45}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:clamp(20px,3vw,30px)}
 .control-panel{min-width:min(100%,300px);background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px 16px;box-shadow:var(--shadow)}
@@ -47,14 +47,14 @@ h2{margin:.25rem 0 .4rem;font-size:clamp(1.35rem,2.5vw,1.75rem)}
 .row-label{font-size:.78rem;color:#536174;font-weight:850}
 .bit{min-height:42px;border:1px solid var(--line);border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;text-align:center;font:850 .88rem ui-monospace,SFMono-Regular,Consolas,monospace}
 .bit.weight{min-height:30px;background:#eef2f7;color:#42526a;font-size:.72rem}
-.bit.network{background:#e8f1ff;border-color:#a8c4ee;color:#0f4faa}.bit.host{background:#fff3df;border-color:#efca8d;color:#8a5300}
+.bit.network{background:#FFF1EF;border-color:#a8c4ee;color:#AA0D04}.bit.host{background:#fff3df;border-color:#efca8d;color:#8a5300}
 .bit.boundary{box-shadow:inset -3px 0 0 #4c5f78}
 .role-row{min-width:650px;display:grid;grid-template-columns:90px repeat(8,1fr);gap:5px;margin-top:7px}
-.role{padding:6px 3px;border-radius:7px;text-align:center;font-size:.72rem;font-weight:800}.role.network{background:#e8f1ff;color:#0f4faa}.role.host{background:#fff3df;color:#8a5300}
+.role{padding:6px 3px;border-radius:7px;text-align:center;font-size:.72rem;font-weight:800}.role.network{background:#FFF1EF;color:#AA0D04}.role.host{background:#fff3df;color:#8a5300}
 .explain-box{margin-top:16px;border-left:4px solid var(--accent);background:#f6f9ff;padding:13px 15px;border-radius:0 11px 11px 0;line-height:1.55;color:#34445b}
 .space-panel{margin-top:22px;border:1px solid var(--line);border-radius:16px;padding:18px;background:#fbfcfe}
 .space-title{display:flex;justify-content:space-between;gap:12px;align-items:end;flex-wrap:wrap;margin-bottom:12px}.space-title h3{margin:0;font-size:1.05rem}.space-title span{color:var(--muted);font-size:.84rem}
-.address-bar{display:flex;height:58px;border-radius:10px;overflow:hidden;background:#e7edf5;margin-bottom:16px}
+.address-bar{display:flex;height:58px;border-radius:10px;overflow:hidden;background:#F4F4F2;margin-bottom:16px}
 .bar-segment{min-width:1px;border:0;border-right:1px solid rgba(255,255,255,.72);background:var(--accent);opacity:.68;cursor:pointer;padding:0;color:transparent;transition:opacity .16s,transform .16s}
 .bar-segment:hover{opacity:.88}.bar-segment.selected{opacity:1;box-shadow:inset 0 0 0 3px #0b3b81;transform:scaleY(1.08);z-index:1}
 .range-toolbar{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin:4px 0 10px}.page-status{color:var(--muted);font-size:.86rem}.page-controls{display:flex;gap:8px}
@@ -74,7 +74,7 @@ h2{margin:.25rem 0 .4rem;font-size:clamp(1.35rem,2.5vw,1.75rem)}
 .subnet-table th{background:#eef2f7;color:#42526a;font-size:.78rem;text-transform:uppercase;letter-spacing:.035em}
 .subnet-table td{font:700 .84rem ui-monospace,SFMono-Regular,Consolas,monospace}
 .subnet-table tbody tr:last-child td{border-bottom:0}
-.subnet-table tbody tr.selected{background:#eef4ff}
+.subnet-table tbody tr.selected{background:#FFF1EF}
 .subnet-table tbody tr.selected td:first-child{color:var(--accent-dark);font-weight:900}
 .detail-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:22px 0}
 .detail{border:1px solid var(--line);border-radius:13px;padding:15px;background:#fbfcfe}.detail-label{display:block;color:var(--muted);font-size:.78rem;font-weight:800}.detail-value{display:block;margin-top:5px;font:850 .98rem ui-monospace,SFMono-Regular,Consolas,monospace;word-break:break-word}
@@ -85,6 +85,15 @@ h2{margin:.25rem 0 .4rem;font-size:clamp(1.35rem,2.5vw,1.75rem)}
 @media(max-width:860px){.metric-grid,.detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.subnet-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:620px){.shell{padding:22px 12px 44px}.card{border-radius:15px}.control-panel{width:100%}.metric-grid,.detail-grid{grid-template-columns:1fr}.subnet-grid{grid-template-columns:1fr}.role-strip{grid-template-columns:1fr;gap:7px}.usable{width:100%;margin:0}.borrow-controls{gap:4px}.borrow-btn{min-height:44px}.address-bar{height:48px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+
+<style id="noroff-blush-shared-theme">
+/* Noroff Blush palette. Presentation only; status and protocol colors retain their meanings. No logo. */
+:root{--bg:#FAFAF8;--background:#FAFAF8;--panel:#FFFFFF;--card:#FFFFFF;--foreground:#1A1A19;--card-foreground:#1A1A19;--ink:#1A1A19;--text:#1A1A19;--muted:#5C5C5B;--muted-foreground:#5C5C5B;--sub:#5C5C5B;--line:#DBDBD9;--border:#DBDBD9;--primary:#E12B21;--blue:#E12B21;--accent:#E12B21;--accent-dark:#AA0D04;--accent2:#AA0D04;--accent-2:#AA0D04;--pale:#FFF1EF;--soft:#FFF1EF;--soft2:#F4F4F2;--blue2:#FFF1EF;--navy:#40403E;--primary-foreground:#FFFFFF}
+html{color-scheme:light}body{background:#FAFAF8;color:#1A1A19;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+:where(.card,.panel,.tile,.question,.module-card,.step-card){border-color:#DBDBD9}
+:where(a,button,input,textarea,select):focus-visible{outline-color:#AA0D04}
+:where(.tab.active,.nav-item.active,.phase-pill.active,.stagebtn.active){background:#FFABA6!important;color:#1A1A19!important;border-color:#E12B21!important}
 </style>
 </head>
 <body>
