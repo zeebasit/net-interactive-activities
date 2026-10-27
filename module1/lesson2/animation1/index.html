@@ -6,15 +6,15 @@
 <title>Animation 1.2.A — Communication Through Network Layers</title>
 <style>
   :root{
-    --bg:#f4f7fb;
+    --bg:#FAFAF8;
     --panel:#ffffff;
-    --text:#172033;
-    --muted:#667085;
-    --line:#d8e0eb;
-    --accent:#1769e0;
-    --accent-dark:#0f4faa;
-    --soft:#edf4ff;
-    --soft2:#f7f9fc;
+    --text:#1A1A19;
+    --muted:#5C5C5B;
+    --line:#DBDBD9;
+    --accent:#E12B21;
+    --accent-dark:#AA0D04;
+    --soft:#FFF1EF;
+    --soft2:#FAFAF8;
     --visited:#f0faf4;
     --visited-line:#b9d9c7;
     --shadow:0 12px 32px rgba(20,35,60,.08);
@@ -28,7 +28,7 @@
   body{
     margin:0;
     font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-    background:linear-gradient(180deg,#f8fafd 0,#f3f6fa 100%);
+    background:linear-gradient(180deg,#f8fafd 0,#F4F4F2 100%);
     color:var(--text);
   }
 
@@ -113,7 +113,7 @@
   .toggle.active{
     background:var(--soft);
     color:var(--accent-dark);
-    border-color:#9fc0f7;
+    border-color:#FFABA6;
   }
 
   .label{
@@ -150,7 +150,7 @@
 
   .progress-track{
     height:8px;
-    background:#e7edf5;
+    background:#F4F4F2;
     border-radius:999px;
     overflow:hidden;
   }
@@ -247,7 +247,7 @@
 
   .layer.active{
     border-color:#86b2ef;
-    background:#e8f1ff;
+    background:#FFF1EF;
     box-shadow:0 6px 18px rgba(23,105,224,.12);
     transform:scale(1.015);
   }
@@ -538,7 +538,7 @@
     top:50%;
     transform:translate(-50%,-50%);
     border-radius:50%;
-    background:radial-gradient(circle, #ffffff 0%, #d9ecff 38%, #5fa4ff 68%, #1769e0 100%);
+    background:radial-gradient(circle, #ffffff 0%, #d9ecff 38%, #5fa4ff 68%, #E12B21 100%);
     box-shadow:0 0 14px rgba(23,105,224,.45);
   }
 
@@ -742,6 +742,15 @@
     .stack-wrap.mapping-on{grid-template-columns:minmax(0,1fr) 105px}
     .toolbar{position:static}
   }
+</style>
+
+<style id="noroff-blush-shared-theme">
+/* Noroff Blush palette. Presentation only; status and protocol colors retain their meanings. No logo. */
+:root{--bg:#FAFAF8;--background:#FAFAF8;--panel:#FFFFFF;--card:#FFFFFF;--foreground:#1A1A19;--card-foreground:#1A1A19;--ink:#1A1A19;--text:#1A1A19;--muted:#5C5C5B;--muted-foreground:#5C5C5B;--sub:#5C5C5B;--line:#DBDBD9;--border:#DBDBD9;--primary:#E12B21;--blue:#E12B21;--accent:#E12B21;--accent-dark:#AA0D04;--accent2:#AA0D04;--accent-2:#AA0D04;--pale:#FFF1EF;--soft:#FFF1EF;--soft2:#F4F4F2;--blue2:#FFF1EF;--navy:#40403E;--primary-foreground:#FFFFFF}
+html{color-scheme:light}body{background:#FAFAF8;color:#1A1A19;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+:where(.card,.panel,.tile,.question,.module-card,.step-card){border-color:#DBDBD9}
+:where(a,button,input,textarea,select):focus-visible{outline-color:#AA0D04}
+:where(.tab.active,.nav-item.active,.phase-pill.active,.stagebtn.active){background:#FFABA6!important;color:#1A1A19!important;border-color:#E12B21!important}
 </style>
 </head>
 <body>

@@ -6,13 +6,13 @@
 <title>Activity 1.3.1 — Encapsulation Challenge</title>
 <style>
 :root{
-  --bg:#f5f7fb;--panel:#fff;--text:#172033;--muted:#667085;--line:#d9e0ea;
-  --accent:#1769e0;--accent2:#0f4faa;--soft:#eef4ff;--good:#137a4b;--goodbg:#edf9f2;
+  --bg:#FAFAF8;--panel:#fff;--text:#1A1A19;--muted:#5C5C5B;--line:#DBDBD9;
+  --accent:#E12B21;--accent2:#AA0D04;--soft:#FFF1EF;--good:#137a4b;--goodbg:#edf9f2;
   --bad:#b42318;--badbg:#fff1f0;--hint:#805600;--hintbg:#fff7df;--shadow:0 12px 32px rgba(20,35,60,.08);
   --app:#f2eaff;--transport:#e7f2ff;--network:#e9f8ef;--link:#fff3df;--physical:#f0f2f5;
 }
 *{box-sizing:border-box}
-body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(180deg,#f7f9fc,#f3f6fa);color:var(--text)}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(180deg,#FAFAF8,#F4F4F2);color:var(--text)}
 .shell{max-width:1180px;margin:0 auto;padding:32px 20px 64px}
 .hero{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;flex-wrap:wrap;margin-bottom:18px}
 .eyebrow{color:var(--accent);font-weight:800;font-size:.82rem;letter-spacing:.06em;text-transform:uppercase}
@@ -20,12 +20,12 @@ h1{margin:.28rem 0 .45rem;font-size:clamp(1.8rem,3vw,2.55rem)}
 .lead{margin:0;color:var(--muted);line-height:1.6;max-width:850px}
 .phase-nav{display:flex;gap:9px;flex-wrap:wrap;margin:18px 0 8px}
 .phase-pill{border:1px solid var(--line);background:#fff;color:#42526a;cursor:pointer;padding:9px 13px;border-radius:999px;font-weight:800;font-size:.86rem}
-.phase-pill.active{background:var(--soft);border-color:#9fc0f7;color:var(--accent2)}
+.phase-pill.active{background:var(--soft);border-color:#FFABA6;color:var(--accent2)}
 .phase-pill.done{background:var(--goodbg);border-color:#b7dfca;color:var(--good)}
 .phase-help{color:var(--muted);font-size:.85rem;line-height:1.45}
 .progress-card{min-width:250px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow)}
 .progress-row{display:flex;justify-content:space-between;font-size:.9rem;margin-bottom:8px}
-.progress-track{height:10px;background:#e7edf5;border-radius:999px;overflow:hidden}
+.progress-track{height:10px;background:#F4F4F2;border-radius:999px;overflow:hidden}
 .progress-fill{height:100%;background:var(--accent);transition:width .25s ease}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:24px}
 .section-kicker{font-size:.82rem;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.05em}
@@ -46,7 +46,7 @@ button{border:none;border-radius:10px;padding:11px 16px;font-weight:800;cursor:p
 /* Phase 1 */
 .stage-nav{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 10px}
 .stage-pill{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;color:#526174;font-size:.84rem;font-weight:800}
-.stage-pill.active{background:var(--soft);border-color:#9fc0f7;color:var(--accent2)}
+.stage-pill.active{background:var(--soft);border-color:#FFABA6;color:var(--accent2)}
 .stage-pill.done{background:var(--goodbg);border-color:#b7dfca;color:var(--good)}
 .workspace{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(270px,.75fr);gap:22px;margin-top:22px;align-items:start}
 .builder,.tray{border:1px solid var(--line);border-radius:16px;background:#fbfcfe;padding:18px}
@@ -109,6 +109,15 @@ button{border:none;border-radius:10px;padding:11px 16px;font-weight:800;cursor:p
   .options{grid-template-columns:1fr}.classify-row{grid-template-columns:1fr}.choice-buttons{grid-template-columns:1fr}
   .phase-summary{grid-template-columns:1fr}.slot{min-width:120px}
 }
+</style>
+
+<style id="noroff-blush-shared-theme">
+/* Noroff Blush palette. Presentation only; status and protocol colors retain their meanings. No logo. */
+:root{--bg:#FAFAF8;--background:#FAFAF8;--panel:#FFFFFF;--card:#FFFFFF;--foreground:#1A1A19;--card-foreground:#1A1A19;--ink:#1A1A19;--text:#1A1A19;--muted:#5C5C5B;--muted-foreground:#5C5C5B;--sub:#5C5C5B;--line:#DBDBD9;--border:#DBDBD9;--primary:#E12B21;--blue:#E12B21;--accent:#E12B21;--accent-dark:#AA0D04;--accent2:#AA0D04;--accent-2:#AA0D04;--pale:#FFF1EF;--soft:#FFF1EF;--soft2:#F4F4F2;--blue2:#FFF1EF;--navy:#40403E;--primary-foreground:#FFFFFF}
+html{color-scheme:light}body{background:#FAFAF8;color:#1A1A19;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+:where(.card,.panel,.tile,.question,.module-card,.step-card){border-color:#DBDBD9}
+:where(a,button,input,textarea,select):focus-visible{outline-color:#AA0D04}
+:where(.tab.active,.nav-item.active,.phase-pill.active,.stagebtn.active){background:#FFABA6!important;color:#1A1A19!important;border-color:#E12B21!important}
 </style>
 </head>
 <body>

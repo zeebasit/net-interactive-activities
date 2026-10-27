@@ -6,13 +6,13 @@
 <title>Activity 1.2.1 — Network Connections</title>
 <style>
   :root{
-    --bg:#f5f7fb;
+    --bg:#FAFAF8;
     --panel:#ffffff;
-    --text:#172033;
-    --muted:#667085;
-    --line:#d9e0ea;
-    --accent:#1769e0;
-    --accent-2:#0f4faa;
+    --text:#1A1A19;
+    --muted:#5C5C5B;
+    --line:#DBDBD9;
+    --accent:#E12B21;
+    --accent-2:#AA0D04;
     --good:#137a4b;
     --good-bg:#edf9f2;
     --bad:#b42318;
@@ -20,13 +20,13 @@
     --hint:#805600;
     --hint-bg:#fff7df;
     --shadow:0 12px 32px rgba(20,35,60,.08);
-    --soft:#eef4ff;
+    --soft:#FFF1EF;
   }
   *{box-sizing:border-box}
   body{
     margin:0;
     font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-    background:linear-gradient(180deg,#f7f9fc 0,#f3f6fa 100%);
+    background:linear-gradient(180deg,#FAFAF8 0,#F4F4F2 100%);
     color:var(--text);
   }
   .shell{max-width:1180px;margin:0 auto;padding:32px 20px 64px}
@@ -45,14 +45,14 @@
     border:1px solid var(--line);background:#fff;color:#42526a;cursor:pointer;
     padding:9px 13px;border-radius:999px;font-weight:750;font-size:.9rem
   }
-  .phase-pill.active{background:var(--soft);border-color:#9fc0f7;color:var(--accent-2)}
+  .phase-pill.active{background:var(--soft);border-color:#FFABA6;color:var(--accent-2)}
   .phase-pill.done{background:var(--good-bg);border-color:#b7dfca;color:var(--good)}
   .progress-card{
     min-width:230px;background:var(--panel);border:1px solid var(--line);
     border-radius:14px;padding:14px 16px;box-shadow:var(--shadow)
   }
   .progress-row{display:flex;justify-content:space-between;font-size:.9rem;margin-bottom:8px}
-  .progress-track{height:10px;background:#e7edf5;border-radius:999px;overflow:hidden}
+  .progress-track{height:10px;background:#F4F4F2;border-radius:999px;overflow:hidden}
   .progress-fill{height:100%;background:var(--accent);transition:width .25s ease}
   .card{
     background:var(--panel);border:1px solid var(--line);border-radius:18px;
@@ -82,7 +82,7 @@
     display:flex;align-items:center;justify-content:center;text-align:center;
     padding:18px;background:#f7fbff;transition:.15s ease
   }
-  .drop-zone.dragover{background:#eaf3ff;border-color:var(--accent);transform:scale(1.02)}
+  .drop-zone.dragover{background:#FFF1EF;border-color:var(--accent);transform:scale(1.02)}
   .drop-zone.filled{border-style:solid}
   .placeholder{color:#61708a;font-weight:700;line-height:1.45}
   .choices{margin-top:24px}
@@ -268,6 +268,15 @@
     .mastery-grid{grid-template-columns:1fr}
     .diagnose-stage{grid-template-columns:1fr}
   }
+</style>
+
+<style id="noroff-blush-shared-theme">
+/* Noroff Blush palette. Presentation only; status and protocol colors retain their meanings. No logo. */
+:root{--bg:#FAFAF8;--background:#FAFAF8;--panel:#FFFFFF;--card:#FFFFFF;--foreground:#1A1A19;--card-foreground:#1A1A19;--ink:#1A1A19;--text:#1A1A19;--muted:#5C5C5B;--muted-foreground:#5C5C5B;--sub:#5C5C5B;--line:#DBDBD9;--border:#DBDBD9;--primary:#E12B21;--blue:#E12B21;--accent:#E12B21;--accent-dark:#AA0D04;--accent2:#AA0D04;--accent-2:#AA0D04;--pale:#FFF1EF;--soft:#FFF1EF;--soft2:#F4F4F2;--blue2:#FFF1EF;--navy:#40403E;--primary-foreground:#FFFFFF}
+html{color-scheme:light}body{background:#FAFAF8;color:#1A1A19;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+:where(.card,.panel,.tile,.question,.module-card,.step-card){border-color:#DBDBD9}
+:where(a,button,input,textarea,select):focus-visible{outline-color:#AA0D04}
+:where(.tab.active,.nav-item.active,.phase-pill.active,.stagebtn.active){background:#FFABA6!important;color:#1A1A19!important;border-color:#E12B21!important}
 </style>
 </head>
 <body>
