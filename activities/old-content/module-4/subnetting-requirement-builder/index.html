@@ -71,5 +71,22 @@ function buildNext(){if(builtRows>=maxRows)return;var i=builtRows,d=rowData(i);b
 byId("phase1Btn").onclick=function(){setPhase(1)};byId("phase2Btn").onclick=function(){setPhase(2)};byId("phase3Btn").onclick=function(){setPhase(3)};byId("previousStep").onclick=function(){if(guideIndex>0){guideIndex--;renderGuide()}};byId("nextStep").onclick=function(){if(guideIndex<guide.length-1){guideIndex++;renderGuide()}else setPhase(2)};byId("restartGuide").onclick=function(){guideIndex=0;renderGuide()};byId("networkMode").onclick=function(){mode="networks";byId("networkMode").classList.add("active");byId("hostMode").classList.remove("active");renderRequirementOptions()};byId("hostMode").onclick=function(){mode="hosts";byId("hostMode").classList.add("active");byId("networkMode").classList.remove("active");renderRequirementOptions()};byId("calculateDesign").onclick=calculate;byId("requirementSelect").onchange=calculate;byId("useDesign").onclick=function(){builtRows=0;setPhase(3)};byId("buildNext").onclick=buildNext;byId("showAll").onclick=function(){builtRows=maxRows;byId("rangeCalculation").textContent="Complete table shown. Each network address increases by the block size of "+design.block+".";renderRanges()};byId("resetRanges").onclick=function(){builtRows=0;renderRanges()};renderGuide();renderRequirementOptions();renderRanges();
 })();
 </script>
-</body>
+<style id="presentation-space-2026">
+@media(min-width:1100px) and (min-height:680px){
+ main.shell{max-width:1500px;padding:12px 18px;min-height:100vh}
+ main.shell>.hero{gap:10px;margin-bottom:8px}
+ main.shell .hero h1{font-size:30px;line-height:1.12;margin:3px 0}
+ main.shell .hero .lead{line-height:1.35;max-width:none}
+ main.shell .phase-nav{margin:7px 0 4px;gap:6px}
+ main.shell .phase-pill{padding:6px 10px}
+ main.shell>.card{padding:14px}
+ main.shell .intro-grid,main.shell .result-grid{margin:10px 0;gap:8px}
+ main.shell .intro-step,main.shell .result-item{padding:10px}
+ main.shell .note{margin:8px 0;padding:8px 10px;line-height:1.35}
+ main.shell .controls{margin-top:9px;gap:6px}
+ main.shell .message,main.shell .explanation{margin-top:7px;padding:8px}
+ main.shell .credit{margin-top:8px}
+ main.shell .primary,main.shell .secondary,main.shell .ghost{padding:8px 12px}
+}
+</style></body>
 </html>

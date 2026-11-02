@@ -35,4 +35,21 @@ function openAt(i,fresh){if(fresh||!scenario)generate();index=i;correct=0;firstT
 byId("startBtn").onclick=function(){openAt(0,true)};byId("restartBtn").onclick=function(){openAt(0,true)};byId("phase1Btn").onclick=function(){openAt(0,false)};byId("phase2Btn").onclick=function(){openAt(3,false)};byId("phase3Btn").onclick=function(){openAt(6,false)};byId("checkBtn").onclick=check;byId("clearBtn").onclick=clear;byId("nextBtn").onclick=function(){if(index===TOTAL-1)results();else{index++;render()}};byId("answerArea").addEventListener("input",function(e){var p=e.target.closest(".field,.choice");if(p)p.classList.remove("problem")});
 byId("answerArea").addEventListener("change",function(e){if(e.target.type==="radio")document.querySelectorAll(".choice.problem").forEach(function(x){x.classList.remove("problem")})});
 })();
-</script></body></html>
+</script><style id="presentation-space-2026">
+@media(min-width:1100px) and (min-height:680px){
+ main.shell{max-width:1500px;padding:12px 18px;min-height:100vh}
+ main.shell>.hero{gap:10px;margin-bottom:8px}
+ main.shell .hero h1{font-size:30px;line-height:1.12;margin:3px 0}
+ main.shell .hero .lead{line-height:1.35;max-width:none}
+ main.shell .phase-nav{margin:7px 0 4px;gap:6px}
+ main.shell .phase-pill{padding:6px 10px}
+ main.shell>.card{padding:14px}
+ main.shell .intro-grid,main.shell .result-grid{margin:10px 0;gap:8px}
+ main.shell .intro-step,main.shell .result-item{padding:10px}
+ main.shell .note{margin:8px 0;padding:8px 10px;line-height:1.35}
+ main.shell .controls{margin-top:9px;gap:6px}
+ main.shell .message,main.shell .explanation{margin-top:7px;padding:8px}
+ main.shell .credit{margin-top:8px}
+ main.shell .primary,main.shell .secondary,main.shell .ghost{padding:8px 12px}
+}
+</style></body></html>

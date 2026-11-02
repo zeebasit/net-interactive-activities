@@ -46,4 +46,21 @@ function openType(id){type=id;demoIndex=0;demoPlaying=false;guided=[];guidedInde
 function demoAdvance(){var s=demoSteps();if(demoIndex<s.length-1){demoIndex++;renderDemo()}else startGuided()}function demoPlay(){demoPlaying=true;renderDemo();function tick(){if(!demoPlaying)return;var s=demoSteps();if(demoIndex>=s.length-1){demoPlaying=false;renderDemo();return}demoIndex++;renderDemo();demoTimer=setTimeout(tick,Math.round(1100/Number(byId("speedRange").value)))}demoTimer=setTimeout(tick,350)}
 byId("conversionGrid").innerHTML=types.map(function(x){return'<button class="conversion" data-type="'+x.id+'" type="button"><strong>'+x.title+'</strong><span>'+x.desc+'</span></button>'}).join("");byId("conversionGrid").onclick=function(e){var b=e.target.closest(".conversion");if(b)openType(b.dataset.type)};byId("pathDemo").onclick=function(){demoPlaying=false;clearTimeout(demoTimer);setPath("demo");renderDemo()};byId("pathGuided").onclick=startGuided;byId("pathIndependent").onclick=function(){demoPlaying=false;clearTimeout(demoTimer);startIndependent()};byId("demoPrevious").onclick=function(){if(demoIndex>0){demoIndex--;renderDemo()}};byId("demoNext").onclick=demoAdvance;byId("demoPlay").onclick=demoPlay;byId("demoPause").onclick=function(){demoPlaying=false;clearTimeout(demoTimer);renderDemo()};byId("anotherExample").onclick=function(){demoPlaying=false;clearTimeout(demoTimer);demoIndex=0;pickDemoValue();setPath("demo");renderDemo()};byId("speedRange").oninput=function(){byId("speedValue").textContent=Number(this.value).toFixed(this.value%1?2:0).replace(/0$/,"")+"×"};byId("checkIndependent").onclick=checkIndependent;byId("anotherValue").onclick=function(){independentValue=pickValue();startIndependent()};byId("backHome").onclick=function(){demoPlaying=false;clearTimeout(demoTimer);byId("lesson").classList.add("hidden");byId("home").classList.remove("hidden");window.scrollTo({top:0,behavior:"smooth"})};renderExplorer();
 })();
-</script></body></html>
+</script><style id="presentation-space-2026">
+@media(min-width:1100px) and (min-height:680px){
+ main.shell{max-width:1500px;padding:12px 18px;min-height:100vh}
+ main.shell>.hero{gap:10px;margin-bottom:8px}
+ main.shell .hero h1{font-size:30px;line-height:1.12;margin:3px 0}
+ main.shell .hero .lead{line-height:1.35;max-width:none}
+ main.shell .phase-nav{margin:7px 0 4px;gap:6px}
+ main.shell .phase-pill{padding:6px 10px}
+ main.shell>.card{padding:14px}
+ main.shell .intro-grid,main.shell .result-grid{margin:10px 0;gap:8px}
+ main.shell .intro-step,main.shell .result-item{padding:10px}
+ main.shell .note{margin:8px 0;padding:8px 10px;line-height:1.35}
+ main.shell .controls{margin-top:9px;gap:6px}
+ main.shell .message,main.shell .explanation{margin-top:7px;padding:8px}
+ main.shell .credit{margin-top:8px}
+ main.shell .primary,main.shell .secondary,main.shell .ghost{padding:8px 12px}
+}
+</style></body></html>
