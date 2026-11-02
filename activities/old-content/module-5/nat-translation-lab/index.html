@@ -87,4 +87,27 @@ function s4(){let x=final[step];$('sceneTitle').textContent='Final design check'
 function pickFinal(el,v){let x=final[step];answer(el,v===x[1],x[2],'This choice does not match the required mapping.')}
 function finish(){let max=16;$('workspace').style.display='none';$('progress').style.display='none';$('summary').style.display='block';$('summary').innerHTML='<div class="counter">INVESTIGATION COMPLETE</div><h2>You can now explain how NAT makes forwarding decisions.</h2><div class="score">'+score+'/'+max+'</div><p>You traced both directions, compared the three methods, and used translation-table entries as the router would.</p><div class="compare"><div class="method"><strong>Static NAT</strong><small>Permanent one-to-one</small></div><div class="method"><strong>Dynamic NAT</strong><small>Temporary one-to-one from a pool</small></div><div class="method"><strong>PAT</strong><small>Many-to-one using ports</small></div></div><div class="actions"><button class="btn primary" onclick="location.reload()">Restart activity</button></div>'}
 render();
-</script></body></html>
+</script><style id="presentation-space">
+@media (min-width:1200px) and (min-height:680px){
+ .wrap{max-width:none;padding:12px 18px;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
+ .wrap>h1{font-size:30px;margin:3px 0}
+ .wrap>.lead{margin:3px 0;max-width:none;line-height:1.3}
+ .progress{margin:7px 0;gap:6px}
+ .stage{padding:7px;font-size:13px}
+ .layout{flex:1;gap:10px;align-items:stretch}
+ .topology{position:relative;top:auto;padding:10px;display:flex;flex-direction:column}
+ .scene{height:auto;min-height:225px;flex:1;margin-top:5px}
+ .inspectors{margin-top:6px;gap:6px}
+ .inspect{padding:6px}.inspect h3{margin-bottom:2px}.field{padding:4px;margin:3px 0}
+ .side{gap:8px;align-content:start}
+ .lesson,.tablecard{padding:10px 12px}
+ .lesson h2{font-size:21px;margin:4px 0}
+ .lesson p{margin:4px 0;line-height:1.3}
+ .prompt{margin:5px 0;padding:7px 10px}
+ .choices{gap:4px}.choice{padding:7px}
+ .actions{margin-top:6px}.btn{padding:7px 10px}
+ .feedback{margin-top:5px;padding:6px}
+ .empty{padding:7px} table{margin-top:3px} th,td{padding:4px}
+ footer{padding:7px 0 0}
+}
+</style></body></html>
