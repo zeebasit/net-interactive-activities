@@ -88,7 +88,7 @@ function pickFinal(el,v){let x=final[step];answer(el,v===x[1],x[2],'This choice 
 function finish(){let max=16;$('workspace').style.display='none';$('progress').style.display='none';$('summary').style.display='block';$('summary').innerHTML='<div class="counter">INVESTIGATION COMPLETE</div><h2>You can now explain how NAT makes forwarding decisions.</h2><div class="score">'+score+'/'+max+'</div><p>You traced both directions, compared the three methods, and used translation-table entries as the router would.</p><div class="compare"><div class="method"><strong>Static NAT</strong><small>Permanent one-to-one</small></div><div class="method"><strong>Dynamic NAT</strong><small>Temporary one-to-one from a pool</small></div><div class="method"><strong>PAT</strong><small>Many-to-one using ports</small></div></div><div class="actions"><button class="btn primary" onclick="location.reload()">Restart activity</button></div>'}
 render();
 </script><style id="presentation-space">
-@media (min-width:1200px) and (min-height:680px){
+@media (min-width:1200px) and (min-height:620px){
  .wrap{max-width:none;padding:12px 18px;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
  .wrap>h1{font-size:30px;margin:3px 0}
  .wrap>.lead{margin:3px 0;max-width:none;line-height:1.3}
