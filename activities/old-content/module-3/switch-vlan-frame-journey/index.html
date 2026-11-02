@@ -8,16 +8,24 @@
 </style>
 <h2>Switching, VLANs and inter-VLAN routing</h2>
 <div class="controls" aria-label="Choose demonstration">
- <button class="btn mode" data-mode="switch" type="button">1 · Switch learning</button><button class="btn mode" data-mode="vlan" type="button">2 · VLAN isolation</button><button class="btn mode" data-mode="route" type="button">3 · Inter-VLAN routing</button>
+ <button class="btn mode" data-mode="switch" type="button">1 · Switch learning</button><button class="btn mode" data-mode="vlan" type="button">2 · VLAN isolation</button><button class="btn mode" data-mode="route" type="button">3 · Inter-VLAN routing</button><button class="btn mode" data-mode="trunk" type="button">4 · VLANs across switches</button>
 </div>
 <div class="layout"><div>
- <div class="diagram" role="img" aria-label="Four PCs connected to a switch, with a router connected below the switch">
+ <div id="single-diagram" class="diagram" role="img" aria-label="Four PCs connected to a switch, with a router connected below the switch">
  <svg aria-hidden="true"><line id="lA" x1="13%" y1="25%" x2="45%" y2="50%"/><line id="lB" x1="38%" y1="25%" x2="48%" y2="48%"/><line id="lC" x1="63%" y1="25%" x2="53%" y2="48%"/><line id="lD" x1="87%" y1="25%" x2="55%" y2="50%"/><line id="lR" x1="50%" y1="59%" x2="50%" y2="80%"/></svg>
  <div class="node host a"><strong>PC A</strong><small id="aInfo"></small><small>Fa0/1 · MAC A</small></div><div class="node host b"><strong>PC B</strong><small id="bInfo"></small><small>Fa0/2 · MAC B</small></div><div class="node host c"><strong>PC C</strong><small id="cInfo"></small><small>Fa0/3 · MAC C</small></div><div class="node host d"><strong>PC D</strong><small id="dInfo"></small><small>Fa0/4 · MAC D</small></div>
  <div class="node switch"><strong>▰ SWITCH</strong><small>Layer 2 forwarding</small></div><div class="node router" id="router"><strong>◉ ROUTER</strong><small>802.1Q trunk · Gi0/1</small><small>VLAN 10: .10.1 | VLAN 20: .20.1</small></div>
  </div>
+ <div id="trunk-diagram" class="diagram trunk-diagram" hidden role="img" aria-label="Two switches connected by a trunk, each with VLAN 10 and VLAN 20 access ports">
+ <svg aria-hidden="true"><line id="trA" x1="15%" y1="28%" x2="30%" y2="62%"/><line id="trB" x1="43%" y1="28%" x2="30%" y2="62%"/><line id="trT" x1="30%" y1="62%" x2="70%" y2="62%"/><line id="trC" x1="58%" y1="28%" x2="70%" y2="62%"/><line id="trD" x1="85%" y1="28%" x2="70%" y2="62%"/></svg>
+ <div class="tnode thost ta"><strong>PC A</strong><small>192.168.10.10 · VLAN 10</small><small>SW1 Fa0/1 · MAC A</small></div>
+ <div class="tnode thost tb"><strong>PC B</strong><small>192.168.20.10 · VLAN 20</small><small>SW1 Fa0/2 · MAC B</small></div>
+ <div class="tnode thost tc"><strong>PC C</strong><small>192.168.10.20 · VLAN 10</small><small>SW2 Fa0/1 · MAC C</small></div>
+ <div class="tnode thost td"><strong>PC D</strong><small>192.168.20.20 · VLAN 20</small><small>SW2 Fa0/2 · MAC D</small></div>
+ <div class="tnode tsw tsw1"><strong>▰ SW1</strong><small>Gi0/1</small></div><div class="tnode tsw tsw2"><strong>▰ SW2</strong><small>Gi0/1</small></div>
+ <div class="tnode trunk-label">802.1Q trunk · VLANs 10, 20</div></div>
  <div class="packetlabel" id="frame"></div><div id="inspector" aria-label="Message and frame details"></div><div class="status" id="explain" aria-live="polite"></div>
- </div><aside class="pane"><h3>VLAN port assignments</h3><table class="table table-sm"><thead><tr><th>VLAN</th><th>Access ports</th></tr></thead><tbody id="vlan-table"></tbody></table><div id="trunk-info" class="table-note"></div><h3 class="mac-heading">Switch MAC address table</h3><table class="table table-sm"><thead><tr><th>VLAN</th><th>MAC</th><th>Port</th></tr></thead><tbody id="table"></tbody></table><div class="detail" id="note"></div></aside></div>
+ </div><aside class="pane"><div id="normal-tables"><h3>VLAN port assignments</h3><table class="table table-sm"><thead><tr><th>VLAN</th><th>Access ports</th></tr></thead><tbody id="vlan-table"></tbody></table><div id="trunk-info" class="table-note"></div><h3 class="mac-heading">Switch MAC address table</h3><table class="table table-sm"><thead><tr><th>VLAN</th><th>MAC</th><th>Port</th></tr></thead><tbody id="table"></tbody></table><div class="detail" id="note"></div></div><div id="trunk-tables" hidden><h3>VLAN port assignments</h3><table><thead><tr><th>Switch</th><th>VLAN 10</th><th>VLAN 20</th></tr></thead><tbody><tr><td>SW1</td><td>Fa0/1 · A</td><td>Fa0/2 · B</td></tr><tr><td>SW2</td><td>Fa0/1 · C</td><td>Fa0/2 · D</td></tr></tbody></table><div class="table-note">Gi0/1 ↔ Gi0/1: trunk permits VLANs 10 and 20.</div><h3 class="mac-heading">SW1 · MAC address table</h3><table><thead><tr><th>VLAN</th><th>MAC</th><th>Port</th></tr></thead><tbody id="tr-mac1"></tbody></table><h3 class="mac-heading">SW2 · MAC address table</h3><table><thead><tr><th>VLAN</th><th>MAC</th><th>Port</th></tr></thead><tbody id="tr-mac2"></tbody></table></div></aside></div>
 <div class="controls"><button type="button" class="btn" id="back">Previous step</button><button type="button" class="btn btn-primary" id="next">Next step</button><button type="button" class="btn" id="reset">Restart scenario</button><span class="progress-label" id="counter"></span></div>
 <script>
 (()=>{const r=document.getElementById('sw-demo'),$=id=>r.querySelector('#'+id);let mode='switch',step=0;const demos={
@@ -47,7 +55,32 @@ switch:[
 {x:'The switch receives the tagged frame on the trunk, identifies VLAN 20 from the 802.1Q tag and learns the source gateway MAC on Gi0/1 in VLAN 20. C’s MAC is assumed already learned on Fa0/3.',f:'Switch ingress trunk: VLAN 20 → find MAC C in VLAN 20',t:[['10','Gateway 10','Gi0/1'],['10','A','Fa0/1'],['20','C','Fa0/3'],['20','Gateway 20','Gi0/1']],l:['R']},
 {x:'The switch forwards to C on access port Fa0/3. The outgoing access frame is untagged; the switch does not send the 802.1Q tag to PC C.',f:'Switch → PC C: untagged access frame · gateway 20 MAC → MAC C',t:[['10','Gateway 10','Gi0/1'],['10','A','Fa0/1'],['20','C','Fa0/3'],['20','Gateway 20','Gi0/1']],l:['C']},
 {x:'PC C receives the packet. Across the routed journey the IP endpoints remain A and C, while Ethernet source and destination addresses change at the router. Return traffic is not shown.',f:'Delivered: original IP endpoints · new Ethernet frame',t:[['10','Gateway 10','Gi0/1'],['10','A','Fa0/1'],['20','C','Fa0/3'],['20','Gateway 20','Gi0/1']],l:['C']}
-]};function render(){const d=demos[mode][step];r.querySelectorAll('.mode').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===mode)));['A','B','C','D','R'].forEach(x=>$('l'+x).classList.toggle('active',d.l.includes(x)));$('router').style.visibility=mode==='route'?'visible':'hidden';$('lR').style.visibility=mode==='route'?'visible':'hidden';['a','b','c','d'].forEach((v,i)=>{$(v+'Info').textContent=mode==='switch'?'VLAN 10 · 192.168.10.'+([10,20,30,40][i]):i<2?'VLAN 10 · 192.168.10.'+(i?20:10):'VLAN 20 · 192.168.20.'+(i===2?10:20)});$('vlan-table').innerHTML=mode==='switch'?'<tr><td>10</td><td>Fa0/1–Fa0/4</td></tr>':'<tr><td>10</td><td>Fa0/1, Fa0/2</td></tr><tr><td>20</td><td>Fa0/3, Fa0/4</td></tr>';
+],trunk:[
+{x:'PC A and PC C are in VLAN 10 on different switches. PC B and PC D are in VLAN 20. Both switches have access-port assignments, and their Gi0/1 ports form a trunk carrying VLANs 10 and 20.',f:'Goal: send a message from A to C across the trunk.',link:[],a:[],b:[]},
+{x:'PC A determines that C is on the same subnet. Assume A already knows C’s MAC address through ARP. It sends an untagged frame to SW1 on Fa0/1.',f:'PC A → SW1 Fa0/1 · untagged access frame',link:['A'],a:[],b:[]},
+{x:'SW1 receives the untagged frame on Fa0/1. Its VLAN table assigns that port to VLAN 10, so SW1 classifies the frame as VLAN 10 and learns source MAC A on Fa0/1.',f:'SW1 ingress: classify as VLAN 10 · learn MAC A',link:['A'],a:[['10','A','Fa0/1']],b:[]},
+{x:'SW1 has no destination MAC C entry. It floods within VLAN 10, including the trunk. SW1 adds an 802.1Q tag with VLAN ID 10 to the copy sent over the trunk. Fa0/2 is in VLAN 20 and receives no copy.',f:'SW1 → SW2 · trunk frame carries 802.1Q VLAN 10',link:['T'],a:[['10','A','Fa0/1']],b:[]},
+{x:'SW2 receives the tagged frame on its trunk. The 802.1Q tag identifies VLAN 10; SW2 associates the frame with that VLAN and learns source MAC A on Gi0/1. Its table does not yet contain C.',f:'SW2 trunk ingress · VLAN 10 · learn MAC A on Gi0/1',link:['T'],a:[['10','A','Fa0/1']],b:[['10','A','Gi0/1']]},
+{x:'SW2 floods the unknown unicast only to other forwarding ports in VLAN 10. Fa0/1 belongs to VLAN 10, so it forwards a copy to C without the 802.1Q tag. VLAN 20 port Fa0/2 receives no copy.',f:'SW2 Fa0/1 → PC C · untagged access frame',link:['C'],a:[['10','A','Fa0/1']],b:[['10','A','Gi0/1']]},
+{x:'PC C replies to A. SW2 learns source MAC C on Fa0/1 and already knows MAC A is on Gi0/1. It forwards the reply across the trunk with an 802.1Q VLAN 10 tag.',f:'PC C → SW2 → trunk · reply tagged VLAN 10',link:['C','T'],a:[['10','A','Fa0/1']],b:[['10','A','Gi0/1'],['10','C','Fa0/1']]},
+{x:'SW1 receives the reply on the trunk and learns source MAC C on Gi0/1 in VLAN 10. It already knows A on Fa0/1 and sends the frame to A untagged.',f:'SW1 Fa0/1 → PC A · untagged reply',link:['A'],a:[['10','A','Fa0/1'],['10','C','Gi0/1']],b:[['10','A','Gi0/1'],['10','C','Fa0/1']]}
+]};function renderTrunk(d){
+ $('single-diagram').hidden=true;$('trunk-diagram').hidden=false;$('normal-tables').hidden=true;$('trunk-tables').hidden=false;
+ r.querySelectorAll('.mode').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode==='trunk')));
+ ['A','B','C','D','T'].forEach(x=>$('tr'+x).classList.toggle('active',d.link.includes(x)));
+ const rows=a=>a.length?a.map(x=>'<tr>'+x.map(v=>'<td>'+v+'</td>').join('')+'</tr>').join(''):'<tr><td colspan="3">No dynamic entries</td></tr>';
+ $('tr-mac1').innerHTML=rows(d.a);$('tr-mac2').innerHTML=rows(d.b);$('frame').textContent=d.f;$('explain').textContent=d.x;
+ const reply=step>=6, tagged=step===3||step===4||step===6, src=reply?'MAC C':'MAC A', dst=reply?'MAC A':'MAC C';
+ const box=(title,body,cls='')=>'<div class="frame-part '+cls+'"><strong>'+title+'</strong>'+body+'</div>';
+ let v='';
+ if(step>0){
+  v='<div class="frame-title">Ethernet frame · '+(tagged?'802.1Q tagged trunk':'untagged access link')+'</div><div class="frame-visual">'+box('Ethernet header','<small>Destination MAC</small><span>'+dst+'</span><small>Source MAC</small><span>'+src+'</span>')+(tagged?box('802.1Q tag','<small>TPID</small><span>0x8100</span><small>PCP / DEI</small><span>0 / 0 (example)</span><small>VLAN ID</small><span>10</span>'):'')+box('EtherType','<span>IPv4 · 0x0800</span>')+box('Data · IPv4 packet','<div class="ip-fields"><div><small>Source IP</small><span>192.168.10.'+(reply?'20':'10')+'</span></div><div><small>Destination IP</small><span>192.168.10.'+(reply?'10':'20')+'</span></div><div><small>Message</small><span>'+(reply?'Reply from C':'Hello, C')+'</span></div></div>','frame-payload')+box('Trailer','<small>FCS</small><span>Error detection</span>')+'</div>';
+  if(step===2)v+='<div class="classify"><strong>SW1 classification: VLAN 10</strong> · Internal association from ingress access port; the frame arrived untagged.</div>';
+  if(step===4)v+='<div class="classify"><strong>SW2 classification: VLAN 10</strong> · Read from the 802.1Q tag on trunk ingress.</div>';
+ }
+ $('inspector').innerHTML=v;$('counter').textContent='Step '+(step+1)+' / '+demos.trunk.length;$('back').disabled=step===0;$('next').disabled=step===demos.trunk.length-1;
+}
+function render(){const d=demos[mode][step];if(mode==='trunk'){renderTrunk(d);return}$('single-diagram').hidden=false;$('trunk-diagram').hidden=true;$('normal-tables').hidden=false;$('trunk-tables').hidden=true;r.querySelectorAll('.mode').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===mode)));['A','B','C','D','R'].forEach(x=>$('l'+x).classList.toggle('active',d.l.includes(x)));$('router').style.visibility=mode==='route'?'visible':'hidden';$('lR').style.visibility=mode==='route'?'visible':'hidden';['a','b','c','d'].forEach((v,i)=>{$(v+'Info').textContent=mode==='switch'?'VLAN 10 · 192.168.10.'+([10,20,30,40][i]):i<2?'VLAN 10 · 192.168.10.'+(i?20:10):'VLAN 20 · 192.168.20.'+(i===2?10:20)});$('vlan-table').innerHTML=mode==='switch'?'<tr><td>10</td><td>Fa0/1–Fa0/4</td></tr>':'<tr><td>10</td><td>Fa0/1, Fa0/2</td></tr><tr><td>20</td><td>Fa0/3, Fa0/4</td></tr>';
 $('trunk-info').textContent=mode==='route'?'Gi0/1: trunk · VLANs 10 and 20':'';
 $('table').innerHTML=d.t.length?d.t.map(x=>'<tr>'+x.map(c=>'<td>'+c+'</td>').join('')+'</tr>').join(''):'<tr><td colspan="3">No dynamic entries</td></tr>';$('explain').textContent=d.x;$('frame').textContent=d.f;
 let visual='';
@@ -123,4 +156,14 @@ $('note').textContent=mode==='route'?'Gateway 10 and C are assumed already learn
  #sw-demo .frame-part{padding:4px}
  #sw-demo .controls{margin:4px 0}
 }
+</style><style>
+#sw-demo [hidden]{display:none!important}
+#sw-demo .trunk-diagram .tnode{position:absolute;text-align:center;transform:translate(-50%,-50%);z-index:2;background:#fff;padding:3px;white-space:nowrap;font-size:13px;line-height:1.25}
+#sw-demo .trunk-diagram .tnode strong,#sw-demo .trunk-diagram .tnode small{display:block}
+#sw-demo .trunk-diagram .tnode small{color:#5C5C5B}
+#sw-demo .trunk-diagram .thost{top:18%}
+#sw-demo .trunk-diagram .ta{left:15%}#sw-demo .trunk-diagram .tb{left:43%}#sw-demo .trunk-diagram .tc{left:58%}#sw-demo .trunk-diagram .td{left:85%}
+#sw-demo .trunk-diagram .tsw{top:62%}#sw-demo .trunk-diagram .tsw1{left:30%}#sw-demo .trunk-diagram .tsw2{left:70%}
+#sw-demo .trunk-diagram .trunk-label{left:50%;top:76%;font-size:12px;color:#5C5C5B}
+@media(max-width:800px){#sw-demo .trunk-diagram .tnode{font-size:11px}#sw-demo .trunk-diagram .tnode small{white-space:normal}}
 </style></body></html>
