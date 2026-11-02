@@ -12,7 +12,7 @@
 </div>
 <div class="layout"><div>
  <div class="diagram" role="img" aria-label="Four PCs connected to a switch, with a router connected below the switch">
- <svg aria-hidden="true"><line id="lA" x1="15%" y1="25%" x2="45%" y2="50%"/><line id="lB" x1="42%" y1="25%" x2="48%" y2="48%"/><line id="lC" x1="68%" y1="25%" x2="53%" y2="48%"/><line id="lD" x1="90%" y1="25%" x2="55%" y2="50%"/><line id="lR" x1="50%" y1="59%" x2="50%" y2="80%"/></svg>
+ <svg aria-hidden="true"><line id="lA" x1="13%" y1="25%" x2="45%" y2="50%"/><line id="lB" x1="38%" y1="25%" x2="48%" y2="48%"/><line id="lC" x1="63%" y1="25%" x2="53%" y2="48%"/><line id="lD" x1="87%" y1="25%" x2="55%" y2="50%"/><line id="lR" x1="50%" y1="59%" x2="50%" y2="80%"/></svg>
  <div class="node host a"><strong>PC A</strong><small id="aInfo"></small><small>Fa0/1 · MAC A</small></div><div class="node host b"><strong>PC B</strong><small id="bInfo"></small><small>Fa0/2 · MAC B</small></div><div class="node host c"><strong>PC C</strong><small id="cInfo"></small><small>Fa0/3 · MAC C</small></div><div class="node host d"><strong>PC D</strong><small id="dInfo"></small><small>Fa0/4 · MAC D</small></div>
  <div class="node switch"><strong>▰ SWITCH</strong><small>Layer 2 forwarding</small></div><div class="node router" id="router"><strong>◉ ROUTER</strong><small>802.1Q trunk · Gi0/1</small><small>VLAN 10: .10.1 | VLAN 20: .20.1</small></div>
  </div>
@@ -65,4 +65,33 @@ $('inspector').innerHTML=visual;
 $('note').textContent=mode==='route'?'Router-on-a-stick: one trunk carries VLANs 10 and 20. Gateway and C MAC entries are shown when learned or assumed known.':'MAC entries are learned from source addresses within their VLAN.';$('counter').textContent='Step '+(step+1)+' / '+demos[mode].length;$('back').disabled=step===0;$('next').disabled=step===demos[mode].length-1}r.querySelectorAll('.mode').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;step=0;render()});$('next').onclick=()=>{step++;render()};$('back').onclick=()=>{step--;render()};$('reset').onclick=()=>{step=0;render()};render()})();
 </script>
 </div>
-<footer>Created by Zeeshan Basit</footer></main></body></html>
+<footer>Created by Zeeshan Basit</footer></main><style id="presentation-fit">
+@media (min-width: 900px) and (min-height: 620px) {
+ body{font-size:14px;line-height:1.35}
+ .wrap{max-width:none;padding:12px 20px}
+ .eyebrow{font-size:11px}
+ .lead{margin:3px 0 5px}
+ #sw-demo h2{font-size:clamp(24px,2.3vw,34px);margin:4px 0 6px}
+ #sw-demo .controls{margin:6px 0;gap:7px;align-items:center}
+ #sw-demo .btn{padding:7px 12px;font-size:14px}
+ #sw-demo .layout{padding:12px 16px;gap:14px;grid-template-columns:minmax(0,1.8fr) minmax(240px,.8fr)}
+ #sw-demo .diagram{height:clamp(155px,25vh,235px);min-height:0}
+ #sw-demo .node{padding:3px;font-size:13px;line-height:1.25}
+ #sw-demo .node small{font-size:12px;white-space:nowrap}
+ #sw-demo .a{left:13%} #sw-demo .b{left:38%} #sw-demo .c{left:63%} #sw-demo .d{left:87%}
+
+ #sw-demo .packetlabel{min-height:0;margin:4px 0;font-size:14px}
+ #sw-demo .frame-title{margin:5px 0 3px}
+ #sw-demo .frame-part{padding:6px;min-width:105px}
+ #sw-demo .frame-payload{min-width:195px}
+ #sw-demo .frame-part small{margin-top:2px}
+ #sw-demo .ip-fields{gap:4px;margin-top:3px}
+ #sw-demo .ip-fields div{padding:4px;min-width:95px}
+ #sw-demo .status{margin-top:6px;padding:8px 10px}
+ #sw-demo .pane h3{margin-bottom:4px;font-size:16px}
+ #sw-demo th,#sw-demo td{padding:5px}
+ #sw-demo .detail{min-height:0;margin-top:6px}
+ #sw-demo .frame-note{margin:3px 0}
+ footer{margin:6px;font-size:12px}
+}
+</style></body></html>
