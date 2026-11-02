@@ -622,5 +622,12 @@ byId("nextBtn").addEventListener("click",function(){if(index===TOTAL-1)showResul
  #questionCard>.question-top{grid-column:1}
  #questionCard>.address-panel{grid-column:2;margin:0;align-self:center}
 }
+</style><style id="and-feedback-fit">
+@media(min-width:1300px) and (min-height:620px){
+ #questionCard>.network-preview{grid-column:1}
+ #questionCard>.controls{grid-column:2;align-self:center}
+ #questionCard:has(.explanation.show)>.message{grid-column:1}
+ #questionCard:has(.explanation.show)>.explanation{grid-column:2}
+}
 </style></body>
 </html>
