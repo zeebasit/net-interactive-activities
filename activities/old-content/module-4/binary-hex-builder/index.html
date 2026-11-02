@@ -700,5 +700,14 @@ html{color-scheme:light}body{background:#FAFAF8;color:#1A1A19;font-family:Inter,
  .card:has(.explanation.show) .message{display:inline-block;width:49%;vertical-align:top;margin-right:1%;box-sizing:border-box}
  .card:has(.explanation.show) .explanation.show{display:inline-block;width:49%;vertical-align:top;box-sizing:border-box}
 }
+</style><style id="binary-question-layout-fit">
+@media(min-width:1300px) and (min-height:620px){
+ #questionCard{display:grid;grid-template-columns:1.3fr 1fr;column-gap:12px}
+ #questionCard>*{grid-column:1 / -1}
+ #questionCard>.question-top{grid-column:1}
+ #questionCard>.target{grid-column:2;margin:0;align-self:center}
+ #questionCard:has(.explanation.show)>.message{grid-column:1;width:auto;margin-right:0}
+ #questionCard:has(.explanation.show)>.explanation{grid-column:2;width:auto}
+}
 </style></body>
 </html>
