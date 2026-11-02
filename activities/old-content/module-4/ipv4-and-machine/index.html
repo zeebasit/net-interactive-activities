@@ -615,5 +615,12 @@ byId("nextBtn").addEventListener("click",function(){if(index===TOTAL-1)showResul
  #questionCard .network-preview{margin-top:7px;padding:7px}
  #questionCard .controls{margin-top:7px}
 }
+</style><style id="and-header-fit">
+@media(min-width:1300px) and (min-height:620px){
+ #questionCard{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+ #questionCard>*{grid-column:1 / -1}
+ #questionCard>.question-top{grid-column:1}
+ #questionCard>.address-panel{grid-column:2;margin:0;align-self:center}
+}
 </style></body>
 </html>
