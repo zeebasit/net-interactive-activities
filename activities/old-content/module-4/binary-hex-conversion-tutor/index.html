@@ -72,4 +72,15 @@ byId("conversionGrid").innerHTML=types.map(function(x){return'<button class="con
  .shell .guide-view{min-height:330px;padding:12px}
  .shell .controls,.shell .actions{margin-top:8px}
 }
+</style><style id="conversion-home-fit">
+@media(min-width:1300px) and (min-height:620px){
+ #home:not(.hidden){display:grid;grid-template-columns:1.05fr .95fr;column-gap:14px;align-items:start}
+ #home>:nth-child(1),#home>:nth-child(2){grid-column:1 / -1}
+ #home>:nth-child(3){grid-column:1;grid-row:3}
+ #home>:nth-child(6){grid-column:2;grid-row:3;align-self:end}
+ #home>.place-panel{grid-column:1;grid-row:4;margin-top:8px}
+ #home>.conversion-grid{grid-column:2;grid-row:4;margin-top:8px}
+ #home>.note{grid-column:1 / -1;grid-row:5}
+ #home>.credit{grid-column:1 / -1;grid-row:6}
+}
 </style></body></html>
