@@ -47,7 +47,7 @@ function updateStatus(){var total=departments.reduce(function(s,d){return s+d.bl
 byId("phase1Btn").onclick=function(){setPhase(1)};byId("phase2Btn").onclick=function(){setPhase(2)};byId("phase3Btn").onclick=function(){setPhase(3)};byId("previousStep").onclick=function(){if(guideIndex>0){guideIndex--;renderGuide()}};byId("nextStep").onclick=function(){if(guideIndex<guide.length-1){guideIndex++;renderGuide()}else setPhase(2)};byId("restartGuide").onclick=function(){guideIndex=0;renderGuide()};byId("sortRequirements").onclick=function(){sorted=true;renderScenario()};byId("newScenario").onclick=makeScenario;byId("calculateNext").onclick=function(){if(!sorted||calculated>=departments.length)return;var d=departments[calculated];calculated++;byId("capacityMessage").classList.add("show");byId("capacityMessage").textContent=d.name+": "+d.hostBits+" host bits give "+d.block+" addresses and "+d.usable+" usable hosts. The smallest valid subnet is /"+d.prefix+".";renderScenario()};byId("showSizePlan").onclick=function(){calculated=departments.length;renderScenario()};byId("usePlan").onclick=function(){allocated=0;setPhase(3)};byId("allocateNext").onclick=function(){if(allocated>=departments.length)return;var d=allocationData()[allocated];allocated++;byId("allocationInfo").textContent=d.name+" receives "+ip(d.network)+"/"+d.prefix+". Its "+d.block+"-address block ends at "+ip(d.broadcast)+"; the next free address is "+(d.broadcast<255?ip(d.broadcast+1):"none")+".";renderAllocation()};byId("showAllAllocations").onclick=function(){allocated=departments.length;renderAllocation();var d=allocationData(),last=d[d.length-1];byId("allocationInfo").textContent="Complete allocation shown. The subnets occupy .0 through ."+last.broadcast+" without gaps or overlaps; ."+(last.broadcast+1)+" through .255 remain available."};byId("resetAllocation").onclick=function(){allocated=0;renderAllocation()};renderGuide();makeScenario();
 })();
 </script><style id="presentation-space-2026">
-@media(min-width:1100px) and (min-height:680px){
+@media(min-width:1100px) and (min-height:620px){
  main.shell{max-width:1500px;padding:12px 18px;min-height:100vh}
  main.shell>.hero{gap:10px;margin-bottom:8px}
  main.shell .hero h1{font-size:30px;line-height:1.12;margin:3px 0}
@@ -64,7 +64,7 @@ byId("phase1Btn").onclick=function(){setPhase(1)};byId("phase2Btn").onclick=func
  main.shell .primary,main.shell .secondary,main.shell .ghost{padding:8px 12px}
 }
 </style><style id="presentation-detail-2026">
-@media(min-width:1100px) and (min-height:680px){
+@media(min-width:1100px) and (min-height:620px){
  .shell .instruction{max-width:none;line-height:1.35}
  .shell h2{font-size:1.4rem;line-height:1.2;margin:4px 0}
  .shell .guide-layout{margin-top:8px;gap:10px}

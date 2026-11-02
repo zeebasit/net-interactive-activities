@@ -43,7 +43,7 @@ function play(){if(step===stages.length-1)step=0;playing=true;render();timer=set
 document.querySelectorAll("[data-field]").forEach(function(x){x.onclick=function(){showField(x.dataset.field)}});byId("startBtn").onclick=function(){byId("intro").classList.add("hidden");byId("simulator").classList.remove("hidden");restart()};byId("backBtn").onclick=function(){pause();byId("simulator").classList.add("hidden");byId("intro").classList.remove("hidden")};byId("playBtn").onclick=play;byId("pauseBtn").onclick=pause;byId("nextBtn").onclick=animateNext;byId("previousBtn").onclick=function(){if(step>0&&!busy){playing=false;clearTimer();step--;render()}};byId("restartBtn").onclick=restart;byId("speedRange").oninput=function(){byId("speedValue").textContent=Number(this.value).toFixed(this.value%1?2:0).replace(/0$/,"")+"×"};showField("id");render();
 })();
 </script><style id="presentation-space-2026">
-@media(min-width:1100px) and (min-height:680px){
+@media(min-width:1100px) and (min-height:620px){
  main.shell{max-width:1500px;padding:12px 18px}
  .shell>.hero{margin-bottom:8px}.shell>.hero h1{font-size:30px;line-height:1.12;margin:3px 0}
  .shell>.hero .lead{max-width:none;line-height:1.35}
@@ -57,7 +57,7 @@ document.querySelectorAll("[data-field]").forEach(function(x){x.onclick=function
  .shell .credit{margin-top:8px}
 }
 </style><style id="dns-stage-fit">
-@media(min-width:1250px) and (min-height:680px){
+@media(min-width:1250px) and (min-height:620px){
  #simulator:not(.hidden){display:grid;grid-template-columns:minmax(610px,1.1fr) minmax(380px,.9fr);column-gap:12px;align-items:start}
  #simulator>*{grid-column:1 / -1}
  #simulator>.simulation{grid-column:1;margin-top:8px;padding:12px}

@@ -47,7 +47,7 @@ function demoAdvance(){var s=demoSteps();if(demoIndex<s.length-1){demoIndex++;re
 byId("conversionGrid").innerHTML=types.map(function(x){return'<button class="conversion" data-type="'+x.id+'" type="button"><strong>'+x.title+'</strong><span>'+x.desc+'</span></button>'}).join("");byId("conversionGrid").onclick=function(e){var b=e.target.closest(".conversion");if(b)openType(b.dataset.type)};byId("pathDemo").onclick=function(){demoPlaying=false;clearTimeout(demoTimer);setPath("demo");renderDemo()};byId("pathGuided").onclick=startGuided;byId("pathIndependent").onclick=function(){demoPlaying=false;clearTimeout(demoTimer);startIndependent()};byId("demoPrevious").onclick=function(){if(demoIndex>0){demoIndex--;renderDemo()}};byId("demoNext").onclick=demoAdvance;byId("demoPlay").onclick=demoPlay;byId("demoPause").onclick=function(){demoPlaying=false;clearTimeout(demoTimer);renderDemo()};byId("anotherExample").onclick=function(){demoPlaying=false;clearTimeout(demoTimer);demoIndex=0;pickDemoValue();setPath("demo");renderDemo()};byId("speedRange").oninput=function(){byId("speedValue").textContent=Number(this.value).toFixed(this.value%1?2:0).replace(/0$/,"")+"×"};byId("checkIndependent").onclick=checkIndependent;byId("anotherValue").onclick=function(){independentValue=pickValue();startIndependent()};byId("backHome").onclick=function(){demoPlaying=false;clearTimeout(demoTimer);byId("lesson").classList.add("hidden");byId("home").classList.remove("hidden");window.scrollTo({top:0,behavior:"smooth"})};renderExplorer();
 })();
 </script><style id="presentation-space-2026">
-@media(min-width:1100px) and (min-height:680px){
+@media(min-width:1100px) and (min-height:620px){
  main.shell{max-width:1500px;padding:12px 18px;min-height:100vh}
  main.shell>.hero{gap:10px;margin-bottom:8px}
  main.shell .hero h1{font-size:30px;line-height:1.12;margin:3px 0}
@@ -64,7 +64,7 @@ byId("conversionGrid").innerHTML=types.map(function(x){return'<button class="con
  main.shell .primary,main.shell .secondary,main.shell .ghost{padding:8px 12px}
 }
 </style><style id="presentation-detail-2026">
-@media(min-width:1100px) and (min-height:680px){
+@media(min-width:1100px) and (min-height:620px){
  .shell .instruction{max-width:none;line-height:1.35}
  .shell h2{font-size:1.4rem;line-height:1.2;margin:4px 0}
  .shell .guide-layout{margin-top:8px;gap:10px}
