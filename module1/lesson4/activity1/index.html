@@ -782,5 +782,18 @@ document.addEventListener('click',e=>{if(e.target.closest('.terminal-card'))cmdI
 startChallenge();
 })();
 </script>
-</body>
+<style id="cli-desktop-fit">
+@media(min-width:1400px) and (min-height:680px){
+ header{padding:8px 18px}header h1{margin:2px 0;font-size:28px}header p{margin:3px 0}
+ main{max-width:none;padding:9px 18px}
+ main .toolbar{gap:6px;margin-bottom:8px}
+ main .grid{grid-template-columns:minmax(450px,1.05fr) minmax(490px,1fr) minmax(190px,.45fr);gap:9px}
+ .brief-card .body,.progress-card .body{padding:9px}
+ .brief-card .requirements{columns:2;column-gap:20px;margin:8px 0 0}
+ .brief-card .requirements li{break-inside:avoid;margin-bottom:5px}
+ .brief-card .legend{margin-top:7px;padding-top:6px}
+ .brief-card .phase-banner{padding:7px;margin-bottom:7px}
+ #terminal{height:clamp(360px,55vh,500px);padding:10px 12px}
+}
+</style></body>
 </html>
