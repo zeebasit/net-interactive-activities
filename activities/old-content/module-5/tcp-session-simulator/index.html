@@ -46,4 +46,18 @@ var history=document.createElement("div");history.className="history";history.id
 function renderHistory(){var shown=data().slice(1,step+1).filter(function(s){return s.dir!=="none"});history.innerHTML='<div class="history-title">Messages exchanged so far</div><div class="history-list">'+(shown.length?shown.map(function(s){var left=s.dir==="right"?"Client":"Server",right=s.dir==="right"?"Server":"Client";return'<div class="history-row"><div class="history-end">'+left+'</div><div class="history-message to-'+s.dir+'"><span>'+s.label+'</span></div><div class="history-end right">'+right+'</div></div>'}).join(""):'<div class="history-empty">Delivered TCP segments will remain here as the simulation progresses.</div>')+'</div>'}
 new MutationObserver(renderHistory).observe(byId("stepName"),{childList:true});renderHistory();
 })();
-</script></body></html>
+</script><style id="presentation-space-2026">
+@media(min-width:1100px) and (min-height:680px){
+ main.shell{max-width:1500px;padding:12px 18px}
+ .shell>.hero{margin-bottom:8px}.shell>.hero h1{font-size:30px;line-height:1.12;margin:3px 0}
+ .shell>.hero .lead{max-width:none;line-height:1.35}
+ .shell>section.card{padding:14px}
+ .shell h2{font-size:1.4rem;margin:4px 0}
+ .shell .instruction{line-height:1.35;max-width:none}
+ .shell .overview,.shell .header-layout{gap:10px;margin-top:10px}
+ .shell .header-field,.shell .message-field,.shell .flag{min-height:43px;padding:7px}
+ .shell .header-detail,.shell .message-detail{padding:10px;min-height:0}
+ .shell .actions{margin-top:8px}.shell .note{margin:8px 0;padding:8px 10px;line-height:1.35}
+ .shell .credit{margin-top:8px}
+}
+</style></body></html>

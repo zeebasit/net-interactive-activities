@@ -42,4 +42,18 @@ function animateNext(){if(busy||step>=stages.length-1)return;var target=stages[s
 function play(){if(step===stages.length-1)step=0;playing=true;render();timer=setTimeout(animateNext,250)}function pause(){playing=false;if(!busy){clearTimer();render()}else byId("pauseBtn").disabled=true}function restart(){playing=false;busy=false;clearTimer();step=0;render()}
 document.querySelectorAll("[data-field]").forEach(function(x){x.onclick=function(){showField(x.dataset.field)}});byId("startBtn").onclick=function(){byId("intro").classList.add("hidden");byId("simulator").classList.remove("hidden");restart()};byId("backBtn").onclick=function(){pause();byId("simulator").classList.add("hidden");byId("intro").classList.remove("hidden")};byId("playBtn").onclick=play;byId("pauseBtn").onclick=pause;byId("nextBtn").onclick=animateNext;byId("previousBtn").onclick=function(){if(step>0&&!busy){playing=false;clearTimer();step--;render()}};byId("restartBtn").onclick=restart;byId("speedRange").oninput=function(){byId("speedValue").textContent=Number(this.value).toFixed(this.value%1?2:0).replace(/0$/,"")+"×"};showField("id");render();
 })();
-</script></body></html>
+</script><style id="presentation-space-2026">
+@media(min-width:1100px) and (min-height:680px){
+ main.shell{max-width:1500px;padding:12px 18px}
+ .shell>.hero{margin-bottom:8px}.shell>.hero h1{font-size:30px;line-height:1.12;margin:3px 0}
+ .shell>.hero .lead{max-width:none;line-height:1.35}
+ .shell>section.card{padding:14px}
+ .shell h2{font-size:1.4rem;margin:4px 0}
+ .shell .instruction{line-height:1.35;max-width:none}
+ .shell .overview,.shell .header-layout{gap:10px;margin-top:10px}
+ .shell .header-field,.shell .message-field,.shell .flag{min-height:43px;padding:7px}
+ .shell .header-detail,.shell .message-detail{padding:10px;min-height:0}
+ .shell .actions{margin-top:8px}.shell .note{margin:8px 0;padding:8px 10px;line-height:1.35}
+ .shell .credit{margin-top:8px}
+}
+</style></body></html>
