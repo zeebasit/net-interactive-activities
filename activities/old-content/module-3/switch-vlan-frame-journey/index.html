@@ -94,4 +94,14 @@ $('note').textContent=mode==='route'?'Router-on-a-stick: one trunk carries VLANs
  #sw-demo .frame-note{margin:3px 0}
  footer{margin:6px;font-size:12px}
 }
+</style><style id="viewport-fit">
+@media (min-width:1100px) and (min-height:720px) {
+ .wrap{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
+ #sw-demo{display:flex;flex-direction:column;flex:1}
+ #sw-demo > .layout{flex:1;align-items:stretch}
+ #sw-demo > .layout > div:first-child{display:flex;flex-direction:column}
+ #sw-demo .diagram{flex:1 1 auto;height:auto;min-height:185px}
+ #sw-demo .packetlabel,#sw-demo #inspector,#sw-demo .status{flex:0 0 auto}
+ footer{flex:0 0 auto}
+}
 </style></body></html>
