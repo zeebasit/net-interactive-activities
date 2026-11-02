@@ -78,4 +78,19 @@ function newT(){tCase=troubles[Math.floor(Math.random()*troubles.length)];tIndex
 $('tCheck').onclick=()=>{if(!tSelected){$('tFeedback').className='feedback warn';$('tFeedback').textContent='Select a diagnosis before checking.';return}if(tSelected===tCase.a){$('tFeedback').className='feedback good';$('tFeedback').innerHTML='<strong>Correct.</strong> '+tCase.hint+' The evidence supports: '+tCase.a+'.';}else{attempts++;$('tFeedback').className='feedback bad';$('tFeedback').innerHTML=attempts<2?'<strong>First attempt:</strong> '+tCase.hint:'<strong>Worked diagnosis:</strong> '+tCase.a+'. '+tCase.hint;}};$('tHint').onclick=()=>{$('tFeedback').className='feedback warn';$('tFeedback').innerHTML='<strong>Hint:</strong> '+tCase.hint;};$('tNew').onclick=newT;
 makeBuild();newD();floating();newT();fRender();
 })();
-</script></body></html>
+</script><style id="presentation-space-2026">
+@media(min-width:1100px) and (min-height:680px){
+ .shell{max-width:1500px;padding:12px 18px}
+ .shell>header h1{font-size:30px;line-height:1.12;margin:3px 0}
+ .shell>header .lead{max-width:none;line-height:1.3}
+ .shell>.tabs{margin:8px 0;gap:6px}
+ .shell>.tabs .tab{padding:7px 10px}
+ .shell>.section.card,.shell>section.card{padding:14px}
+ .shell .workarea{gap:10px;margin-top:8px}
+ .shell .panel{padding:10px}
+ .shell .panel p{line-height:1.35}
+ .shell .note,.shell .feedback,.shell .decision{margin:7px 0;padding:8px 10px;line-height:1.35}
+ .shell .topology{margin:10px 0}
+ .shell .credit{margin-top:8px}
+}
+</style></body></html>
